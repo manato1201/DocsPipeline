@@ -1,6 +1,4 @@
-import pytest
-
-from docspipeline import cli
+from docspipeline import cli, confluence, diagrams
 
 
 def run(*argv):
@@ -68,11 +66,11 @@ def test_check_diagrams(tmp_path, capsys):
     (tmp_path / "c.drawio").write_text("<x/>", encoding="utf-8")
     (tmp_path / "c.svg").write_text("<svg/>", encoding="utf-8")
     assert run("check-diagrams", str(tmp_path)) == 1
-    assert [p.name for p in cli.find_missing_diagram_exports(tmp_path)] == ["a.drawio"]
+    assert [p.name for p in diagrams.find_missing_exports(tmp_path)] == ["a.drawio"]
 
 
 def test_publish_beyond_local_requires_settings_and_stops_before_building(tmp_path, monkeypatch, capsys):
-    for name in ("CONFLUENCE_SERVER_URL", "CONFLUENCE_SPACE_KEY", "CONFLUENCE_PARENT_PAGE", "CONFLUENCE_SERVER_USER", "CONFLUENCE_API_TOKEN"):
+    for name in confluence.REQUIRED_ENV:
         monkeypatch.delenv(name, raising=False)
     called = []
     monkeypatch.setattr(cli, "_run", lambda *a, **k: called.append(a) or 0)
@@ -93,21 +91,43 @@ def test_publish_local_never_runs_the_connection_test(tmp_path, monkeypatch):
 
 
 def test_publish_runs_connection_test_first_and_stops_on_failure(tmp_path, monkeypatch):
-    for name, value in {
-        "CONFLUENCE_SERVER_URL": "https://x/wiki/", "CONFLUENCE_SPACE_KEY": "D", "CONFLUENCE_PARENT_PAGE": "P",
-        "CONFLUENCE_SERVER_USER": "u", "CONFLUENCE_API_TOKEN": "t" * 12,
-    }.items():
-        monkeypatch.setenv(name, value)
+    for name in confluence.REQUIRED_ENV:
+        monkeypatch.setenv(name, "x" * 12)
     commands = []
     monkeypatch.setattr(cli, "_run", lambda cmd, env=None: commands.append(list(cmd)) or 1)
     assert run("publish", str(tmp_path), "--mode", "publish") == 1
     assert len(commands) == 1 and "connection-test" in commands[0]
 
 
-def test_bad_mode_in_environment_stops_before_sphinx(tmp_path, monkeypatch, capsys):
-    monkeypatch.setenv("DOCSPIPELINE_CONFLUENCE_MODE", "publsh")
-    assert run("build", str(tmp_path)) == 2
-    assert "DOCSPIPELINE_CONFLUENCE_MODE" in capsys.readouterr().err
+def test_build_never_publishes_even_if_the_environment_asks_to(tmp_path, monkeypatch):
+    # 環境変数にモードが残っていても、build / linkcheck は local 固定 (意図しない公開を防ぐ)
+    monkeypatch.setenv("DOCSPIPELINE_CONFLUENCE_MODE", "publish")
+    commands = []
+    monkeypatch.setattr(cli, "_run", lambda cmd, env=None: commands.append((list(cmd), env)) or 0)
+    assert run("build", str(tmp_path), "-b", "confluence") == 0
+    assert run("linkcheck", str(tmp_path)) == 0
+    for _, env in commands:
+        assert env["DOCSPIPELINE_CONFLUENCE_MODE"] == "local"
+
+
+def test_require_mermaid_sets_the_policy(tmp_path, monkeypatch):
+    commands = []
+    monkeypatch.setattr(cli, "_run", lambda cmd, env=None: commands.append((list(cmd), env)) or 0)
+    run("build", str(tmp_path), "--require-mermaid")
+    cmd, env = commands[0]
+    assert env["DOCSPIPELINE_MERMAID_MISSING"] == "error"
+    assert "-W" in cmd and "--keep-going" in cmd
+    run("build", str(tmp_path), "--no-strict")
+    assert "-W" not in commands[1][0]
+
+
+def test_doctor_reports_without_leaking_values(monkeypatch, capsys):
+    monkeypatch.setenv("CONFLUENCE_API_TOKEN", "tok-0123456789abcdef")
+    code = run("doctor")
+    out = capsys.readouterr().out
+    assert code == 0  # このテスト環境には、必須の Sphinx などが入っている
+    assert "Sphinx" in out and "tok-0123456789abcdef" not in out
+    assert "未設定: " in out and "CONFLUENCE_API_TOKEN" not in out.split("未設定: ")[1]
 
 
 def test_run_masks_the_token_in_child_output(monkeypatch, capsys):

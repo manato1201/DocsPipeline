@@ -51,9 +51,13 @@ def test_dryrun_connects_but_does_not_apply():
 
 
 def test_publish_applies():
-    settings = confluence.sphinx_settings(
-        {**FULL, confluence.MODE_ENV: "publish", "CONFLUENCE_API_TOKEN_SCOPED": "true", "CONFLUENCE_PAGE_PREFIX": "[auto] "}
-    )
+    env = {
+        **FULL,
+        confluence.MODE_ENV: "publish",
+        "CONFLUENCE_API_TOKEN_SCOPED": "true",
+        "CONFLUENCE_PAGE_PREFIX": "[auto] ",
+    }
+    settings = confluence.sphinx_settings(env)
     assert settings["confluence_publish"] is True
     assert settings["confluence_publish_dryrun"] is False
     assert settings["confluence_api_token_scoped"] is True
@@ -88,3 +92,29 @@ def test_mask_secrets():
 
 def test_mask_secrets_ignores_trivially_short_values():
     assert confluence.mask_secrets("a b c", {"CONFLUENCE_API_TOKEN": "a"}) == "a b c"
+
+
+def test_every_setting_name_is_registered_by_the_installed_confluence_builder(tmp_path):
+    """設定名がビルダーの版で変わると、Sphinx は未知の名前を黙って無視する。
+
+    purge / trample などの安全設定が効かなくなるので、名前が実在するかを確かめる。
+    """
+    pytest.importorskip("sphinxcontrib.confluencebuilder")
+    from sphinx.application import Sphinx
+
+    (tmp_path / "conf.py").write_text("extensions = ['sphinxcontrib.confluencebuilder']\n", encoding="utf-8")
+    (tmp_path / "index.rst").write_text("T\n=\n", encoding="utf-8")
+    app = Sphinx(
+        str(tmp_path),
+        str(tmp_path),
+        str(tmp_path / "out"),
+        str(tmp_path / "doctrees"),
+        "confluence",
+        status=None,
+        warning=None,
+    )
+
+    env = {**FULL, confluence.MODE_ENV: "publish", "CONFLUENCE_API_TOKEN_SCOPED": "1", "CONFLUENCE_PAGE_PREFIX": "p"}
+    names = set(confluence.sphinx_settings(env, footer_file="/x"))
+    unknown = sorted(n for n in names if n not in app.config.values)
+    assert not unknown, f"ビルダーに無い設定名: {unknown}"

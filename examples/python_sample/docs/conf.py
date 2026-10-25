@@ -5,9 +5,9 @@ from docspipeline.config import build_config
 globals().update(
     build_config(
         confdir=__file__,
-        project='Sample Tool',
-        author='manato1201',
-        package_paths=['../src'],
+        project="Sample Tool",
+        author="manato1201",
+        package_paths=["../src"],
         use_hou_stub=True,
         cpp_sources=[],
         # 出典・ライセンスの注記。HTML のフッターと Confluence の各ページ末尾に付く。

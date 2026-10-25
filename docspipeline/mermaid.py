@@ -35,13 +35,15 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from docutils import nodes
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
+
+from . import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -102,9 +104,7 @@ def render(code: str, out_dir: Path, *, cmd: list[str], fmt: str = "svg", puppet
     Raises:
         MermaidRenderError: ``mmdc`` が失敗したとき。
     """
-    key = hashlib.sha1(
-        json.dumps([code, fmt, MERMAID_CONFIG], sort_keys=True).encode("utf-8")
-    ).hexdigest()[:16]
+    key = hashlib.sha1(json.dumps([code, fmt, MERMAID_CONFIG], sort_keys=True).encode("utf-8")).hexdigest()[:16]
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"mermaid-{key}.{fmt}"
     if out.exists():
@@ -139,7 +139,7 @@ class MermaidDirective(SphinxDirective):
 
     has_content = True
     required_arguments = 0
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         "alt": lambda arg: arg or "",
         "caption": lambda arg: arg or "",
     }
@@ -213,4 +213,4 @@ def setup(app: Sphinx) -> dict[str, Any]:
     app.add_config_value("docspipeline_mermaid_puppeteer_config", None, "env")
     app.add_directive("mermaid", MermaidDirective)
     app.connect("config-inited", _check_policy)
-    return {"version": "0.1.0", "parallel_read_safe": True, "parallel_write_safe": True}
+    return {"version": __version__, "parallel_read_safe": True, "parallel_write_safe": True}

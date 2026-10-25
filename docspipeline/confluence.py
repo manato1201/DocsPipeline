@@ -61,9 +61,7 @@ def current_mode(environ: Mapping[str, str] | None = None) -> str:
     env = os.environ if environ is None else environ
     mode = (env.get(MODE_ENV) or "local").strip().lower()
     if mode not in MODES:
-        raise ConfluenceSettingsError(
-            f"{MODE_ENV} は {', '.join(MODES)} のいずれかにしてください (指定値: {mode!r})"
-        )
+        raise ConfluenceSettingsError(f"{MODE_ENV} は {', '.join(MODES)} のいずれかにしてください (指定値: {mode!r})")
     return mode
 
 
@@ -120,9 +118,7 @@ def sphinx_settings(
 
     missing = missing_env(env)
     if missing:
-        raise ConfluenceSettingsError(
-            f"{mode} モードには次の環境変数が必要です: {', '.join(missing)}"
-        )
+        raise ConfluenceSettingsError(f"{mode} モードには次の環境変数が必要です: {', '.join(missing)}")
 
     settings.update(
         {

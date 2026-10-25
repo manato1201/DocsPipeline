@@ -18,6 +18,12 @@ docstring から自動生成する。直接編集せず、コードの docstring
 
 .. automodule:: docspipeline.docstring_coverage
 
+.. automodule:: docspipeline.scaffold
+
+.. automodule:: docspipeline.diagrams
+
+.. automodule:: docspipeline.doctor
+
 .. automodule:: docspipeline.cli
 
 .. automodule:: docspipeline.stubs.hou

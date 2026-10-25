@@ -15,4 +15,5 @@ docstring から API 文書を自動生成し、構成図を加えて、Confluen
    hou
    output-formats
    runbook
+   learn/index
    api

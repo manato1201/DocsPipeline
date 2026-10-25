@@ -16,12 +16,15 @@
        既存のファイルは ``--force`` を付けない限り上書きしない。
    * - ``docspipeline build [DOCS]``
      - Sphinx でビルドする。既定は警告をエラー扱い (``-W --keep-going``)。
+       ``-b confluence`` でも **公開はしない** (常に ``local``)。公開できるのは ``publish`` だけ。
    * - ``docspipeline linkcheck [DOCS]``
      - 外部リンクの切れを確認する。
    * - ``docspipeline coverage PATH...``
      - docstring が無い公開 API を一覧する。``--fail-under`` で基準を決められる。
    * - ``docspipeline check-diagrams [DOCS]``
      - ``.drawio`` に、書き出した SVG があるかを確認する。
+   * - ``docspipeline doctor``
+     - 手元で使える機能 (``mmdc``・``doxygen``・Confluence の設定など) を確認する。トークンの値は出さない。
    * - ``docspipeline confluence-check [DOCS]``
      - Confluence への接続・認証・権限を確認する。ページは変更しない。
    * - ``docspipeline publish [DOCS] --mode MODE``

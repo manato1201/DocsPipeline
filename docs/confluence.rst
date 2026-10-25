@@ -7,6 +7,15 @@ Confluence への公開
 Sphinx の出力を、専用の親ページ配下に Confluence のページとして公開する。
 公開には `sphinxcontrib-confluencebuilder <https://sphinxcontrib-confluencebuilder.readthedocs.io/>`_ を使う。
 
+公開の流れ
+----------
+
+.. image:: diagrams/publish-flow.drawio.svg
+   :alt: main への反映から、CI の確認、環境変数の確認、接続テスト、ビルド、Confluence の親ページ配下への反映まで。番号は実行順
+   :width: 100%
+
+番号は実行順。赤字は、そこで止まる条件を表す。
+
 見るポイント
 ------------
 

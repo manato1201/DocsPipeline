@@ -109,3 +109,12 @@ def test_scan_skips_virtualenv_and_cache_dirs(tmp_path):
     (tmp_path / ".venv" / "x.py").write_text("def f():\n    pass\n", encoding="utf-8")
     (tmp_path / "ok.py").write_text('"""d."""\n', encoding="utf-8")
     assert {i.path.name for i in dc.scan([tmp_path]).items} == {"ok.py"}
+
+
+def test_definitions_inside_if_and_try_are_counted(tmp_path):
+    items = _scan(
+        tmp_path,
+        "try:\n    import fast\nexcept ImportError:\n    def load():\n        pass\n"
+        "if True:\n    class Opt:\n        pass\n",
+    )
+    assert {i.qualname for i in items if not i.documented} >= {"mod.load", "mod.Opt", "mod"}

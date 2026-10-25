@@ -37,6 +37,10 @@ Confluence の安全設定を DocsPipeline から受け取る。
      - Houdini の外で ``hou`` を使うコードを文書化する
      - :mod:`docspipeline.stubs.hou`
 
+.. image:: diagrams/system-overview.drawio.svg
+   :alt: 書く・組み立てる・届ける・守る
+   :width: 100%
+
 最短の手順
 ----------
 
@@ -53,6 +57,7 @@ Confluence の安全設定を DocsPipeline から受け取る。
 
 * 公開は最後の工程。まずローカルの HTML で品質を確保する。公開先の設定が無くても、HTML までで完了できる。
 * 既定のモードでは Confluence に一切つながらない (:doc:`confluence`)。
+* 保守・拡張する人は、:doc:`learn/index` から読む。
 
 使うときの注意
 --------------

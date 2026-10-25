@@ -12,6 +12,8 @@ from typing import Any
 from sphinx.application import Sphinx
 from sphinx.errors import ConfigError
 
+from . import __version__
+
 
 def _raise_config_error(app: Sphinx, config: Any) -> None:
     if config.docspipeline_config_error:
@@ -22,4 +24,4 @@ def setup(app: Sphinx) -> dict[str, Any]:
     """Sphinx 拡張の登録。"""
     app.add_config_value("docspipeline_config_error", "", "env")
     app.connect("config-inited", _raise_config_error, priority=100)
-    return {"version": "0.1.0", "parallel_read_safe": True, "parallel_write_safe": True}
+    return {"version": __version__, "parallel_read_safe": True, "parallel_write_safe": True}

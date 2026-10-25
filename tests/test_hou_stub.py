@@ -37,7 +37,7 @@ def test_identity_is_stable(hou):
 
 def test_dunder_lookups_still_fail_so_tools_are_not_confused(hou):
     with pytest.raises(AttributeError):
-        hou.__wrapped__
+        _ = hou.__wrapped__
 
 
 def test_stub_is_marked(hou):

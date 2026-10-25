@@ -4,12 +4,14 @@
 全体の流れ
 ----------
 
-.. image:: diagrams/architecture.drawio.svg
-   :alt: 入力 (Python / Markdown / C++ / Mermaid / diagrams.net) が Sphinx を通り、HTML と Confluence に出る
-   :width: 100%
+.. image:: diagrams/system-overview.drawio.svg
+   :alt: 書く (Python・Markdown・C++・図) → 組み立てる (Sphinx と拡張) → 届ける (HTML・Confluence)。下に、CI が守る項目
 
-図は diagrams.net で描いた。元データ (``architecture.drawio``) と、書き出した SVG
-(``architecture.drawio.svg``) の両方をリポジトリに置く。``docspipeline check-diagrams`` が、
+「書く」ものを、Sphinx と拡張が「組み立て」、HTML と Confluence に「届ける」。下の「守る」は、CI が毎回確かめる項目。
+青い矢印は入力、オレンジは公開の経路を表す。
+
+図は diagrams.net で開ける ``.drawio`` と、書き出した ``.drawio.svg`` の両方をリポジトリに置く。
+生成の仕方と、図の足し方は :doc:`learn/04-extend` を参照。``docspipeline check-diagrams`` が、
 書き出しの漏れを確認する。
 
 設計方針

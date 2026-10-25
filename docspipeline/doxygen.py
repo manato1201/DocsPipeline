@@ -23,6 +23,8 @@ from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
 from sphinx.util import logging
 
+from . import __version__
+
 logger = logging.getLogger(__name__)
 
 SKIP_ENV = "DOCSPIPELINE_SKIP_DOXYGEN"
@@ -77,7 +79,7 @@ def run_doxygen(app: Sphinx) -> None:
     """``builder-inited`` で Doxygen を走らせ、警告を Sphinx の警告として転送する。
 
     Raises:
-        ExtensionError: ``doxygen`` が無い、または失敗したとき。
+        sphinx.errors.ExtensionError: ``doxygen`` が無い、または失敗したとき。
     """
     config = app.config
     inputs: list[str] = config.docspipeline_doxygen_inputs
@@ -91,8 +93,7 @@ def run_doxygen(app: Sphinx) -> None:
     doxygen = shutil.which(config.docspipeline_doxygen_cmd)
     if doxygen is None:
         raise ExtensionError(
-            "doxygen が見つかりません。インストールするか、"
-            f"{SKIP_ENV}=1 で C++ の節を飛ばしてください"
+            f"doxygen が見つかりません。インストールするか、{SKIP_ENV}=1 で C++ の節を飛ばしてください"
         )
 
     output = Path(config.docspipeline_doxygen_output)
@@ -128,4 +129,4 @@ def setup(app: Sphinx) -> dict[str, Any]:
     app.add_config_value("docspipeline_doxygen_cmd", "doxygen", "env")
     # Breathe より先に走らせる (小さい数字ほど先)。
     app.connect("builder-inited", run_doxygen, priority=100)
-    return {"version": "0.1.0", "parallel_read_safe": True}
+    return {"version": __version__, "parallel_read_safe": True}

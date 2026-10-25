@@ -20,7 +20,8 @@ pytestmark = pytest.mark.slow
 def _env(tmp_path: Path, **extra: str) -> dict[str, str]:
     env = {k: v for k, v in os.environ.items() if not k.startswith(("CONFLUENCE_", "DOCSPIPELINE_"))}
     # 外部サイトにつながない。mmdc が PATH に残っていても使わない (偽物か、無いときの挙動を試す)。
-    env.update(DOCSPIPELINE_OFFLINE="1", PATH=f"{Path(sys.executable).parent}{os.pathsep}/usr/bin{os.pathsep}/bin")
+    path = f"{Path(sys.executable).parent}{os.pathsep}/usr/bin{os.pathsep}/bin"
+    env.update(DOCSPIPELINE_OFFLINE="1", PATH=path)
     env.update(extra)
     return env
 
@@ -28,7 +29,18 @@ def _env(tmp_path: Path, **extra: str) -> dict[str, str]:
 def _build(project: Path, builder: str, env: dict[str, str], *extra: str) -> subprocess.CompletedProcess:
     docs = project / "docs"
     return subprocess.run(
-        [sys.executable, "-m", "sphinx", "-W", "--keep-going", "-b", builder, *extra, str(docs), str(docs / "_build" / builder)],
+        [
+            sys.executable,
+            "-m",
+            "sphinx",
+            "-W",
+            "--keep-going",
+            "-b",
+            builder,
+            *extra,
+            str(docs),
+            str(docs / "_build" / builder),
+        ],
         capture_output=True,
         text=True,
         env=env,

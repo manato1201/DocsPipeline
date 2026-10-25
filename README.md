@@ -9,7 +9,10 @@
 - 公開: Confluence (専用の親ページ配下だけ。既定は公開しない)
 - Houdini の `hou` を使うコード: スタブで文書化・テスト
 
+![全体像: 書く → 組み立てる → 届ける、と CI が守る項目](docs/diagrams/system-overview.drawio.svg)
+
 文書は [`docs/`](docs/) にあり、この道具自身で生成する (`docspipeline build docs`)。
+保守・拡張する人は、[学習資料](docs/learn/index.md) から読む (全体像 → コードの読み方 → ビルドの内側 → 拡張のレシピ → テスト → 演習 → トラブルシュート)。
 
 ## クイックスタート
 
@@ -38,6 +41,7 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 | `docspipeline coverage PATH...` | docstring が無い公開 API を一覧 (`--fail-under N`) |
 | `docspipeline check-diagrams [DOCS]` | `.drawio` に書き出した SVG があるか |
 | `docspipeline linkcheck [DOCS]` | 外部リンクの切れ |
+| `docspipeline doctor` | 手元で使える機能 (`mmdc`・`doxygen`・設定の有無) を確認。トークンの値は出さない |
 | `docspipeline confluence-check [DOCS]` | Confluence への接続・認証・権限の確認 (ページは変更しない) |
 | `docspipeline publish [DOCS] --mode local\|dryrun\|publish` | 既定は `local` (ネットワークにつながない) |
 
@@ -47,6 +51,19 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 - 公開先は専用の親ページ配下だけ (`CONFLUENCE_PARENT_PAGE` が必須)。親ページの外の同名ページは上書きしない。今回の出力に無いページは消さない
 - API トークンは環境変数だけ。CLI が起動した出力から、トークンの値は `***` に置き換わる
 - 公開は CI の変数 `CONFLUENCE_PUBLISH=true` のときだけ、main への反映で実行する
+
+## 構成図
+
+図は `tools/diagrams/build_diagrams.py` の定義から、diagrams.net で開ける `.drawio` と、書き出し SVG を生成する
+(`python tools/diagrams/build_diagrams.py`)。生成物が定義とずれると、`pytest` が落ちる。
+図の足し方は [拡張のしかた](docs/learn/04-extend.md)。
+
+| 図 | 内容 |
+|---|---|
+| [system-overview](docs/diagrams/system-overview.drawio.svg) | 書く・組み立てる・届ける・守る |
+| [publish-flow](docs/diagrams/publish-flow.drawio.svg) | 公開の流れ (番号は実行順、赤は止まる条件) |
+| [module-map](docs/diagrams/module-map.drawio.svg) | モジュールの依存 (読む順番の地図) |
+| [build-internals](docs/diagrams/build-internals.drawio.svg) | Sphinx のビルドの内側 |
 
 ## 設計書のフェーズとの対応
 
@@ -77,5 +94,6 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 
 ```bash
 pip install -e ".[docs,cpp,confluence,dev]"
-pytest              # 単体テスト + サンプルと自身の文書の実ビルド (doxygen が無ければ C++ は飛ばす)
+pytest              # 単体テスト + サンプルと自身の文書の実ビルド + 図の整合 (doxygen が無ければ C++ は飛ばす)
+ruff check . && ruff format --check .
 ```

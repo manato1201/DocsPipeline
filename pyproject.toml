@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docspipeline"
-version = "0.1.0"
+dynamic = ["version"]
 description = "docstring から API 文書を生成し、Confluence へ公開するための共通設定と CLI"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -21,16 +21,33 @@ docs = [
 cpp = ["breathe>=4.35"]
 # Confluence への公開
 confluence = ["sphinxcontrib-confluencebuilder>=2.5"]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "ruff>=0.5"]
 
 [project.scripts]
 docspipeline = "docspipeline.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "docspipeline.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["docspipeline*"]
 
 [tool.setuptools.package-data]
 docspipeline = ["templates/**/*", "stubs/*.py"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+    "RUF001", "RUF002", "RUF003",  # 日本語の全角文字は、文書・コメントで意図して使う
+]
+
+[tool.ruff.lint.per-file-ignores]
+# アイコンと SVG の断片は、1 行に収めたほうが読みやすいデータ
+"tools/diagrams/kit.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

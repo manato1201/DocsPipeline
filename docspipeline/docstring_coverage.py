@@ -15,6 +15,7 @@ Sphinx の autodoc は docstring が無い項目を黙って飛ばすので、``
 from __future__ import annotations
 
 import ast
+import contextlib
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -70,9 +71,7 @@ def _is_public(name: str) -> bool:
 def _exported(tree: ast.Module) -> set[str] | None:
     """``__all__`` の中身を返す。無い (または静的に読めない) ときは ``None``。"""
     for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets
-        ):
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
             try:
                 value = ast.literal_eval(node.value)
             except ValueError:
@@ -110,7 +109,14 @@ def scan_file(path: Path, *, module_name: str | None = None) -> list[Item]:
 
     def visit_body(body: list[ast.stmt], prefix: str, top_level: bool) -> None:
         for node in body:
-            if isinstance(node, ast.ClassDef):
+            if isinstance(node, (ast.If, ast.Try, ast.With)):
+                # 条件つきの定義 (try: import ... / if sys.version_info ...) も、同じ階層として扱う
+                visit_body(node.body, prefix, top_level)
+                visit_body(getattr(node, "orelse", []), prefix, top_level)
+                for handler in getattr(node, "handlers", []):
+                    visit_body(handler.body, prefix, top_level)
+                visit_body(getattr(node, "finalbody", []), prefix, top_level)
+            elif isinstance(node, ast.ClassDef):
                 if not _is_public(node.name) or (top_level and exported is not None and node.name not in exported):
                     continue
                 qual = f"{prefix}.{node.name}"
@@ -158,10 +164,8 @@ def format_report(report: Report, *, base: Path | None = None) -> str:
     for item in report.missing:
         shown = item.path
         if base is not None:
-            try:
+            with contextlib.suppress(ValueError):  # base の外にあるファイルは、そのまま表示する
                 shown = item.path.relative_to(base)
-            except ValueError:
-                pass
         lines.append(f"{shown}:{item.line}: {item.kind} {item.qualname} に docstring がありません")
     total = len(report.items)
     lines.append(f"docstring のカバレッジ: {report.percent:.1f}% ({total - len(report.missing)}/{total})")
