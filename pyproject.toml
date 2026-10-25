@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docspipeline"
+version = "0.1.0"
+description = "docstring から API 文書を生成し、Confluence へ公開するための共通設定と CLI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+# Sphinx 本体と、設計書で使うことにした拡張
+docs = [
+    "sphinx>=7.2",
+    "myst-parser>=2.0",
+    "furo>=2024.1.29",
+]
+# C++ (Doxygen XML を Sphinx に取り込む)。Doxygen 本体は別途インストールする
+cpp = ["breathe>=4.35"]
+# Confluence への公開
+confluence = ["sphinxcontrib-confluencebuilder>=2.5"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+docspipeline = "docspipeline.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["docspipeline*"]
+
+[tool.setuptools.package-data]
+docspipeline = ["templates/**/*", "stubs/*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: Sphinx のビルドを実際に走らせるテスト",
+]

@@ -1,0 +1,12 @@
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+
+# Sphinx / Doxygen / Mermaid の生成物
+_build/
+_doxygen/
+_generated/
+node_modules/

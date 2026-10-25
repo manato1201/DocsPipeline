@@ -1,0 +1,101 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 3 * * 1" # 週 1 回、外部リンクの切れを確認する
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Mermaid の変換 (mmdc) を CI で動かすための設定 (Chromium のサンドボックスを切る)
+  DOCSPIPELINE_PUPPETEER_CONFIG: ${{ github.workspace }}/.puppeteer-ci.json
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y doxygen
+      - name: Install
+        run: pip install -e ".[docs,cpp,confluence,dev]"
+      - name: Unit and build tests
+        run: pytest -q
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y doxygen
+      - name: Install tools
+        run: |
+          pip install -e ".[docs,cpp,confluence]"
+          npm install --no-save @mermaid-js/mermaid-cli
+          echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+          echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
+      - name: Build (warnings are errors)
+        run: docspipeline build docs --require-mermaid
+      - name: Build Confluence format (no network)
+        run: docspipeline build docs -b confluence --require-mermaid
+      - name: Build examples
+        run: |
+          docspipeline build examples/python_sample/docs --require-mermaid
+          docspipeline build examples/cpp_sample/docs --require-mermaid
+      - name: Check diagram exports
+        run: docspipeline check-diagrams docs
+      - name: Docstring coverage
+        run: docspipeline coverage docspipeline --fail-under 100
+      - name: Link check
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: docspipeline linkcheck docs
+
+  publish:
+    # リポジトリ変数 CONFLUENCE_PUBLISH が 'true' のときだけ、main への反映で公開する
+    needs: [test, docs]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CONFLUENCE_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: confluence
+    concurrency: confluence-publish
+    env:
+      CONFLUENCE_SERVER_URL: ${{ vars.CONFLUENCE_SERVER_URL }}
+      CONFLUENCE_SPACE_KEY: ${{ vars.CONFLUENCE_SPACE_KEY }}
+      CONFLUENCE_PARENT_PAGE: ${{ vars.CONFLUENCE_PARENT_PAGE }}
+      CONFLUENCE_SERVER_USER: ${{ vars.CONFLUENCE_SERVER_USER }}
+      CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+      DOCSPIPELINE_PUPPETEER_CONFIG: ${{ github.workspace }}/.puppeteer-ci.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install tools
+        run: |
+          pip install -e ".[docs,confluence]"
+          npm install --no-save @mermaid-js/mermaid-cli
+          echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+          echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
+      - name: Publish to Confluence
+        # 接続テスト → 公開。トークンは出力から伏せられる
+        run: DOCSPIPELINE_MERMAID_MISSING=error docspipeline publish docs --mode publish
