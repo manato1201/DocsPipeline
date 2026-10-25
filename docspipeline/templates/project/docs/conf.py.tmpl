@@ -1,0 +1,16 @@
+"""@@project@@ の Sphinx 設定。共通の設定は DocsPipeline から読み込む。"""
+
+from docspipeline.config import build_config
+
+globals().update(
+    build_config(
+        confdir=__file__,
+        project=@@project_repr@@,
+        author=@@author_repr@@,
+        package_paths=@@package_paths@@,
+        use_hou_stub=@@use_hou_stub@@,
+        cpp_sources=@@cpp_sources@@,
+        # 出典・ライセンスの注記。HTML のフッターと Confluence の各ページ末尾に付く。
+        license_note="",
+    )
+)

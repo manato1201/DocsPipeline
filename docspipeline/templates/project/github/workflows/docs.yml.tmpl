@@ -1,0 +1,79 @@
+name: docs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 3 * * 1" # 週 1 回、外部リンクの切れを確認する
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Mermaid の変換 (mmdc) を CI で動かすための設定
+  DOCSPIPELINE_PUPPETEER_CONFIG: ${{ github.workspace }}/.puppeteer-ci.json
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+@@doxygen_step@@
+      - name: Install tools
+        run: |
+          # 再現性のため、@main は公開後にタグかコミットへ固定すること
+          pip install "docspipeline[docs,cpp,confluence] @ git+https://github.com/manato1201/DocsPipeline@main"
+          npm install --no-save @mermaid-js/mermaid-cli
+          echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+          echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
+      - name: Build (warnings are errors)
+        run: docspipeline build docs --require-mermaid
+      - name: Build Confluence format (no network)
+        # Confluence に載せられない書き方 (未対応のコード言語など) を、公開の前に見つける
+        run: docspipeline build docs -b confluence
+      - name: Check diagram exports
+        run: docspipeline check-diagrams docs
+@@coverage_step@@      - name: Link check
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: docspipeline linkcheck docs
+
+  publish:
+    # リポジトリ変数 CONFLUENCE_PUBLISH が 'true' のときだけ、main への反映で公開する
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CONFLUENCE_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: confluence
+    concurrency: confluence-publish
+    env:
+      CONFLUENCE_SERVER_URL: ${{ vars.CONFLUENCE_SERVER_URL }}
+      CONFLUENCE_SPACE_KEY: ${{ vars.CONFLUENCE_SPACE_KEY }}
+      CONFLUENCE_PARENT_PAGE: ${{ vars.CONFLUENCE_PARENT_PAGE }}
+      CONFLUENCE_SERVER_USER: ${{ vars.CONFLUENCE_SERVER_USER }}
+      CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+      DOCSPIPELINE_PUPPETEER_CONFIG: ${{ github.workspace }}/.puppeteer-ci.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+@@doxygen_step@@
+      - name: Install tools
+        run: |
+          pip install "docspipeline[docs,cpp,confluence] @ git+https://github.com/manato1201/DocsPipeline@main"
+          npm install --no-save @mermaid-js/mermaid-cli
+          echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+          echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
+      - name: Publish to Confluence
+        # 接続テスト → 公開。トークンは出力から伏せられる
+        run: docspipeline publish docs --mode publish
