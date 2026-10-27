@@ -69,16 +69,30 @@ def _is_public(name: str) -> bool:
 
 
 def _exported(tree: ast.Module) -> set[str] | None:
-    """``__all__`` の中身を返す。無い (または静的に読めない) ときは ``None``。"""
+    """``__all__`` の中身を返す。無い (または静的に読めない) ときは ``None``。
+
+    ``__all__ = [...]``・``__all__: list[str] = [...]``・``__all__ += [...]`` を読む。
+    """
+    names: set[str] | None = None
     for node in tree.body:
         if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
-            try:
-                value = ast.literal_eval(node.value)
-            except ValueError:
-                return None
-            if isinstance(value, (list, tuple)) and all(isinstance(v, str) for v in value):
-                return set(value)
-    return None
+            value_node, replace = node.value, True
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == "__all__":
+            if node.value is None:
+                continue
+            value_node, replace = node.value, True
+        elif isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Name) and node.target.id == "__all__":
+            value_node, replace = node.value, False
+        else:
+            continue
+        try:
+            value = ast.literal_eval(value_node)
+        except ValueError:
+            return None
+        if not (isinstance(value, list | tuple) and all(isinstance(v, str) for v in value)):
+            return None
+        names = set(value) if replace or names is None else names | set(value)
+    return names
 
 
 def _decorator_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
@@ -100,9 +114,15 @@ def scan_file(path: Path, *, module_name: str | None = None) -> list[Item]:
         module_name: 結果に使うモジュール名。省略するとファイル名から付ける。
 
     Returns:
-        見つかった項目。構文エラーのファイルは ``SyntaxError`` をそのまま投げる。
+        見つかった項目。
+
+    Raises:
+        ValueError: ファイルが構文エラーのとき (ファイル名と行を含む)。
     """
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError as exc:
+        raise ValueError(f"{path}:{exc.lineno}: 構文エラー: {exc.msg}") from exc
     module = module_name or path.stem
     exported = _exported(tree)
     items: list[Item] = []
@@ -150,9 +170,16 @@ def _module_name(path: Path, root: Path) -> str:
 
 
 def scan(roots: Iterable[Path]) -> Report:
-    """``roots`` 配下の公開 API を調べて集計する。"""
+    """``roots`` 配下の公開 API を調べて集計する。
+
+    Raises:
+        ValueError: 存在しないパスがあるとき、または構文エラーのファイルがあるとき。
+            存在しないパスを「100%」と報告すると、パスの打ち間違いや移動で、検査が黙って空になる。
+    """
     items: list[Item] = []
     for root in roots:
+        if not root.exists():
+            raise ValueError(f"パスがありません: {root}")
         for path in iter_python_files([root]):
             items.extend(scan_file(path, module_name=_module_name(path, root)))
     return Report(tuple(items))

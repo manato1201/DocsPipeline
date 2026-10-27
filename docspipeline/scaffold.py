@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shlex
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ _DOXYGEN_STEP = """      - name: Install Doxygen
 """
 
 _COVERAGE_STEP = """      - name: Docstring coverage
-        run: docspipeline coverage {paths}
+        run: docspipeline coverage {paths} --fail-under {minimum}
 """
 
 
@@ -44,6 +45,7 @@ class Options:
     package: tuple[str, ...] = ()
     cpp: tuple[str, ...] = ()
     hou: bool = False
+    min_coverage: int = 80
 
 
 def title_rule(text: str) -> str:
@@ -97,7 +99,10 @@ def _py_list(items: Sequence[str]) -> str:
 
 def _values(opts: Options) -> dict[str, str]:
     docs = opts.target / "docs"
-    coverage_paths = " ".join(os.path.relpath((docs / p).resolve(), opts.target) for p in opts.package)
+    # CI は Linux で動く。区切りは / に揃え、空白などを含む名前は引用する
+    coverage_paths = " ".join(
+        shlex.quote(Path(os.path.relpath((docs / p).resolve(), opts.target)).as_posix()) for p in opts.package
+    )
     return {
         "project": opts.project,
         "project_repr": repr(opts.project),
@@ -109,7 +114,7 @@ def _values(opts: Options) -> dict[str, str]:
         "extra_toctree": ("   api\n" if opts.package else "") + ("   cpp\n" if opts.cpp else ""),
         "api_modules": api_modules(docs, opts.package),
         "doxygen_step": _DOXYGEN_STEP if opts.cpp else "",
-        "coverage_step": _COVERAGE_STEP.format(paths=coverage_paths) if opts.package else "",
+        "coverage_step": _COVERAGE_STEP.format(paths=coverage_paths, minimum=opts.min_coverage) if opts.package else "",
     }
 
 

@@ -14,6 +14,7 @@
      - ``TARGET/docs`` に ``conf.py`` と雛形、``.github/workflows/docs.yml`` を作る。
        ``--package`` (Python のソース)・``--cpp`` (C++ のソース)・``--hou`` で構成を選ぶ。
        既存のファイルは ``--force`` を付けない限り上書きしない。
+       CI の docstring の関門は、``--min-coverage`` (既定 80) 未満で **失敗する**。
    * - ``docspipeline build [DOCS]``
      - Sphinx でビルドする。既定は警告をエラー扱い (``-W --keep-going``)。
        ``-b confluence`` でも **公開はしない** (常に ``local``)。公開できるのは ``publish`` だけ。
@@ -21,8 +22,11 @@
      - 外部リンクの切れを確認する。
    * - ``docspipeline coverage PATH...``
      - docstring が無い公開 API を一覧する。``--fail-under`` で基準を決められる。
+       存在しないパス・構文エラーのファイルは、終了コード 2 のエラーにする (「100%」と黙って報告しない)。
+       ``__all__`` は ``= [...]``・``: list[str] = [...]``・``+= [...]`` を読む。
    * - ``docspipeline check-diagrams [DOCS]``
-     - ``.drawio`` に、書き出した SVG があるかを確認する。
+     - ``.drawio`` に、書き出した SVG があるかを確認する。``DOCS`` が無ければ終了コード 2。
+       ``_build``・``_generated``・``_doxygen``・``node_modules``・隠しディレクトリは探さない。
    * - ``docspipeline map PACKAGE``
      - ソースを構文解析して、モジュールの依存の地図を作る (Markdown の下書き / Mermaid / JSON)。
        ローカルで読むだけで、外部へは送信しない。``--fail-on-cycle`` で、循環があれば失敗させる。
@@ -32,7 +36,9 @@
    * - ``docspipeline confluence-check [DOCS]``
      - Confluence への接続・認証・権限を確認する。ページは変更しない。
    * - ``docspipeline publish [DOCS] --mode MODE``
-     - Confluence 形式でビルドする。:doc:`confluence` を参照。
+     - Confluence 形式でビルドする。:doc:`confluence` を参照。``dryrun`` / ``publish`` では、Mermaid が画像にならなければ
+       **失敗させる** (``DOCSPIPELINE_MERMAID_MISSING=error`` を自動で付ける)。黙ってコードのままにすると、
+       Confluence のページが、図の無いページに置き換わるため。
 
 環境変数
 --------

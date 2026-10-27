@@ -36,6 +36,15 @@
 * - `Cannot find file: .../_doxygen/xml/index.xml`
   - Doxygen が走っていない (`SKIP` か、`cpp_sources` の指定漏れ)
   - `config.build_config(cpp_sources=...)`
+* - `エラー: パスがありません: ...` / `ディレクトリがありません: ...` (終了コード 2)
+  - `coverage` / `check-diagrams` に渡したパスの打ち間違い・移動。以前は「100%」「問題なし」と黙って成功していた
+  - 渡したパスを確かめる。CI の設定 (`docs.yml`) のパスも
+* - `エラー: ...py:12: 構文エラー: ...` (終了コード 2)
+  - `coverage` / `map` が読んだファイルが、Python として解釈できない
+  - メッセージのファイルと行。`--fail-on-cycle` の失敗 (終了コード 1) とは区別できる
+* - `dryrun` / `publish` が「mmdc が見つかりません」で失敗する
+  - 図が画像にならないまま公開すると、Confluence のページが図の無いページに置き換わるため、公開系のモードでは失敗させている
+  - `mmdc` を入れる。確認は `docspipeline doctor`
 * - `次の環境変数が未設定です: ...`
   - `dryrun` / `publish` に必要な設定が足りない
   - `confluence.REQUIRED_ENV`。名前だけが出る

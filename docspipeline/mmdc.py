@@ -13,6 +13,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -46,10 +47,13 @@ def find_mmdc(configured: str | None, confdir: str | Path) -> list[str] | None:
     on_path = shutil.which("mmdc")
     if on_path:
         return [on_path]
+    # Windows の npm は、拡張子なしのシェルスクリプトと mmdc.cmd の両方を置く。実行できるのは .cmd の方。
+    names = ("mmdc.cmd", "mmdc") if sys.platform == "win32" else ("mmdc",)
     for base in (Path(confdir), Path(confdir).parent):
-        candidate = base / "node_modules" / ".bin" / "mmdc"
-        if candidate.exists():
-            return [str(candidate)]
+        for name in names:
+            candidate = base / "node_modules" / ".bin" / name
+            if candidate.exists():
+                return [str(candidate)]
     return None
 
 

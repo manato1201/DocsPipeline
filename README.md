@@ -84,6 +84,8 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 外部資料の追補のうち、Z16 (oh-my-mermaid) の「機械が読み取った事実と、人が書く理由を分けて持つ」考え方は、
 **自前の** `docspipeline map` として実装した (外部ツールは導入せず、コードの情報を外部へ送らない。[学習資料](docs/learn/09-structure-map.md))。
 X3 (graphify)・X7 (better-readme-skill)・Y9 (skills.sh のスキル) は、導入前に SKILL.md と監査結果を読む前提の提案で、取り込んでいない。
+最新の追補の ASCII モチーフ (蚕・繭) も、実装していない。設計書が「出す場所は UI を作る段階で決める」としており、
+DocsPipeline にはまだ UI が無い (理由は [設計](docs/design.rst))。
 Graphify の地図との比較も、未実施。
 
 ## 未検証のこと

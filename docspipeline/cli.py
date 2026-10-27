@@ -19,7 +19,15 @@ from . import confluence, diagrams, docstring_coverage, doctor, scaffold, struct
 def _run(cmd: Sequence[str], env: dict[str, str] | None = None) -> int:
     """コマンドを走らせ、出力から API トークンを伏せて表示する。"""
     merged = {**os.environ, **(env or {})}
-    with subprocess.Popen(list(cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=merged) as proc:
+    with subprocess.Popen(
+        list(cmd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",  # 読めない文字で、ビルドの途中で落ちない
+        env=merged,
+    ) as proc:
         for line in proc.stdout or ():
             print(confluence.mask_secrets(line, merged), end="", flush=True)
         return proc.wait()
@@ -60,7 +68,11 @@ def cmd_linkcheck(args: argparse.Namespace) -> int:
 
 def cmd_coverage(args: argparse.Namespace) -> int:
     """``coverage``: docstring が無い公開 API を一覧し、基準に満たなければ失敗にする。"""
-    report = docstring_coverage.scan([Path(p) for p in args.paths])
+    try:
+        report = docstring_coverage.scan([Path(p) for p in args.paths])
+    except ValueError as exc:
+        print(f"エラー: {exc}", file=sys.stderr)
+        return 2
     print(docstring_coverage.format_report(report, base=Path.cwd()))
     if args.fail_under is not None and report.percent < args.fail_under:
         print(f"カバレッジが基準 {args.fail_under}% を下回っています", file=sys.stderr)
@@ -70,7 +82,11 @@ def cmd_coverage(args: argparse.Namespace) -> int:
 
 def cmd_check_diagrams(args: argparse.Namespace) -> int:
     """``check-diagrams``: 書き出した SVG が無い ``.drawio`` があれば失敗にする。"""
-    missing = diagrams.find_missing_exports(Path(args.docs))
+    try:
+        missing = diagrams.find_missing_exports(Path(args.docs))
+    except ValueError as exc:
+        print(f"エラー: {exc}", file=sys.stderr)
+        return 2
     for path in missing:
         print(f"{path}: 書き出した SVG がありません (diagrams.net の Export → SVG)")
     return 1 if missing else 0
@@ -99,7 +115,10 @@ def cmd_publish(args: argparse.Namespace) -> int:
                 print("接続テストに失敗したため、中止します", file=sys.stderr)
                 return rc
     print(f"== Confluence ビルド (mode={args.mode}) ==")
-    return _sphinx("confluence", Path(args.docs), mode=args.mode, strict=args.strict)
+    # 接続する・公開するときは、Mermaid が画像にならなければ失敗させる。
+    # 黙ってコードのままにすると、Confluence のページが、図の無いページに置き換わってしまう。
+    extra = {"DOCSPIPELINE_MERMAID_MISSING": "error"} if args.mode != "local" else None
+    return _sphinx("confluence", Path(args.docs), mode=args.mode, strict=args.strict, extra_env=extra)
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -111,6 +130,7 @@ def cmd_init(args: argparse.Namespace) -> int:
         package=tuple(args.package),
         cpp=tuple(args.cpp),
         hou=args.hou,
+        min_coverage=args.min_coverage,
     )
     try:
         created = scaffold.write(opts, force=args.force)
@@ -169,6 +189,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--cpp", action="append", default=[], metavar="PATH", help="C++ のソース (docs/ からの相対)。複数可")
     p.add_argument("--hou", action="store_true", help="Houdini の hou スタブを使う")
+    p.add_argument(
+        "--min-coverage", type=int, default=80, metavar="PERCENT", help="CI の docstring 網羅の基準 (既定 80)"
+    )
     p.add_argument("--force", action="store_true", help="既存のファイルを上書きする")
     p.set_defaults(func=cmd_init)
 

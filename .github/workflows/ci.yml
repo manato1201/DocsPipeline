@@ -102,4 +102,4 @@ jobs:
           echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
       - name: Publish to Confluence
         # 接続テスト → 公開。トークンは出力から伏せられる
-        run: DOCSPIPELINE_MERMAID_MISSING=error docspipeline publish docs --mode publish
+        run: docspipeline publish docs --mode publish

@@ -81,9 +81,13 @@ class Graph:
         return result
 
     def cycles(self) -> list[list[str]]:
-        """``import`` の循環を、強連結成分として返す (無ければ空)。"""
+        """``import`` の循環を、強連結成分として返す (無ければ空)。
+
+        パッケージ自身 (``__init__``) を経由する循環も含める。``__init__`` が子を import し、
+        子が ``from pkg import X`` する形は、循環 import の典型だから。
+        """
         graph: dict[str, set[str]] = {m.name: set() for m in self.modules}
-        for src, dst in self.edges():
+        for src, dst in self.edges(include_root=True):
             graph[src].add(dst)
         index: dict[str, int] = {}
         low: dict[str, int] = {}
@@ -162,7 +166,10 @@ def _resolve_from(node: ast.ImportFrom, module: str, is_package: bool, known: se
 
 def _analyze(path: Path, name: str, is_package: bool, known: set[str]) -> Module:
     text = path.read_text(encoding="utf-8")
-    tree = ast.parse(text, filename=str(path))
+    try:
+        tree = ast.parse(text, filename=str(path))
+    except SyntaxError as exc:
+        raise ValueError(f"{path}:{exc.lineno}: 構文エラー: {exc.msg}") from exc
     imports: set[str] = set()
     references: set[str] = set()
     external: set[str] = set()
@@ -211,7 +218,8 @@ def scan_package(root: Path) -> Graph:
         モジュールの一覧と依存。
 
     Raises:
-        ValueError: ``root`` がパッケージ (``__init__.py`` を持つディレクトリ) でないとき。
+        ValueError: ``root`` がパッケージ (``__init__.py`` を持つディレクトリ) でないとき、
+            または構文エラーのファイルがあるとき。
     """
     root = root.resolve()
     if not (root / "__init__.py").is_file():
