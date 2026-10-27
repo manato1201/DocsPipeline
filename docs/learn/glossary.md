@@ -50,6 +50,8 @@
   - 出力に混ざったトークンの値を `***` に置き換えること (`confluence.mask_secrets`)
 * - スタブ
   - 実物が動かない環境で、`import` だけを通すための偽物 (`hou` など)
+* - 機械の地図
+  - ソースを `ast` で読んで作る、モジュールの依存の一覧。事実だけを持ち、理由は持たない (`docspipeline map`)
 * - カバレッジ (docstring)
   - 公開 API のうち、docstring がある割合。`docspipeline coverage`
 ```

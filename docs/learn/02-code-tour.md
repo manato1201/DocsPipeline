@@ -38,8 +38,11 @@
   - `docspipeline/cli.py`
   - コマンドの入口。一つのコマンドは、一つの `cmd_*` 関数 + `build_parser` の一行
 * - 7
-  - `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`
-  - CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている
+  - `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`、`structure_map.py`
+  - CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている。`structure_map` は、この地図そのものを作る ([機械の地図](09-structure-map.md))
+* - 7'
+  - `docspipeline/mmdc.py`
+  - `mmdc` の探索と実行。**Sphinx に依存しない**。拡張 (`mermaid.py`) と `doctor.py` の両方が使う
 * - 8
   - `docspipeline/stubs/hou.py`
   - 属性参照・継承・呼び出しをすべて受け流す偽物。`_Meta` と `_Any` の二段構え
@@ -74,9 +77,11 @@
 ## よくある誤り
 
 * **`cli.py` に計算を書き足す**。コマンドが長くなったら、部品を別のモジュールへ出す (`scaffold.py` は、そうして `cli.py` から出した)。
+* **core のモジュールから、拡張 (Sphinx を import するもの) を import する**。Sphinx が無い環境で、CLI 全体が起動しなくなる (実際に起きた)。両方が使う部品は `mmdc.py` のように、Sphinx に依存しない別のモジュールへ ([機械の地図](09-structure-map.md))。
 * **`os.environ` を関数の奥で直接読む**。環境変数は引数 (`environ: Mapping[str, str] | None`) として受け取り、テストで差し替えられるようにする。`confluence.py` が手本。
 
 ## 関連
 
+* 地図を機械で作るには [機械の地図](09-structure-map.md)
 * 次は [ビルドの内側](03-build-internals.md)
 * 責務の一覧は [API リファレンス](../api.rst)

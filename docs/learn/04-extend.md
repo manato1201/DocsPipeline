@@ -15,10 +15,13 @@
 4. 次の三つがすべて通ること。
 
 ```bash
-python -m pytest -q
+python -m pytest -q              # 依存の向き (tests/test_structure_map.py) と、図の整合を含む
 ruff check . && ruff format --check .
 docspipeline build docs          # 自分の文書が、警告なしで通る
 ```
+
+新しい **import を足したら**、`pytest` が「図に無い依存」で落ちることがある。それは、`module-map` の矢印を足すという合図
+([機械の地図](09-structure-map.md))。
 
 ---
 
@@ -81,6 +84,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
 1. `docspipeline/myext.py` を作り、上の形から始める。
 2. `config.build_config` の `extensions` に `"docspipeline.myext"` を足す (条件つきなら `if` で)。
 3. **外部コマンドを呼ぶなら**: 実行 (`run_*`) と、引数・設定の組み立て (`make_*`) を分ける。見つからないときの方針 (`literal` / `warn` / `error` のような) を設け、CI では厳しい方を選べるようにする。`mermaid.py` が手本。
+   **Sphinx に依存しない部分は、別のモジュールに出す** (`mmdc.py` がそう)。拡張の中に置くと、`doctor` のような core の部品が、拡張を import して Sphinx を引き込む。
 4. 並列読み込みに安全か考え、`parallel_read_safe` を決める。
 5. テスト: 偽のコマンド (次の [テストの書き方](05-testing.md)) で、成功・失敗・コマンド無しの三つを確かめる。
 

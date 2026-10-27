@@ -57,6 +57,7 @@ ruff check . && ruff format --check .
 
 - [ ] 依存を更新して、上の手順が通る
 - [ ] `docspipeline coverage docspipeline --fail-under 100`
+- [ ] `docspipeline map docspipeline --fail-on-cycle` と、依存の向きのテスト (`tests/test_structure_map.py`)
 - [ ] `docs/confluence.rst` の「検証できていないこと」が、まだ正しいか。環境が手に入ったなら、**検証して書き換える**
 - [ ] 雛形から作った新しいリポジトリで、`init` → `build` が通る
 - [ ] 公開した文書に、秘密情報・個人情報が無い ([運用手順](../runbook.md) の検索)

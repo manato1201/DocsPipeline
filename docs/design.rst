@@ -68,11 +68,31 @@ Mermaid の扱い
    * - ``error``
      - ビルドを失敗させる。CI では ``docspipeline build --require-mermaid`` で、この値になる
 
+外部資料 (Z16: oh-my-mermaid) の取り込み方
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+設計書の追補にある「コードから構造図と説明の階層を作る」という考え方を、**自前の** ``docspipeline map`` として実装した。
+外部のツールは導入していない。
+
+* 取り入れたもの: 「機械が読み取った事実 (依存の地図)」と「人が書く理由 (説明)」を **分けて持つ** 考え方。
+  地図は事実なので毎回作り直せる。説明は人が書き、地図とのずれをテストで検出する。
+* 導入しなかった理由: 外部ツールの中身 (SKILL.md・監査結果) を、この作業では確かめていない。また ``omm push`` のように、
+  コードの情報を外部へアップロードする機能があるため、非公開のリポジトリには使えない。
+  自前の ``map`` は、ローカルで読むだけで、何も送信しない。
+* 比べていないもの: Graphify (X3) の地図との比較は、Graphify を導入していないので **未実施**。
+
+出力は「下書き」として扱う。推定を含むので、人が確認してから使い、そのまま公開しない
+(出力の冒頭に、その旨の警告が入る)。使い方と限界は :doc:`learn/09-structure-map`。
+
 よくある誤り
 ------------
 
 * ``docs/conf.py`` で例外を投げる実装にすると、Sphinx がスタックトレースつきの内部エラーとして出す。
   設定の誤りは ``docspipeline_config_error`` に入れて、:mod:`docspipeline.guard` が報告する。
+* **core のモジュールから、Sphinx を import するモジュールを import する**。``docspipeline`` の CLI は、
+  Sphinx が入っていない環境でも動く (``init``・``coverage``・``map``・``doctor``)。Sphinx に依存してよいのは
+  拡張 (``guard``・``mermaid``・``doxygen``) だけで、``mmdc`` の探索のように両方が使う部品は、Sphinx に依存しない
+  :mod:`docspipeline.mmdc` に置く。``tests/test_structure_map.py`` が検査する。
 * ``confluence_*`` の設定は、未設定だと同名の環境変数から補われる。公開の可否に関わる項目は、
   :func:`docspipeline.confluence.sphinx_settings` がすべて明示している。
 

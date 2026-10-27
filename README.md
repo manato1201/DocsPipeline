@@ -41,6 +41,7 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 | `docspipeline coverage PATH...` | docstring が無い公開 API を一覧 (`--fail-under N`) |
 | `docspipeline check-diagrams [DOCS]` | `.drawio` に書き出した SVG があるか |
 | `docspipeline linkcheck [DOCS]` | 外部リンクの切れ |
+| `docspipeline map PACKAGE` | ソースを構文解析して、モジュールの依存の地図 (Markdown の下書き / Mermaid / JSON) を作る。ローカルで読むだけで、外部へは送信しない。`--fail-on-cycle` |
 | `docspipeline doctor` | 手元で使える機能 (`mmdc`・`doxygen`・設定の有無) を確認。トークンの値は出さない |
 | `docspipeline confluence-check [DOCS]` | Confluence への接続・認証・権限の確認 (ページは変更しない) |
 | `docspipeline publish [DOCS] --mode local\|dryrun\|publish` | 既定は `local` (ネットワークにつながない) |
@@ -79,8 +80,11 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 | 7 更新の自動化 | 済 | CI・更新ルール ([運用手順](docs/runbook.md))・`hou` スタブ |
 | Final | 済 | [運用手順](docs/runbook.md) |
 
-追補の TakayuStudio 系 (T2 定型項目・T11 出力形式の表・T12 出典の注記) は反映した。外部資料の追補
-(X3 graphify・X7 better-readme-skill・Y9 skills.sh のスキル) は、導入前に SKILL.md と監査結果を読む前提の提案で、取り込んでいない。
+追補の TakayuStudio 系 (T2 定型項目・T11 出力形式の表・T12 出典の注記) は反映した。
+外部資料の追補のうち、Z16 (oh-my-mermaid) の「機械が読み取った事実と、人が書く理由を分けて持つ」考え方は、
+**自前の** `docspipeline map` として実装した (外部ツールは導入せず、コードの情報を外部へ送らない。[学習資料](docs/learn/09-structure-map.md))。
+X3 (graphify)・X7 (better-readme-skill)・Y9 (skills.sh のスキル) は、導入前に SKILL.md と監査結果を読む前提の提案で、取り込んでいない。
+Graphify の地図との比較も、未実施。
 
 ## 未検証のこと
 

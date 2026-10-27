@@ -13,7 +13,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from . import confluence, diagrams, docstring_coverage, doctor, scaffold
+from . import confluence, diagrams, docstring_coverage, doctor, scaffold, structure_map
 
 
 def _run(cmd: Sequence[str], env: dict[str, str] | None = None) -> int:
@@ -132,6 +132,29 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return doctor.exit_code(checks)
 
 
+def cmd_map(args: argparse.Namespace) -> int:
+    """``map``: ソースを構文解析して、依存の地図を作る。ローカルで読むだけで、外部へは送信しない。"""
+    try:
+        graph = structure_map.scan_package(Path(args.package))
+    except ValueError as exc:
+        print(f"エラー: {exc}", file=sys.stderr)
+        return 2
+    render = {"markdown": structure_map.to_markdown, "mermaid": structure_map.to_mermaid, "json": structure_map.to_json}
+    text = render[args.format](graph)
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+        print(f"作成: {args.output}")
+    else:
+        print(text, end="")
+    cycles = graph.cycles()
+    if cycles:
+        for cycle in cycles:
+            print(f"循環があります: {' <-> '.join(cycle)}", file=sys.stderr)
+        if args.fail_on_cycle:
+            return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """``docspipeline`` の引数の定義を作る。"""
     parser = argparse.ArgumentParser(prog="docspipeline", description="API 文書の生成と Confluence への公開")
@@ -185,6 +208,13 @@ def build_parser() -> argparse.ArgumentParser:
     # 文書の品質は build (-W) で止める。コメント付きのページを飛ばしたときの警告で、公開まで失敗させない
     p.add_argument("--strict", action="store_true", help="警告をエラー扱いにする (既定は警告を表示するだけ)")
     p.set_defaults(func=cmd_publish)
+
+    p = sub.add_parser("map", help="ソースを構文解析して、依存の地図を作る (外部へは送信しない)")
+    p.add_argument("package", help="__init__.py を持つディレクトリ")
+    p.add_argument("--format", choices=("markdown", "mermaid", "json"), default="markdown")
+    p.add_argument("-o", "--output", help="書き出すファイル (省略すると標準出力)")
+    p.add_argument("--fail-on-cycle", action="store_true", help="import の循環があれば失敗させる")
+    p.set_defaults(func=cmd_map)
 
     p = sub.add_parser("doctor", help="手元の環境で使える機能を確認する")
     p.set_defaults(func=cmd_doctor)

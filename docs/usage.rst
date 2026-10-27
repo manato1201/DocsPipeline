@@ -23,6 +23,10 @@
      - docstring が無い公開 API を一覧する。``--fail-under`` で基準を決められる。
    * - ``docspipeline check-diagrams [DOCS]``
      - ``.drawio`` に、書き出した SVG があるかを確認する。
+   * - ``docspipeline map PACKAGE``
+     - ソースを構文解析して、モジュールの依存の地図を作る (Markdown の下書き / Mermaid / JSON)。
+       ローカルで読むだけで、外部へは送信しない。``--fail-on-cycle`` で、循環があれば失敗させる。
+       使い方は :doc:`learn/09-structure-map`。
    * - ``docspipeline doctor``
      - 手元で使える機能 (``mmdc``・``doxygen``・Confluence の設定など) を確認する。トークンの値は出さない。
    * - ``docspipeline confluence-check [DOCS]``

@@ -174,3 +174,25 @@ def test_docspipeline_documents_itself(tmp_path):
         # 標準ライブラリの型は intersphinx で解決する前提。オフラインでは nitpicky を切って確かめる
         result = _build(project, builder, _env(tmp_path))
         assert result.returncode == 0, result.stderr + result.stdout
+
+
+def test_generated_architecture_draft_builds_as_a_page(tmp_path):
+    """``docspipeline map`` の Markdown が、そのまま Sphinx のページとしてビルドできる (警告つき + Mermaid の図)。"""
+    from docspipeline import structure_map
+
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "conf.py").write_text(
+        "from docspipeline.config import build_config\n"
+        'globals().update(build_config(confdir=__file__, project="T", author="me"))\n',
+        encoding="utf-8",
+    )
+    (docs / "index.rst").write_text("T\n=\n\n.. toctree::\n\n   map\n", encoding="utf-8")
+    (docs / "map.md").write_text(
+        structure_map.to_markdown(structure_map.scan_package(ROOT / "docspipeline")), encoding="utf-8"
+    )
+    env = _env(tmp_path, DOCSPIPELINE_MMDC=_fake_mmdc(tmp_path / "mmdc"), DOCSPIPELINE_MERMAID_MISSING="error")
+    result = _build(tmp_path, "html", env)
+    assert result.returncode == 0, result.stderr + result.stdout
+    page = (docs / "_build" / "html" / "map.html").read_text(encoding="utf-8")
+    assert "自動生成の下書き" in page and "_images/mermaid-" in page

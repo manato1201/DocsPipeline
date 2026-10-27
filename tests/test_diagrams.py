@@ -70,3 +70,39 @@ def test_numbered_badges_are_unique_and_start_at_one():
     for name in ("publish-flow", "build-internals"):
         numbers = sorted(c.badge for c in build_diagrams.DIAGRAMS[name]().cards if c.badge is not None)
         assert numbers == list(range(1, len(numbers) + 1)), name
+
+
+# ---- module-map が、実際の依存と一致していること (docspipeline map と同じ読み取りで突き合わせる) ----
+
+
+def _real_edges(kind: str) -> set[tuple[str, str]]:
+    from docspipeline import structure_map
+
+    graph = structure_map.scan_package(ROOT / "docspipeline")
+    prefix = "docspipeline."
+    return {
+        (src.removeprefix(prefix), dst.removeprefix(prefix))
+        for src, dst in graph.edges(kind)
+        if src != "docspipeline.__main__"  # python -m の入口だけの依存は、図に描かない
+    }
+
+
+def test_module_map_imports_match_the_real_imports():
+    drawn = set(build_diagrams.MODULE_IMPORTS)
+    real = _real_edges("import")
+    assert drawn - real == set(), f"実際には無い依存を描いている: {sorted(drawn - real)}"
+    missing = real - drawn
+    assert missing == set(), f"図に無い依存がある (MODULE_IMPORTS に足す): {sorted(missing)}"
+
+
+def test_module_map_references_match_the_real_references():
+    assert set(build_diagrams.MODULE_REFERENCES) == _real_edges("reference")
+
+
+def test_every_drawn_module_exists():
+    graph_modules = {
+        m.name.removeprefix("docspipeline.")
+        for m in __import__("docspipeline.structure_map", fromlist=["x"]).scan_package(ROOT / "docspipeline").modules
+    }
+    labels = {c.label for c in build_diagrams.module_map().cards}
+    assert labels <= graph_modules, sorted(labels - graph_modules)

@@ -145,7 +145,7 @@ class Note:
     lines: list[str]
     color: str = MUTED
     size: float = 12
-    anchor: str = "start"  # start / middle
+    anchor: str = "start"  # start / middle / end
     mono: bool = False
     bold: bool = False
 
@@ -392,9 +392,9 @@ class Diagram:
 
         for note in self.notes:
             family = "Courier New" if note.mono else "Noto Sans JP"
-            style = f"text;html=1;align={'center' if note.anchor == 'middle' else 'left'};verticalAlign=top;fontSize={int(note.size)};fontColor={note.color};fontFamily={family};{'fontStyle=1;' if note.bold else ''}"
+            style = f"text;html=1;align={ {'middle': 'center', 'end': 'right'}.get(note.anchor, 'left') };verticalAlign=top;fontSize={int(note.size)};fontColor={note.color};fontFamily={family};{'fontStyle=1;' if note.bold else ''}"
             width = max(text_width(line, note.size, note.mono) for line in note.lines) + 16
-            x = note.x - width / 2 if note.anchor == "middle" else note.x
+            x = {"middle": note.x - width / 2, "end": note.x - width}.get(note.anchor, note.x)
             add(
                 "<br>".join(html.escape(line) for line in note.lines),
                 style,

@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from . import confluence
-from .mermaid import find_mmdc
+from .mmdc import MMDC_ENV, find_mmdc
 
 
 @dataclass(frozen=True)
@@ -56,7 +56,7 @@ def run_checks(environ: Mapping[str, str] | None = None) -> list[Check]:
         version = _version(dist)
         checks.append(Check(label, version is not None, version or f"pip install '{dist}' (extras を参照)", required))
 
-    mmdc = find_mmdc(env.get("DOCSPIPELINE_MMDC"), os.getcwd())
+    mmdc = find_mmdc(env.get(MMDC_ENV), os.getcwd())
     checks.append(
         Check("mmdc (Mermaid → SVG)", mmdc is not None, " ".join(mmdc) if mmdc else "無い: 図はコードのまま出る")
     )

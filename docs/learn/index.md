@@ -41,7 +41,7 @@ DocsPipeline を **保守し、拡張できるようになる** ための資料�
   - 半日〜
   - 答えの無い課題を、自分で設計して実装できる
 * - 5
-  - [トラブルシュート](07-troubleshooting.md)、[メンテナンス](08-maintenance.md)
+  - [トラブルシュート](07-troubleshooting.md)、[メンテナンス](08-maintenance.md)、[機械の地図](09-structure-map.md)
   - 随時
   - 依存の更新・障害の切り分けを一人でできる
 ```
@@ -82,5 +82,6 @@ python -m pytest -q                                   # テスト (Sphinx の実
 06-exercises
 07-troubleshooting
 08-maintenance
+09-structure-map
 glossary
 ```
