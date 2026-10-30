@@ -41,6 +41,9 @@ jobs:
         run: docspipeline build docs -b confluence
       - name: Check diagram exports
         run: docspipeline check-diagrams docs
+      - name: Check Mermaid style
+        # 全ての Mermaid ブロックが、標準の %%{init}%% の行で始まること (GitHub と HTML で見た目が揃う)
+        run: docspipeline check-mermaid docs
 @@coverage_step@@      - name: Link check
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: docspipeline linkcheck docs

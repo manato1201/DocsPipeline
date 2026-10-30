@@ -57,9 +57,13 @@ ICONS = {
 
 
 def text_width(text: str, size: float, mono: bool = False) -> float:
-    """文字列の幅 (px) の見積り。全角は 1 文字ぶん、半角は約 0.55 (等幅は 0.6) 文字ぶん。"""
+    """文字列の幅 (px) の見積り。全角は 1 文字ぶん、半角は約 0.55 (等幅は 0.6) 文字ぶん。
+
+    小数第 2 位に丸める。Python 3.12 から、浮動小数点の ``sum`` の誤差の出方が変わり、
+    丸めないと、版によって生成物 (.drawio / .svg) の末尾の桁が違ってしまう。
+    """
     ascii_w = 0.6 if mono else 0.55
-    return sum(size if unicodedata.east_asian_width(c) in "WF" else size * ascii_w for c in text)
+    return round(sum(size if unicodedata.east_asian_width(c) in "WF" else size * ascii_w for c in text), 2)
 
 
 @dataclass

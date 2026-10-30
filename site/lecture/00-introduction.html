@@ -1,0 +1,698 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="第 1 回 Python の基礎 (この講義で必要な範囲)" href="01-python-basics.html"><link rel="prev" title="講義資料: 文書を「コード」として作り、安全に公開する" href="index.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>第 0 回 はじめに: 文書を「コード」として扱う - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-ast.html">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07-sphinx-extensions.html">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10-testing.html">第 10 回 テスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="11-diagrams.html">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13-capstone.html">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/lecture/00-introduction.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="id1">
+<h1>第 0 回 はじめに: 文書を「コード」として扱う<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>所要時間の目安: 1.5 時間 / 前提: コマンドラインの基本操作</p>
+</div></blockquote>
+<section id="id2">
+<h2>この回のゴール<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>文書が <strong>なぜ古くなるのか</strong>、そして、それをどう防ぐかを説明できる。</p></li>
+<li><p>「docs as code」の考え方を、自分の言葉で説明できる。</p></li>
+<li><p>DocsPipeline の全体 (書く → 組み立てる → 届ける → 守る) と、リポジトリの構成を言える。</p></li>
+<li><p>手元の環境を整えて、サンプルの文書をビルドできる。</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>1. 解きたい問題<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>文書は、書いた瞬間から古くなり始めます。コードは変わるのに、文書は誰も直さないからです。
+DocsPipeline が解く問題は、次の表のとおりです。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>問題</p></th>
+<th class="head"><p>起きること</p></th>
+<th class="head"><p>この仕組みの答え</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>コードを変えたのに文書が古い</p></td>
+<td><p>嘘の説明が残る</p></td>
+<td><p>文書を <strong>コードの隣</strong> に置き、同じ PR で更新する。docstring から API 文書を <strong>自動生成</strong> する</p></td>
+</tr>
+<tr class="row-odd"><td><p>文書の誤り (リンク切れ) に気付かない</p></td>
+<td><p>読者が迷う</p></td>
+<td><p>ビルドの警告を <strong>エラー扱い</strong> にする (<code class="docutils literal notranslate"><span class="pre">-W</span></code>)。CI で毎回確かめる</p></td>
+</tr>
+<tr class="row-even"><td><p>図が古い・手書きの図が実態と違う</p></td>
+<td><p>構成の理解を誤る</p></td>
+<td><p>図を <strong>コードから生成</strong> し、実際の依存と一致することを <strong>テスト</strong> で確かめる</p></td>
+</tr>
+<tr class="row-odd"><td><p>手作業の公開が壊れる・他人のページを上書きする</p></td>
+<td><p>事故になる</p></td>
+<td><p>公開を <strong>段階的</strong> にし、安全装置 (専用の親ページ配下だけ・消さない) を <strong>コードに入れる</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>秘密情報 (API トークン) が漏れる</p></td>
+<td><p>重大な事故</p></td>
+<td><p>環境変数だけに置き、出力から <strong>伏せる</strong>。CI では、必要なステップだけに渡す</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>どれも「人が気を付ける」では防げません。<strong>仕組み (自動化とテスト) で防ぐ</strong> のが、この講義の一貫した考え方です。</p>
+</section>
+<section id="docs-as-code">
+<h2>2. Docs as code (文書をコードとして扱う)<a class="headerlink" href="#docs-as-code" title="Link to this heading">¶</a></h2>
+<p>コードには、バージョン管理・レビュー・テスト・ビルド・デプロイの仕組みがあります。
+文書にも、同じ仕組みを当てはめます。</p>
+<img alt="" src="../_images/mermaid-c99934c80f7d13f5.svg" />
+<p>文書を、コードと <strong>同じ道</strong> に乗せると、次のことが手に入ります。</p>
+<ol class="arabic simple">
+<li><p><strong>差分が見える</strong>: 文書の変更も、<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span></code> とレビューの対象になる。</p></li>
+<li><p><strong>壊れたら止まる</strong>: リンク切れ・未解決の参照を、CI が止める。</p></li>
+<li><p><strong>再現できる</strong>: 誰の手元でも、同じコマンドで、同じ文書が作れる。</p></li>
+<li><p><strong>自動化できる</strong>: 生成・検査・公開を、人手なしで繰り返せる。</p></li>
+</ol>
+</section>
+<section id="id4">
+<h2>3. 全体像: 書く → 組み立てる → 届ける → 守る<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<img alt="" src="../_images/mermaid-d290b0e419cf3401.svg" />
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>段階</p></th>
+<th class="head"><p>何をするか</p></th>
+<th class="head"><p>担当 (第何回で学ぶか)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>① 書く</p></td>
+<td><p>docstring・Markdown・図を、人が書く</p></td>
+<td><p>第 1 回 (Python)・第 11 回 (図)</p></td>
+</tr>
+<tr class="row-odd"><td><p>② 組み立てる</p></td>
+<td><p>Sphinx が読み込み、拡張が足りない機能を補う</p></td>
+<td><p>第 6・7 回</p></td>
+</tr>
+<tr class="row-even"><td><p>③ 届ける</p></td>
+<td><p>HTML と Confluence に出す。公開は安全装置つき</p></td>
+<td><p>第 9 回</p></td>
+</tr>
+<tr class="row-odd"><td><p>④ 守る</p></td>
+<td><p>検査とテストを、毎回、自動で走らせる</p></td>
+<td><p>第 10・12 回</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>道具の部品は、第 2〜5 回で学ぶ「文字列」「プロセス」「構文木」「グラフ」の上に立っています。</p>
+</section>
+<section id="id5">
+<h2>4. リポジトリを歩く<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>実際のリポジトリの構成を、コードで確かめましょう。次の例は、<code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> パッケージの場所から、
+リポジトリのルートを割り出して、直下の項目と、パッケージの中のモジュールを並べます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+
+<span class="n">package</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">parent</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ルートの主な項目:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"README.md"</span><span class="p">,</span> <span class="s2">"pyproject.toml"</span><span class="p">,</span> <span class="s2">"docs"</span><span class="p">,</span> <span class="s2">"docspipeline"</span><span class="p">,</span> <span class="s2">"examples"</span><span class="p">,</span> <span class="s2">"tests"</span><span class="p">,</span> <span class="s2">"tools"</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"(ディレクトリ)"</span> <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"(ファイル)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"docspipeline/ のモジュール:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.py"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+ルートの主な項目:
+  README.md (ファイル)
+  pyproject.toml (ファイル)
+  docs (ディレクトリ)
+  docspipeline (ディレクトリ)
+  examples (ディレクトリ)
+  tests (ディレクトリ)
+  tools (ディレクトリ)
+docspipeline/ のモジュール:
+  __init__.py
+  __main__.py
+  cli.py
+  config.py
+  confluence.py
+  diagrams.py
+  docstring_coverage.py
+  doctor.py
+  doxygen.py
+  files.py
+  guard.py
+  mermaid.py
+  mmdc.py
+  prompt.py
+  scaffold.py
+  structure_map.py
+</pre></div>
+</div>
+<p>各モジュールの役割は、次のとおりです (詳しくは <a class="reference internal" href="../learn/02-code-tour.html"><span class="std std-doc">コードの読み方</span></a>)。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>モジュール</p></th>
+<th class="head"><p>役割</p></th>
+<th class="head"><p>主に学ぶ回</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cli.py</span></code></p></td>
+<td><p>コマンドの入口</p></td>
+<td><p>第 8 回</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">config.py</span></code></p></td>
+<td><p>Sphinx の共通設定 (<code class="docutils literal notranslate"><span class="pre">build_config</span></code>)</p></td>
+<td><p>第 6 回</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">confluence.py</span></code></p></td>
+<td><p>公開の安全装置</p></td>
+<td><p>第 9 回</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mermaid.py</span></code>・<code class="docutils literal notranslate"><span class="pre">prompt.py</span></code>・<code class="docutils literal notranslate"><span class="pre">doxygen.py</span></code>・<code class="docutils literal notranslate"><span class="pre">guard.py</span></code></p></td>
+<td><p>Sphinx の拡張</p></td>
+<td><p>第 7 回</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mmdc.py</span></code>・<code class="docutils literal notranslate"><span class="pre">files.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の実行・ファイルの列挙 (Sphinx 不要の部品)</p></td>
+<td><p>第 2・3 回</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">docstring_coverage.py</span></code>・<code class="docutils literal notranslate"><span class="pre">structure_map.py</span></code></p></td>
+<td><p>ソースの静的解析</p></td>
+<td><p>第 4・5 回</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scaffold.py</span></code>・<code class="docutils literal notranslate"><span class="pre">doctor.py</span></code>・<code class="docutils literal notranslate"><span class="pre">diagrams.py</span></code></p></td>
+<td><p>雛形・環境の確認・図の検査</p></td>
+<td><p>第 8・11 回</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stubs/hou.py</span></code></p></td>
+<td><p>Houdini の偽物</p></td>
+<td><p>第 7 回</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id6">
+<h2>5. 環境を整える<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/manato1201/DocsPipeline.git<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>DocsPipeline
+$<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[docs,cpp,confluence,dev]"</span><span class="w">      </span><span class="c1"># 本体 + 文書・C++・公開・開発の道具</span>
+$<span class="w"> </span>npm<span class="w"> </span>install<span class="w"> </span>--no-save<span class="w"> </span>@mermaid-js/mermaid-cli@12.0.0<span class="w">   </span><span class="c1"># 図の変換 (mmdc)。Node.js が要る</span>
+$<span class="w"> </span>docspipeline<span class="w"> </span>doctor<span class="w">                               </span><span class="c1"># 何が使えるか</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">doctor</span></code> の出力は、たとえば次のようになります (環境で変わります)。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[OK  ] Python: 3.13.x
+[OK  ] Sphinx: 9.x
+[OK  ] MyST (Markdown の取り込み): 5.x
+[OK  ] テーマ furo: 2025.x
+[OK  ] Breathe (C++): 5.x
+[OK  ] Confluence ビルダー: 3.x
+[OK  ] mmdc (Mermaid → SVG): /path/to/mmdc
+[OK  ] doxygen (C++): /usr/bin/doxygen
+[OK  ] Confluence のモード: local
+[なし] Confluence の環境変数: 未設定: ... (公開するときだけ必要)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">OK</span></code> は使える。<code class="docutils literal notranslate"><span class="pre">NG</span></code> は <strong>必須</strong> なのに無い。<code class="docutils literal notranslate"><span class="pre">なし</span></code> は、無くてもよい (その機能を使うときだけ要る)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が無いと、Mermaid の図は <strong>コードのまま</strong> 表示されます (第 7 回で、なぜそうなっているかを学びます)。</p></li>
+<li><p>Confluence の環境変数が <code class="docutils literal notranslate"><span class="pre">なし</span></code> でも構いません。この講義では、Confluence に <strong>つながなくてよい</strong> です。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>6. ハンズオン: サンプルをビルドする<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>docspipeline<span class="w"> </span>build<span class="w"> </span>examples/python_sample/docs<span class="w"> </span>--require-mermaid
+$<span class="w"> </span>open<span class="w"> </span>examples/python_sample/docs/_build/html/index.html<span class="w">     </span><span class="c1"># macOS。Linux は xdg-open</span>
+</pre></div>
+</div>
+<p>ビルドが成功すると、<code class="docutils literal notranslate"><span class="pre">build</span> <span class="pre">succeeded.</span></code> と表示されます。HTML をブラウザで開き、次を確かめます。</p>
+<ol class="arabic simple">
+<li><p>「API リファレンス」に、<code class="docutils literal notranslate"><span class="pre">Stopwatch</span></code> などの <strong>docstring から作られた</strong> 説明がある。</p></li>
+<li><p>「設計」に、Mermaid の図が <strong>画像として</strong> 描かれている (コードのままなら <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が無い)。</p></li>
+</ol>
+<p>続けて、わざと壊してみましょう。サンプルの <code class="docutils literal notranslate"><span class="pre">docs/overview.rst</span></code> の末尾に、存在しない参照を足します。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>:ref:`存在しない参照`
+</pre></div>
+</div>
+<p>もう一度 <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">build</span> <span class="pre">examples/python_sample/docs</span></code> を実行すると、<strong>失敗します</strong>。
+これが「壊れたら止まる」(<code class="docutils literal notranslate"><span class="pre">-W</span></code>) です。確かめたら、足した行を消して、元に戻してください。</p>
+</section>
+<section id="id8">
+<h2>7. この講義の読み方<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>講義の中のコードには、2 種類の印があります。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>```python
+# 引用: docspipeline/files.py::iter_python_files
+...
+```
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">引用:</span></code> は、<strong>リポジトリのソースから自動で作った</strong> 引用です。今のコードと一致しています。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">実行できる</span></code> は、<strong>テストが実際に実行する</strong> 例で、直後の <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">出力</span></code> が、本当の出力です。</p></li>
+</ul>
+<p>講義を読んで「このコードを変えたい」と思ったら、実際に変えてみてください。引用がずれるので、
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">tools/quote_code.py</span> <span class="pre">docs/lecture</span></code> で更新し、<code class="docutils literal notranslate"><span class="pre">pytest</span></code> が通ることを確かめます。
+これは、<strong>文書とコードを同期させる仕組みそのもの</strong> の実習にもなっています (第 10 回)。</p>
+</section>
+<section id="id9">
+<h2>ハンズオンのまとめ<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>手順</p></th>
+<th class="head"><p>確かめたこと</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">doctor</span></code></p></td>
+<td><p>使える機能 (<code class="docutils literal notranslate"><span class="pre">mmdc</span></code>・<code class="docutils literal notranslate"><span class="pre">doxygen</span></code> など) の有無</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">build</span></code> (成功)</p></td>
+<td><p>docstring から API 文書が作られる</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">build</span></code> (わざと壊す)</p></td>
+<td><p>警告をエラー扱いにすると、壊れた文書を出さない</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id10">
+<h2>確認問題<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>「文書が古くなる」ことを防ぐために、DocsPipeline は <strong>何を自動化</strong> していますか。2 つ挙げてください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-W</span></code> (警告をエラー扱い) を付けないと、どんな事故が起きやすいですか。</p></li>
+<li><p>「docs as code」で、文書が <strong>コードと同じ道</strong> に乗ると、手に入る利点を 3 つ挙げてください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">doctor</span></code> で、<code class="docutils literal notranslate"><span class="pre">NG</span></code> と <code class="docutils literal notranslate"><span class="pre">なし</span></code> の違いは何ですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が無い環境でビルドすると、Mermaid の図はどうなりますか。</p></li>
+</ol>
+</section>
+<section id="id11">
+<h2>解答<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>例: (a) docstring からの API 文書の生成、(b) ビルドの警告のエラー化と CI での検査、(c) 図の生成と、実際の依存との一致の検査、(d) 公開の段階化と安全装置。</p></li>
+<li><p>リンク切れ・未解決の参照が <strong>警告のまま</strong> 公開され、誰も気付かない。警告は、ログに流れて、見落とされる。</p></li>
+<li><p>差分とレビューができる / 壊れたら CI が止める / 誰の手元でも再現できる / 自動化できる、のうちの 3 つ。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NG</span></code> は、<strong>必須</strong> の部品 (Python・Sphinx・MyST・テーマ) が無い。文書をビルドできない。
+<code class="docutils literal notranslate"><span class="pre">なし</span></code> は、無くてもビルドできるが、その機能 (Mermaid の画像化・C++・公開) は使えない。</p></li>
+<li><p>コードのまま (テキストとして) 表示される。方針は <code class="docutils literal notranslate"><span class="pre">docspipeline_mermaid_missing</span></code> で、<code class="docutils literal notranslate"><span class="pre">literal</span></code> (既定)・<code class="docutils literal notranslate"><span class="pre">warn</span></code>・<code class="docutils literal notranslate"><span class="pre">error</span></code> から選ぶ。</p></li>
+</ol>
+</section>
+<section id="id12">
+<h2>まとめ<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>概念</p></th>
+<th class="head"><p>要点</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>問題</p></td>
+<td><p>文書は放っておくと古くなる。人の注意では防げない</p></td>
+</tr>
+<tr class="row-odd"><td><p>docs as code</p></td>
+<td><p>文書を、コードと同じ道 (VCS・レビュー・テスト・ビルド・デプロイ) に乗せる</p></td>
+</tr>
+<tr class="row-even"><td><p>全体像</p></td>
+<td><p>書く → 組み立てる → 届ける。<strong>守る</strong> が、全体を支える</p></td>
+</tr>
+<tr class="row-odd"><td><p>道具</p></td>
+<td><p>Sphinx + 拡張。自前の部品は、Python の標準機能の上に立っている</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id13">
+<h2>次回<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="01-python-basics.html"><span class="std std-doc">第 1 回 Python の基礎</span></a>: この講義のコードを読むのに必要な範囲を、実行しながら学びます。</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="01-python-basics.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">第 1 回 Python の基礎 (この講義で必要な範囲)</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">講義資料: 文書を「コード」として作り、安全に公開する</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">第 0 回 はじめに: 文書を「コード」として扱う</a><ul>
+<li><a class="reference internal" href="#id2">この回のゴール</a></li>
+<li><a class="reference internal" href="#id3">1. 解きたい問題</a></li>
+<li><a class="reference internal" href="#docs-as-code">2. Docs as code (文書をコードとして扱う)</a></li>
+<li><a class="reference internal" href="#id4">3. 全体像: 書く → 組み立てる → 届ける → 守る</a></li>
+<li><a class="reference internal" href="#id5">4. リポジトリを歩く</a></li>
+<li><a class="reference internal" href="#id6">5. 環境を整える</a></li>
+<li><a class="reference internal" href="#id7">6. ハンズオン: サンプルをビルドする</a></li>
+<li><a class="reference internal" href="#id8">7. この講義の読み方</a></li>
+<li><a class="reference internal" href="#id9">ハンズオンのまとめ</a></li>
+<li><a class="reference internal" href="#id10">確認問題</a></li>
+<li><a class="reference internal" href="#id11">解答</a></li>
+<li><a class="reference internal" href="#id12">まとめ</a></li>
+<li><a class="reference internal" href="#id13">次回</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/dp_prompt.js?v=654ff740"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

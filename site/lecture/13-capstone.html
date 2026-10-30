@@ -1,0 +1,1118 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="API リファレンス" href="../api.html"><link rel="prev" title="第 12 回 CI と運用" href="12-ci-and-operations.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>第 13 回 総合演習 - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00-introduction.html">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-ast.html">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07-sphinx-extensions.html">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10-testing.html">第 10 回 テスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="11-diagrams.html">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/lecture/13-capstone.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="id1">
+<h1>第 13 回 総合演習<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>所要時間の目安: 5 時間 / 前提: 第 1〜12 回</p>
+</div></blockquote>
+<section id="id2">
+<h2>この回のゴール<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>新しい機能を、<strong>要件 → 設計 → 実装 → テスト → 変異 → 取り込み → 点検</strong> の順に、最初から最後まで作れる。</p></li>
+<li><p>実装の前に、<strong>置き場所と依存の向き</strong> を決められる。</p></li>
+<li><p>アルゴリズムの <strong>計算量</strong> を見積もり、素朴な書き方と比べられる。</p></li>
+<li><p>自分の実装の <strong>弱点を、自分で見つけて</strong>、書き出せる。</p></li>
+<li><p>機能を <strong>本体に取り込む手順</strong> (CLI・文書・テスト・HTML 版・CI) を、漏れなく挙げられる。</p></li>
+</ul>
+<p>この回は、新しい知識を学ぶ回ではありません。<strong>これまでの 12 回を、1 つの作業に通して使う</strong> 回です。
+題材は小さな機能ですが、手順は、実際の保守・拡張と同じです。</p>
+</section>
+<section id="id3">
+<h2>1. 題材と進め方<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><p><strong>題材: 依存の中心 (ハブ) を探す機能</strong>
+多くのモジュールから使われているモジュールは、<strong>変更の影響が広い</strong>。そうしたモジュールを、一覧にしたい。</p>
+</div></blockquote>
+<img alt="" src="../_images/mermaid-dee5aece0743dd21.svg" />
+<p>このリポジトリを <strong>変更せずに</strong>、一時ディレクトリの中で ①〜⑥ を行います (⑦ は手順を示すので、宿題として実際にやってみてください)。
+こうすると、講義の例が、<strong>実行して確かめられる</strong> まま、リポジトリを汚しません。</p>
+</section>
+<section id="id4">
+<h2>2. ① 要件と ② 設計<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<section id="id5">
+<h3>要件を 1 文で書く<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>「パッケージの各モジュールについて、<strong>何個のモジュールから import されているか (被依存数 = fan-in)</strong>、
+<strong>何個のモジュールを import しているか (依存数 = fan-out)</strong> を数え、被依存数の多い順に並べる。
+被依存数が基準以上のものを <strong>ハブ</strong> と呼ぶ。」</p>
+</div></blockquote>
+<p><strong>1 文で書けない要件は、まだ分かっていません</strong>。書けたら、次の 3 つを自問します。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>自問</p></th>
+<th class="head"><p>この題材での答え</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>入力は何か</p></td>
+<td><p>第 5 回の <code class="docutils literal notranslate"><span class="pre">Graph</span></code> (<code class="docutils literal notranslate"><span class="pre">scan_package</span></code> の結果)。ソースを再び読まない</p></td>
+</tr>
+<tr class="row-odd"><td><p>出力は何か</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Degree(name,</span> <span class="pre">fan_in,</span> <span class="pre">fan_out)</span></code> の並び。<strong>表示の形は含めない</strong> (表示は別の仕事)</p></td>
+</tr>
+<tr class="row-even"><td><p>失敗するのは、どんなとき</p></td>
+<td><p>基準 (<code class="docutils literal notranslate"><span class="pre">minimum</span></code>) が 1 未満のとき。それ以外は、<strong>空でも正常</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id6">
+<h3>置き場所と依存の向き (第 8 回・第 10 回)<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>案</p></th>
+<th class="head"><p>長所</p></th>
+<th class="head"><p>短所</p></th>
+<th class="head"><p>判断</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Graph</span></code> にメソッドを足す</p></td>
+<td><p>呼びやすい</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">structure_map.py</span></code> が大きくなる。<strong>地図の作成</strong> と <strong>地図の分析</strong> が混ざる</p></td>
+<td><p>却下</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cli.py</span></code> の中に書く</p></td>
+<td><p>手軽</p></td>
+<td><p>テストしにくい (引数や出力と混ざる)。CLI は薄く保つ</p></td>
+<td><p>却下</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>新しいモジュール <code class="docutils literal notranslate"><span class="pre">hubs.py</span></code></strong></p></td>
+<td><p>純粋な関数だけ。テストしやすい</p></td>
+<td><p>ファイルが 1 つ増える</p></td>
+<td><p><strong>採用</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">hubs.py</span></code> が import するのは <code class="docutils literal notranslate"><span class="pre">structure_map</span></code> だけ。<code class="docutils literal notranslate"><span class="pre">structure_map</span></code> は Sphinx を import しない (第 10 回の構造テスト) ので、
+<strong>新しいモジュールも core のまま</strong> です。依存の向きは、<code class="docutils literal notranslate"><span class="pre">cli</span> <span class="pre">→</span> <span class="pre">hubs</span> <span class="pre">→</span> <span class="pre">structure_map</span></code> の一方向で、循環しません。</p>
+</section>
+</section>
+<section id="id7">
+<h2>3. ③ 実装<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<section id="id8">
+<h3>アルゴリズム: 数え上げ<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>依存の組 <code class="docutils literal notranslate"><span class="pre">(使う側,</span> <span class="pre">使われる側)</span></code> の集合を <strong>1 回だけ走査</strong> し、使う側の <code class="docutils literal notranslate"><span class="pre">fan_out</span></code> と、使われる側の <code class="docutils literal notranslate"><span class="pre">fan_in</span></code> を、それぞれ +1 します。</p>
+<img alt="" src="../_images/mermaid-44cbfc5c46c67843.svg" />
+<p><strong>計算量の比較</strong> (モジュール数 <code class="docutils literal notranslate"><span class="pre">M</span></code>、依存の数 <code class="docutils literal notranslate"><span class="pre">E</span></code>):</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>書き方</p></th>
+<th class="head"><p>計算量</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>素朴: モジュールごとに、全ての依存を走査して数える</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">×</span> <span class="pre">E)</span></code></p></td>
+<td><p>「<code class="docutils literal notranslate"><span class="pre">pkg.core</span></code> の被依存数」を、毎回全部の依存から数える</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>採用: 1 回走査して <code class="docutils literal notranslate"><span class="pre">Counter</span></code> に足す</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">+</span> <span class="pre">E)</span></code> + 整列 <code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">log</span> <span class="pre">M)</span></code></p></td>
+<td><p>依存を 1 度見るだけ</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>このリポジトリの規模 (十数モジュール) では、どちらも一瞬です。それでも <strong><code class="docutils literal notranslate"><span class="pre">Counter</span></code> を選ぶ</strong> のは、
+書き方が <strong>短く・読みやすく</strong>、規模が大きくなっても <strong>困らない</strong> からです (第 5 回: 計算量は、規模が増えたときに効く)。</p>
+</section>
+<section id="id9">
+<h3>整列の鍵<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>整列の鍵は、<code class="docutils literal notranslate"><span class="pre">(-被依存数,</span> <span class="pre">-依存数,</span> <span class="pre">名前)</span></code> です。</p>
+<ul class="simple">
+<li><p>マイナスを付けて、<strong>多い順</strong> (降順)。</p></li>
+<li><p>同数のときは、依存数の多い順、最後に <strong>名前順</strong>。名前を入れるのは、<strong>出力を決定的</strong> にするため (第 10 回)。</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3>弱点を、最初から意識する<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Graph.edges</span></code> には、依存の <strong>種類</strong> があります (第 5 回)。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>種類</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">import</span></code></p></td>
+<td><p>モジュール直下の import (読み込み時に実行される)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">deferred</span></code></p></td>
+<td><p>関数の中の import (呼ばれたときに初めて読み込まれる)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference</span></code></p></td>
+<td><p>モジュール名と一致する文字列 (<code class="docutils literal notranslate"><span class="pre">extensions</span> <span class="pre">=</span> <span class="pre">[&quot;pkg.ext&quot;]</span></code> など)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>どれを数えるかで、結果が変わります。<strong>既定は <code class="docutils literal notranslate"><span class="pre">import</span></code> だけ</strong> にし、引数 <code class="docutils literal notranslate"><span class="pre">kinds</span></code> で選べるようにします。</p>
+</section>
+</section>
+<section id="id11">
+<h2>4. ④ テストと ⑤ 変異<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<p>以下は、実装・テスト・変異・実データでの実行を、<strong>ひとつにまとめた例</strong> です。上から読んでください。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">HUBS</span></code>: 実装 (モジュール <code class="docutils literal notranslate"><span class="pre">hubs.py</span></code> の中身)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TESTS</span></code>: テスト。小さなパッケージを <code class="docutils literal notranslate"><span class="pre">tmp_path</span></code> に作って <code class="docutils literal notranslate"><span class="pre">scan_package</span></code> にかける (偽物を作らず、<strong>本物の読み取り</strong> を使う)。</p></li>
+<li><p>変異: 実装を 4 通りに壊して、<strong>どのテストが落ちるか</strong> を確かめる。</p></li>
+<li><p>最後に、本物の <code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> に対して実行する。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+
+<span class="n">HUBS</span> <span class="o">=</span> <span class="s1">'''"""依存の中心 (ハブ) を探す。被依存数 (fan-in) が多いモジュールは、変更の影響が広い。"""</span>
+
+<span class="s1">from __future__ import annotations</span>
+
+<span class="s1">from collections import Counter</span>
+<span class="s1">from collections.abc import Iterable</span>
+<span class="s1">from dataclasses import dataclass</span>
+
+<span class="s1">from docspipeline.structure_map import Graph</span>
+
+
+<span class="s1">@dataclass(frozen=True)</span>
+<span class="s1">class Degree:</span>
+<span class="s1">    """1 つのモジュールの次数。"""</span>
+
+<span class="s1">    name: str</span>
+<span class="s1">    fan_in: int  # このモジュールを import するモジュールの数</span>
+<span class="s1">    fan_out: int  # このモジュールが import するモジュールの数</span>
+
+
+<span class="s1">def degrees(graph: Graph, kinds: Iterable[str] = ("import",)) -&gt; list[Degree]:</span>
+<span class="s1">    """全モジュールの次数を、被依存数の多い順 (同数なら依存数の多い順、名前順) に返す。</span>
+
+<span class="s1">    Args:</span>
+<span class="s1">        graph: ``scan_package`` の結果。</span>
+<span class="s1">        kinds: 数える依存の種類 (``import``・``deferred``・``reference``)。</span>
+<span class="s1">    """</span>
+<span class="s1">    edges: set[tuple[str, str]] = set()</span>
+<span class="s1">    for kind in kinds:</span>
+<span class="s1">        edges |= graph.edges(kind)  # 集合の和: 同じ組が 2 種類にあっても、1 回だけ数える</span>
+<span class="s1">    fan_in: Counter[str] = Counter()</span>
+<span class="s1">    fan_out: Counter[str] = Counter()</span>
+<span class="s1">    for src, dst in edges:</span>
+<span class="s1">        fan_out[src] += 1</span>
+<span class="s1">        fan_in[dst] += 1</span>
+<span class="s1">    rows = [Degree(m.name, fan_in[m.name], fan_out[m.name]) for m in graph.modules]</span>
+<span class="s1">    return sorted(rows, key=lambda d: (-d.fan_in, -d.fan_out, d.name))</span>
+
+
+<span class="s1">def hubs(graph: Graph, minimum: int = 3, kinds: Iterable[str] = ("import",)) -&gt; list[Degree]:</span>
+<span class="s1">    """被依存数が ``minimum`` 以上のモジュール。</span>
+
+<span class="s1">    Raises:</span>
+<span class="s1">        ValueError: ``minimum`` が 1 未満のとき (全モジュールが該当してしまい、意味が無いため)。</span>
+<span class="s1">    """</span>
+<span class="s1">    if minimum &lt; 1:</span>
+<span class="s1">        raise ValueError("minimum は 1 以上にしてください")</span>
+<span class="s1">    return [d for d in degrees(graph, kinds) if d.fan_in &gt;= minimum]</span>
+<span class="s1">'''</span>
+
+<span class="n">TESTS</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">import pytest</span>
+<span class="s1">from docspipeline.structure_map import scan_package</span>
+<span class="s1">from hubs import Degree, degrees, hubs</span>
+
+<span class="s1">STAR = {</span>
+<span class="s1">    "core": '"""core."""</span><span class="se">\\</span><span class="s1">n',</span>
+<span class="s1">    "a": "from . import core</span><span class="se">\\</span><span class="s1">n",</span>
+<span class="s1">    "b": "from . import core</span><span class="se">\\</span><span class="s1">nfrom . import core as again</span><span class="se">\\</span><span class="s1">n",</span>
+<span class="s1">    "c": "from . import core</span><span class="se">\\</span><span class="s1">nfrom . import a</span><span class="se">\\</span><span class="s1">n",</span>
+<span class="s1">}</span>
+
+
+<span class="s1">def make_graph(tmp_path, files):</span>
+<span class="s1">    pkg = tmp_path / "pkg"</span>
+<span class="s1">    pkg.mkdir()</span>
+<span class="s1">    (pkg / "__init__.py").write_text('"""pkg."""</span><span class="se">\\</span><span class="s1">n')</span>
+<span class="s1">    for name, body in files.items():</span>
+<span class="s1">        (pkg / f"</span><span class="si">{name}</span><span class="s1">.py").write_text(body)</span>
+<span class="s1">    return scan_package(pkg)</span>
+
+
+<span class="s1">def test_counts_the_modules_that_import_it_and_that_it_imports(tmp_path):</span>
+<span class="s1">    rows = {d.name: d for d in degrees(make_graph(tmp_path, STAR))}</span>
+<span class="s1">    assert rows["pkg.core"] == Degree("pkg.core", fan_in=3, fan_out=0)</span>
+<span class="s1">    assert rows["pkg.c"] == Degree("pkg.c", fan_in=0, fan_out=2)</span>
+<span class="s1">    assert rows["pkg.a"] == Degree("pkg.a", fan_in=1, fan_out=1)</span>
+
+
+<span class="s1">def test_importing_the_same_module_twice_counts_once(tmp_path):</span>
+<span class="s1">    rows = {d.name: d for d in degrees(make_graph(tmp_path, STAR))}</span>
+<span class="s1">    assert rows["pkg.b"].fan_out == 1</span>
+
+
+<span class="s1">def test_order_is_fan_in_then_fan_out_then_name(tmp_path):</span>
+<span class="s1">    names = [d.name for d in degrees(make_graph(tmp_path, STAR))]</span>
+<span class="s1">    assert names == ["pkg.core", "pkg.a", "pkg.c", "pkg.b", "pkg"]</span>
+
+
+<span class="s1">def test_hubs_use_the_threshold_inclusively(tmp_path):</span>
+<span class="s1">    graph = make_graph(tmp_path, STAR)</span>
+<span class="s1">    assert [d.name for d in hubs(graph, minimum=3)] == ["pkg.core"]</span>
+<span class="s1">    assert hubs(graph, minimum=4) == []</span>
+
+
+<span class="s1">@pytest.mark.parametrize("minimum", [0, -1])</span>
+<span class="s1">def test_a_threshold_below_one_is_rejected(tmp_path, minimum):</span>
+<span class="s1">    with pytest.raises(ValueError, match="1 以上"):</span>
+<span class="s1">        hubs(make_graph(tmp_path, STAR), minimum=minimum)</span>
+
+
+<span class="s1">def test_a_package_with_no_modules_has_no_hubs(tmp_path):</span>
+<span class="s1">    graph = make_graph(tmp_path, </span><span class="si">{}</span><span class="s1">)</span>
+<span class="s1">    assert hubs(graph) == []</span>
+<span class="s1">    assert [d.fan_in for d in degrees(graph)] == [0]</span>
+
+
+<span class="s1">def test_imports_inside_functions_count_only_when_asked(tmp_path):</span>
+<span class="s1">    graph = make_graph(tmp_path, {**STAR, "d": "def f():</span><span class="se">\\</span><span class="s1">n    from . import core</span><span class="se">\\</span><span class="s1">n"})</span>
+<span class="s1">    core = lambda kinds: next(d for d in degrees(graph, kinds) if d.name == "pkg.core")</span>
+<span class="s1">    assert core(("import",)).fan_in == 3</span>
+<span class="s1">    assert core(("import", "deferred")).fan_in == 4</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-B"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pytest"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="s2">"-p"</span><span class="p">,</span> <span class="s2">"no:cacheprovider"</span><span class="p">,</span> <span class="s2">"--tb=no"</span><span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">" in [0-9.]+s.*$"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
+
+
+<span class="n">MUTANTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"被依存と依存を取り違える"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"fan_in[dst] += 1"</span><span class="p">,</span> <span class="s2">"fan_in[src] += 1"</span><span class="p">),</span>
+    <span class="s2">"基準を「以上」でなく「超える」に"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"d.fan_in &gt;= minimum"</span><span class="p">,</span> <span class="s2">"d.fan_in &gt; minimum"</span><span class="p">),</span>
+    <span class="s2">"整列から依存数を外す"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"(-d.fan_in, -d.fan_out, d.name)"</span><span class="p">,</span> <span class="s2">"(-d.fan_in, d.name)"</span><span class="p">),</span>
+    <span class="s2">"基準の検査を 0 未満に緩める"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"if minimum &lt; 1:"</span><span class="p">,</span> <span class="s2">"if minimum &lt; 0:"</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"test_hubs.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">TESTS</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"hubs.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">HUBS</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"元の実装        :"</span><span class="p">,</span> <span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span> <span class="ow">in</span> <span class="n">MUTANTS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">assert</span> <span class="n">HUBS</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">old</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">label</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"hubs.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">HUBS</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"変異: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">'見つけた'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">'failed'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'見逃した'</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"hubs.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">HUBS</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tmp</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">hubs</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.structure_map</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan_package</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">scan_package</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s2">"docspipeline."</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"--- 本物の docspipeline (import だけ) ---"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">hubs</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">graph</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="si">:</span><span class="s2">12</span><span class="si">}</span><span class="s2"> 被依存 </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">fan_in</span><span class="si">}</span><span class="s2">  依存 </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">fan_out</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"ハブ (被依存 3 以上):"</span><span class="p">,</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">hubs</span><span class="o">.</span><span class="n">hubs</span><span class="p">(</span><span class="n">graph</span><span class="p">)])</span>
+    <span class="n">plain</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">hubs</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s2">"guard"</span><span class="p">)</span>
+    <span class="n">wide</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">hubs</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="p">(</span><span class="s2">"import"</span><span class="p">,</span> <span class="s2">"reference"</span><span class="p">))</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s2">"guard"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"guard の被依存: import だけ ="</span><span class="p">,</span> <span class="n">plain</span><span class="o">.</span><span class="n">fan_in</span><span class="p">,</span> <span class="s2">"/ 名前による参照も数えると ="</span><span class="p">,</span> <span class="n">wide</span><span class="o">.</span><span class="n">fan_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+元の実装        : 8 passed
+変異: 被依存と依存を取り違える: 見つけた (4 failed, 4 passed)
+変異: 基準を「以上」でなく「超える」に: 見つけた (1 failed, 7 passed)
+変異: 整列から依存数を外す: 見つけた (1 failed, 7 passed)
+変異: 基準の検査を 0 未満に緩める: 見つけた (1 failed, 7 passed)
+--- 本物の docspipeline (import だけ) ---
+  files        被依存 4  依存 0
+  confluence   被依存 3  依存 0
+  mmdc         被依存 3  依存 0
+  cli          被依存 1  依存 8
+ハブ (被依存 3 以上): ['files', 'confluence', 'mmdc']
+guard の被依存: import だけ = 0 / 名前による参照も数えると = 1
+</pre></div>
+</div>
+<section id="id12">
+<h3>読み解く<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>観点</p></th>
+<th class="head"><p>見るところ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>テストは <strong>本物の読み取り</strong> を使う</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">make_graph</span></code> が、<code class="docutils literal notranslate"><span class="pre">tmp_path</span></code> に小さなパッケージを書き、<code class="docutils literal notranslate"><span class="pre">scan_package</span></code> にかける。<code class="docutils literal notranslate"><span class="pre">Graph</span></code> を偽造しない</p></td>
+</tr>
+<tr class="row-odd"><td><p>境界値</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">minimum</span></code> が <strong>ちょうど 3 のとき含む</strong> (以上)・4 で空・0 と −1 で例外・モジュールが無い</p></td>
+</tr>
+<tr class="row-even"><td><p>重複</p></td>
+<td><p>同じモジュールを 2 回 import しても、<strong>1 回</strong> と数える (依存は集合)</p></td>
+</tr>
+<tr class="row-odd"><td><p>順序</p></td>
+<td><p>完全な順序を <strong>1 つのテスト</strong> で確かめる (3 段の鍵のうち 1 つを外すと、順序が変わるように、データを選んだ)</p></td>
+</tr>
+<tr class="row-even"><td><p>変異</p></td>
+<td><p>4 通りの壊し方を、<strong>すべて見つけた</strong> ことを確かめた。1 つでも見逃したら、テストを足す</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id13">
+<h3>弱点: 見えているものと、見えていないもの<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<p>最後の 2 行に、<strong>この実装の限界</strong> が出ています。<code class="docutils literal notranslate"><span class="pre">guard</span></code> は、<code class="docutils literal notranslate"><span class="pre">import</span></code> の依存だけで数えると、<strong>どこからも使われていない</strong> ように見えます。
+実際には、<code class="docutils literal notranslate"><span class="pre">config</span></code> が <strong>名前の文字列</strong> で読み込んでいます (第 7 回)。名前による参照も数えると、被依存数は増えます。</p>
+<p><strong>ハブの一覧は、「どの種類の依存を数えたか」を添えないと、誤解を生みます</strong>。数字は、定義とセットで読みます。</p>
+<p>(上位の <code class="docutils literal notranslate"><span class="pre">files</span></code> は、第 11 回の図で矢印を省いた <strong>共通部品</strong> です。ハブ = 悪いもの、ではありません。<strong>変更の影響が広いので、慎重に変える</strong> という目印です。)</p>
+</section>
+</section>
+<section id="id14">
+<h2>5. ⑦ 本体に取り込む<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<p>実装が確かめられたら、<strong>本体 (リポジトリ) に取り込み</strong>ます。ここは、宿題として、実際にやってください。</p>
+<img alt="" src="../_images/mermaid-c4f3ae8d2bbd90a3.svg" />
+<p>CLI の足し方は、既存のコマンドを手本にします (第 8 回)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/cli.py::cmd_check_mermaid</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmd_check_mermaid</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``check-mermaid``: 全ての Mermaid ブロックが、標準の ``%%{init}%%`` の行で始まっているかを確かめる。</span>
+
+<span class="sd">    GitHub (Markdown のまま) と Sphinx (``mmdc`` で SVG にした HTML) で、図の色とフォントを揃えるため。</span>
+<span class="sd">    ``--fix`` で、足りない行を入れる。</span>
+<span class="sd">    """</span>
+    <span class="n">roots</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">paths</span><span class="p">]</span>
+    <span class="n">missing_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">roots</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="n">missing_paths</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">missing_paths</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"エラー: パスがありません: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="n">problems</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">iter_markdown_files</span><span class="p">(</span><span class="n">roots</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">mmdc</span><span class="o">.</span><span class="n">check_mermaid_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">fix</span><span class="p">:</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">mmdc</span><span class="o">.</span><span class="n">fix_mermaid_text</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"修正: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="si">}</span><span class="s2"> か所)"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">problems</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: Mermaid ブロックが、標準の %%</span><span class="se">{{</span><span class="s2">init</span><span class="se">}}</span><span class="s2">%% の行で始まっていません"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">problems</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"docspipeline check-mermaid --fix で、標準の行を入れられます"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">problems</span> <span class="k">else</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>手本から学ぶこと</p></th>
+<th class="head"><p>新しいコマンドでは</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1 つの関数が 1 つのコマンド。<code class="docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> を受け、<code class="docutils literal notranslate"><span class="pre">int</span></code> (終了コード) を返す</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cmd_hubs(args)</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>最初に入力を検査</strong> する (パスが無ければ 2 で終わる)</p></td>
+<td><p>パッケージのパスが無ければ、2 で終わる</p></td>
+</tr>
+<tr class="row-even"><td><p>結果は標準出力、<strong>問題は標準エラー</strong></p></td>
+<td><p>一覧は標準出力、警告は標準エラー</p></td>
+</tr>
+<tr class="row-odd"><td><p>問題があれば 1、無ければ 0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--fail-over</span> <span class="pre">N</span></code> を付けるなら、基準超えの個数で決める (任意)</p></td>
+</tr>
+<tr class="row-even"><td><p>docstring を書く (coverage 100% が CI の関門)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Args</span></code>・<code class="docutils literal notranslate"><span class="pre">Returns</span></code> まで書く</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>取り込みの <strong>漏れ防止チェックリスト</strong> です。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>確認</p></th>
+<th class="head"><p>方法</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>構造のルールを守っている</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_structure_map.py</span></code> (core が Sphinx を import しない)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sphinx が無くても、動く</p></td>
+<td><p>第 10 回の <code class="docutils literal notranslate"><span class="pre">sys.modules[...]</span> <span class="pre">=</span> <span class="pre">None</span></code> のテストが通る</p></td>
+</tr>
+<tr class="row-even"><td><p>公開 API の docstring がある</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">coverage</span> <span class="pre">docspipeline</span> <span class="pre">--fail-under</span> <span class="pre">100</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>文書に載っている</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">docs/api.rst</span></code> の一覧に足し、<code class="docutils literal notranslate"><span class="pre">docs/usage.md</span></code> に使い方</p></td>
+</tr>
+<tr class="row-even"><td><p>文書のコマンド例が、本物と合う</p></td>
+<td><p>第 8 回の <code class="docutils literal notranslate"><span class="pre">argparse</span></code> のヘルプと照合</p></td>
+</tr>
+<tr class="row-odd"><td><p>HTML 版が最新</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">tools/build_site.py</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>構成図が、依存と一致</p></td>
+<td><p>新しい import (<code class="docutils literal notranslate"><span class="pre">cli</span> <span class="pre">→</span> <span class="pre">hubs</span></code>) を <code class="docutils literal notranslate"><span class="pre">MODULE_IMPORTS</span></code> に足す (第 11 回。足さないとテストが落ちる)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>最後の項目に注意してください。<strong>新しい依存を足すと、構成図のテストが落ちます</strong>。それは、不具合ではなく、<strong>図を直し忘れていることの検出</strong> です。</p>
+</section>
+<section id="id15">
+<h2>6. ⑧ 自己点検<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<p>仕上げに、自分の実装を、<strong>批判的に</strong> 読みます。弱点を探すのは、<strong>書いた本人の仕事</strong>です。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>観点</p></th>
+<th class="head"><p>この実装では</p></th>
+<th class="head"><p>対処</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>反例を探す</p></td>
+<td><p>推移的な依存 (a → b → core) の影響は数えていない。<strong>直接</strong> の被依存数だけ</p></td>
+<td><p>名前に <code class="docutils literal notranslate"><span class="pre">direct</span></code> と付ける、または推移閉包 (第 5 回の DFS) を足す</p></td>
+</tr>
+<tr class="row-odd"><td><p>数えないもの</p></td>
+<td><p>動的な import (<code class="docutils literal notranslate"><span class="pre">importlib.import_module(変数)</span></code>) は、見つけられない</p></td>
+<td><p>文書に「静的に読める依存のみ」と明記する</p></td>
+</tr>
+<tr class="row-even"><td><p>定義の揺れ</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">import</span></code> だけか、名前の参照も含むかで、順位が変わる</p></td>
+<td><p>出力に、数えた種類を添える</p></td>
+</tr>
+<tr class="row-odd"><td><p>基準の根拠</p></td>
+<td><p>既定の <code class="docutils literal notranslate"><span class="pre">minimum=3</span></code> に、根拠は無い</p></td>
+<td><p>「目安」と書く。調整できる引数にする</p></td>
+</tr>
+<tr class="row-even"><td><p>規模</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">+</span> <span class="pre">E)</span></code> で足りる</p></td>
+<td><p>問題なし</p></td>
+</tr>
+<tr class="row-odd"><td><p>失敗の道</p></td>
+<td><p>空のパッケージ・基準 0 を試した</p></td>
+<td><p>十分</p></td>
+</tr>
+<tr class="row-even"><td><p>将来の変更</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Module</span></code> に新しい依存の種類が増えたら</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kinds</span></code> に未知の名前が来ると <code class="docutils literal notranslate"><span class="pre">Graph.edges</span></code> が <code class="docutils literal notranslate"><span class="pre">KeyError</span></code>。<strong>入力の検査を足す</strong> か、文書に書く</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>最後の行は、実際に <strong>見つかった弱点</strong> です。確かめましょう。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.structure_map</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan_package</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">scan_package</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="s2">"typo"</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"未知の種類を渡すと、KeyError:"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+未知の種類を渡すと、KeyError: 'typo'
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">KeyError:</span> <span class="pre">'typo'</span></code> では、<strong>何が間違いか</strong> が伝わりません。利用者に向けた機能なら、<code class="docutils literal notranslate"><span class="pre">ValueError(&quot;kinds</span> <span class="pre">は</span> <span class="pre">import</span> <span class="pre">/</span> <span class="pre">deferred</span> <span class="pre">/</span> <span class="pre">reference</span> <span class="pre">のいずれか&quot;)</span></code> のように、
+<strong>分かるメッセージ</strong> で止めるべきです (第 9 回の「早く止まる」)。<strong>これは、課題として、残します</strong>。</p>
+</section>
+<section id="id16">
+<h2>7. 拡張の課題<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>課題</p></th>
+<th class="head"><p>使う知識</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kinds</span></code> の検査を足し、分かるメッセージで <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> にする。テストを足す</p></td>
+<td><p>第 10 回 (回帰テスト)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ハブを <strong>Mermaid の図</strong> で出す (ハブを <code class="docutils literal notranslate"><span class="pre">out</span></code>、他を <code class="docutils literal notranslate"><span class="pre">plain</span></code> の色に)。<code class="docutils literal notranslate"><span class="pre">check-mermaid</span></code> を通す</p></td>
+<td><p>第 11 回</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>推移的な被依存数</strong> (間接的に、どれだけのモジュールが影響を受けるか) を数える。循環があっても止まるように</p></td>
+<td><p>第 5 回 (DFS・訪問済み)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">hubs</span> <span class="pre">--format</span> <span class="pre">json</span></code> を足す。出力の形は、<code class="docutils literal notranslate"><span class="pre">to_json</span></code> に倣う</p></td>
+<td><p>第 8 回</p></td>
+</tr>
+<tr class="row-even"><td><p>閾値を、設定ファイルから読む。<strong>未知のキー</strong> を検出する</p></td>
+<td><p>第 6〜9 回</p></td>
+</tr>
+<tr class="row-odd"><td><p>実行時間を測り、モジュール数 1000 の合成データで <code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">×</span> <span class="pre">E)</span></code> と比べる</p></td>
+<td><p>第 5 回</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id17">
+<h2>8. まとめと、これからの学び方<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>学んだこと</p></th>
+<th class="head"><p>第 何 回</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Python の基本・データの形 (dataclass・集合・辞書)</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>文字列・正規表現・テキストの変換</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>ファイル・プロセス・環境変数・エラー処理</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ast</span></code> による静的解析</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>グラフ・循環検出・整列</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sphinx の仕組みと設定</p></td>
+<td><p>6〜7</p></td>
+</tr>
+<tr class="row-even"><td><p>CLI と雛形</p></td>
+<td><p>8</p></td>
+</tr>
+<tr class="row-odd"><td><p>公開の安全設計</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-even"><td><p>テストの技法</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-odd"><td><p>図づくり</p></td>
+<td><p>11</p></td>
+</tr>
+<tr class="row-even"><td><p>CI と運用</p></td>
+<td><p>12</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>保守・拡張の心得</strong></p>
+<ol class="arabic simple">
+<li><p>変更の前に、<strong>何を守るか</strong> (テスト・図・文書・安全の約束) を確かめる。</p></li>
+<li><p>変更は、<strong>小さく・1 つの目的</strong> で。直したら、<strong>直したことを、テストに記録</strong> する。</p></li>
+<li><p><strong>コードと文書と図を、一緒に</strong> 変える。ずれは、テストで検出する。</p></li>
+<li><p>失敗は、<strong>早く・分かりやすく</strong>。黙って成功するより、止まるほうが安全。</p></li>
+<li><p><strong>確かめたことと、確かめていないこと</strong> を、分けて書く。</p></li>
+</ol>
+</section>
+<section id="id18">
+<h2>確認問題<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>新しい機能を足す前に、<strong>置き場所と依存の向き</strong> を決めるのは、なぜですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">degrees</span></code> を、<code class="docutils literal notranslate"><span class="pre">Counter</span></code> を使わず、「モジュールごとに全ての依存を走査」して書くと、計算量はどうなりますか。</p></li>
+<li><p>整列の鍵に、名前を入れる理由は何ですか。</p></li>
+<li><p>変異テストで、4 通りの変異を全て見つけた、ということは、何を意味しますか。何を意味 <strong>しません</strong> か。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hubs</span></code> が <code class="docutils literal notranslate"><span class="pre">kinds</span></code> を引数に取るのは、どんな問題への対処ですか。</p></li>
+<li><p>新しい import (<code class="docutils literal notranslate"><span class="pre">cli</span> <span class="pre">→</span> <span class="pre">hubs</span></code>) を足すと、図のテストが落ちるのは、なぜですか。落ちたら、何をしますか。</p></li>
+<li><p>この実装の弱点を、新しく 1 つ挙げ、その対処を書いてください (本文の表に無いもの)。</p></li>
+<li><p>(書く問題) <code class="docutils literal notranslate"><span class="pre">Degree</span></code> の一覧を、<strong>Markdown の表</strong> にする関数 <code class="docutils literal notranslate"><span class="pre">to_markdown(rows)</span></code> を書いてください。空の一覧では、<code class="docutils literal notranslate"><span class="pre">(なし)</span></code> の 1 行を返すこと。</p></li>
+</ol>
+</section>
+<section id="id19">
+<h2>解答<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>後から直す費用が<strong>高い</strong>から。置き場所を誤ると、<strong>循環 import</strong>・Sphinx への依存の混入・テストしにくい構造になり、直すには呼び出し側もすべて変える必要がある。
+事前に決めておけば、構造テストが、違反を自動で見つけてくれる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">×</span> <span class="pre">E)</span></code>。モジュール <code class="docutils literal notranslate"><span class="pre">M</span></code> 個のそれぞれについて、依存 <code class="docutils literal notranslate"><span class="pre">E</span></code> 個を全部見るため。<code class="docutils literal notranslate"><span class="pre">Counter</span></code> で 1 回走査すれば <code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">+</span> <span class="pre">E)</span></code> (整列は別に <code class="docutils literal notranslate"><span class="pre">O(M</span> <span class="pre">log</span> <span class="pre">M)</span></code>)。</p></li>
+<li><p>被依存数と依存数が同じモジュールの順序を<strong>固定</strong>し、出力を<strong>決定的</strong>にするため。固定しないと、実行ごとに順序が揺れ、テストと文書の出力が不安定になる。</p></li>
+<li><p>意味すること: テストが、<strong>その 4 通りの壊し方には、効いている</strong>。意味しないこと: <strong>全ての誤りを見つけられる</strong>わけではない (思いつかなかった壊し方は、試していない)。変異は、テストを強くする道具で、完全性の証明ではない。</p></li>
+<li><p><strong>何を依存と数えるか</strong> によって、ハブの順位が変わる問題。<code class="docutils literal notranslate"><span class="pre">import</span></code> だけだと、名前の文字列で読み込まれるモジュール (<code class="docutils literal notranslate"><span class="pre">guard</span></code> など) が、「使われていない」ように見える。</p></li>
+<li><p>図の矢印と、実際の依存の<strong>ずれ</strong>を、テストが検出するから。<code class="docutils literal notranslate"><span class="pre">MODULE_IMPORTS</span></code> に、新しい矢印 (と、図の中での折れ線) を足し、<code class="docutils literal notranslate"><span class="pre">build_diagrams.py</span></code> で図を作り直す。</p></li>
+<li><p>例: 「ハブの判定の基準が、モジュール数に関係なく固定 (3)。小さなパッケージでは全部がハブ、大きなパッケージでは基準が低すぎる」。
+対処: 割合 (上位何 %) でも指定できるようにする、または基準を設定可能にして、出力に基準を添える。</p></li>
+<li><p>例 (実行して確かめてある):</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Degree</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">fan_in</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">fan_out</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">to_markdown</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"(なし)"</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"| モジュール | 被依存 | 依存 |"</span><span class="p">,</span> <span class="s2">"|---|---:|---:|"</span><span class="p">]</span>
+    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"| `</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` | </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">fan_in</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">fan_out</span><span class="si">}</span><span class="s2"> |"</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">to_markdown</span><span class="p">([</span><span class="n">Degree</span><span class="p">(</span><span class="s2">"pkg.core"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Degree</span><span class="p">(</span><span class="s2">"pkg.a"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">to_markdown</span><span class="p">([]))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+| モジュール | 被依存 | 依存 |
+|---|---:|---:|
+| `pkg.core` | 3 | 0 |
+| `pkg.a` | 1 | 1 |
+(なし)
+</pre></div>
+</div>
+<p>(数値の列を右寄せにする <code class="docutils literal notranslate"><span class="pre">---:</span></code> は、Markdown の表の書き方です。表示の形を決める関数は、<strong>数える関数とは別</strong> にして、それぞれ単独でテストできるようにします。)</p>
+</section>
+<section id="id20">
+<h2>まとめ<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>概念</p></th>
+<th class="head"><p>要点</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>進め方</p></td>
+<td><p>要件 → 設計 → 実装 → テスト → 変異 → 取り込み → 点検</p></td>
+</tr>
+<tr class="row-odd"><td><p>設計</p></td>
+<td><p>入出力・置き場所・依存の向きを先に決める。表示と計算を分ける</p></td>
+</tr>
+<tr class="row-even"><td><p>実装</p></td>
+<td><p>純粋な関数。計算量を見積もる。出力は決定的に</p></td>
+</tr>
+<tr class="row-odd"><td><p>テスト</p></td>
+<td><p>本物の読み取りを使う。境界値・失敗の道・重複・順序</p></td>
+</tr>
+<tr class="row-even"><td><p>変異</p></td>
+<td><p>壊してみて、テストが落ちるかを確かめる</p></td>
+</tr>
+<tr class="row-odd"><td><p>取り込み</p></td>
+<td><p>CLI・docstring・文書・図・HTML 版・CI を漏れなく</p></td>
+</tr>
+<tr class="row-even"><td><p>自己点検</p></td>
+<td><p>弱点を書き出す。残す課題も、正直に書く</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id21">
+<h2>次回<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h2>
+<p>これで講義は終わりです。<a class="reference internal" href="../learn/glossary.html"><span class="std std-doc">用語集</span></a> と <a class="reference internal" href="../learn/index.html"><span class="std std-doc">学習資料</span></a> を手元に置いて、<strong>実際に手を動かして</strong>、保守・拡張を進めてください。</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../api.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API リファレンス</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="12-ci-and-operations.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第 12 回 CI と運用</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">第 13 回 総合演習</a><ul>
+<li><a class="reference internal" href="#id2">この回のゴール</a></li>
+<li><a class="reference internal" href="#id3">1. 題材と進め方</a></li>
+<li><a class="reference internal" href="#id4">2. ① 要件と ② 設計</a><ul>
+<li><a class="reference internal" href="#id5">要件を 1 文で書く</a></li>
+<li><a class="reference internal" href="#id6">置き場所と依存の向き (第 8 回・第 10 回)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id7">3. ③ 実装</a><ul>
+<li><a class="reference internal" href="#id8">アルゴリズム: 数え上げ</a></li>
+<li><a class="reference internal" href="#id9">整列の鍵</a></li>
+<li><a class="reference internal" href="#id10">弱点を、最初から意識する</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id11">4. ④ テストと ⑤ 変異</a><ul>
+<li><a class="reference internal" href="#id12">読み解く</a></li>
+<li><a class="reference internal" href="#id13">弱点: 見えているものと、見えていないもの</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id14">5. ⑦ 本体に取り込む</a></li>
+<li><a class="reference internal" href="#id15">6. ⑧ 自己点検</a></li>
+<li><a class="reference internal" href="#id16">7. 拡張の課題</a></li>
+<li><a class="reference internal" href="#id17">8. まとめと、これからの学び方</a></li>
+<li><a class="reference internal" href="#id18">確認問題</a></li>
+<li><a class="reference internal" href="#id19">解答</a></li>
+<li><a class="reference internal" href="#id20">まとめ</a></li>
+<li><a class="reference internal" href="#id21">次回</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/dp_prompt.js?v=654ff740"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

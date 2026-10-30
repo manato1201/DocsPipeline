@@ -11,47 +11,16 @@
 
 ### 番号ごとの対応
 
-```{list-table}
-:header-rows: 1
-:widths: 6 22 36 36
-
-* - 番号
-  - 段階
-  - コードの場所
-  - 失敗したときの見え方
-* - 1
-  - ビルドの開始
-  - `cli.cmd_build` → `cli._sphinx`
-  - `docspipeline: error` ではなく、Sphinx の出力がそのまま出る
-* - 2
-  - `conf.py` の実行
-  - `config.build_config`
-  - `conf.py` の例外は Sphinx が「設定ファイルにプログラムの誤り」と報告する
-* - 3
-  - 設定の検査
-  - `guard._raise_config_error`、`mermaid._check_policy` (どちらも `config-inited`)
-  - `Configuration error` と、DocsPipeline のメッセージ (環境変数が足りない、等)
-* - 4
-  - Doxygen の実行
-  - `doxygen.run_doxygen` (`builder-inited`、`priority=100` で Breathe より先)
-  - `doxygen が見つかりません` / `doxygen: ...` の警告
-* - 5
-  - Mermaid の変換
-  - `mermaid.MermaidDirective.run`
-  - `Mermaid をコードのまま表示します` (情報) / 警告 / エラー
-* - 6
-  - docstring の読み込み
-  - Sphinx 標準の autodoc (`import` する)
-  - `autodoc: failed to import ...` (パスや依存の不足)
-* - 7
-  - 参照の解決
-  - Sphinx 標準 (`nitpicky = True`。`DOCSPIPELINE_OFFLINE=1` のときは切れる)
-  - `reference target not found`
-* - 8
-  - 書き出し
-  - ビルダー (`html` / `confluence`)
-  - Confluence 形式では `unsupported code language` など
-```
+| 番号 | 段階 | コードの場所 | 失敗したときの見え方 |
+|---|---|---|---|
+| 1 | ビルドの開始 | `cli.cmd_build` → `cli._sphinx` | `docspipeline: error` ではなく、Sphinx の出力がそのまま出る |
+| 2 | `conf.py` の実行 | `config.build_config` | `conf.py` の例外は Sphinx が「設定ファイルにプログラムの誤り」と報告する |
+| 3 | 設定の検査 | `guard._raise_config_error`、`mermaid._check_policy` (どちらも `config-inited`) | `Configuration error` と、DocsPipeline のメッセージ (環境変数が足りない、等) |
+| 4 | Doxygen の実行 | `doxygen.run_doxygen` (`builder-inited`、`priority=100` で Breathe より先) | `doxygen が見つかりません` / `doxygen: ...` の警告 |
+| 5 | Mermaid の変換 | `mermaid.MermaidDirective.run` | `Mermaid をコードのまま表示します` (情報) / 警告 / エラー |
+| 6 | docstring の読み込み | Sphinx 標準の autodoc (`import` する) | `autodoc: failed to import ...` (パスや依存の不足) |
+| 7 | 参照の解決 | Sphinx 標準 (`nitpicky = True`。`DOCSPIPELINE_OFFLINE=1` のときは切れる) | `reference target not found` |
+| 8 | 書き出し | ビルダー (`html` / `confluence`) | Confluence 形式では `unsupported code language` など |
 
 ### 「優先度」と「順序」
 

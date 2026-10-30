@@ -1,0 +1,1847 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="genindex.html"><link rel="search" title="検索" href="search.html"><link rel="prev" title="第 13 回 総合演習" href="lecture/13-capstone.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>API リファレンス - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="lecture/index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="lecture/00-introduction.html">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/04-ast.html">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/07-sphinx-extensions.html">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/10-testing.html">第 10 回 テスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/11-diagrams.html">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lecture/13-capstone.html">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/api.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="api">
+<h1>API リファレンス<a class="headerlink" href="#api" title="Link to this heading">¶</a></h1>
+<p>docstring から自動生成する。直接編集せず、コードの docstring を直すこと。</p>
+<p id="module-docspipeline">docstring から API 文書を作り、Confluence へ公開するための共通設定と CLI。</p>
+<p id="module-docspipeline.config">各リポジトリの <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> から読み込む共通の Sphinx 設定。</p>
+<p>使い方 (<code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_config</span>
+
+<span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="n">build_config</span><span class="p">(</span>
+        <span class="n">confdir</span><span class="o">=</span><span class="vm">__file__</span><span class="p">,</span>
+        <span class="n">project</span><span class="o">=</span><span class="s2">"ProfilingTool"</span><span class="p">,</span>
+        <span class="n">author</span><span class="o">=</span><span class="s2">"manato1201"</span><span class="p">,</span>
+        <span class="n">package_paths</span><span class="o">=</span><span class="p">[</span><span class="s2">"../src"</span><span class="p">],</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>個別のリポジトリが決めるのは名前と対象のパスだけで、拡張・autodoc・Markdown 取り込み・
+Confluence の設定はここに集める。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.config.is_offline">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.config.</span></span><span class="sig-name descname"><span class="pre">is_offline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.config.is_offline" title="Link to this definition">¶</a></dt>
+<dd><p>外部サイトにつなげない環境か。</p>
+<p><code class="docutils literal notranslate"><span class="pre">DOCSPIPELINE_OFFLINE=1</span></code> のとき、intersphinx と nitpicky を無効にする。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>environ</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.config.build_config">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.config.</span></span><span class="sig-name descname"><span class="pre">build_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">confdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">release</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ja'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mock_imports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_hou_stub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpp_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpp_predefined</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">license_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_extensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.config.build_config" title="Link to this definition">¶</a></dt>
+<dd><p>Sphinx の設定を辞書で返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>confdir</strong> (<em>str</em><em> | </em><em>Path</em>) -- <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の場所。<code class="docutils literal notranslate"><span class="pre">__file__</span></code> をそのまま渡してよい。</p></li>
+<li><p><strong>project</strong> (<em>str</em>) -- 文書の題名 (プロジェクト名)。</p></li>
+<li><p><strong>author</strong> (<em>str</em>) -- 著作者名。</p></li>
+<li><p><strong>release</strong> (<em>str</em>) -- バージョン表記。</p></li>
+<li><p><strong>language</strong> (<em>str</em>) -- 文書の言語。</p></li>
+<li><p><strong>package_paths</strong> (<em>list</em><em>[</em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>None</em>) -- autodoc が <code class="docutils literal notranslate"><span class="pre">import</span></code> できるようにする Python のソースの場所
+(<code class="docutils literal notranslate"><span class="pre">confdir</span></code> からの相対パス)。</p></li>
+<li><p><strong>mock_imports</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) -- autodoc のときだけ偽物に差し替えるモジュール名。</p></li>
+<li><p><strong>use_hou_stub</strong> (<em>bool</em>) -- Houdini の <code class="docutils literal notranslate"><span class="pre">hou</span></code> が無い環境用のスタブを使うか。
+本物の <code class="docutils literal notranslate"><span class="pre">hou</span></code> が <code class="docutils literal notranslate"><span class="pre">import</span></code> できる環境では、そちらが優先される。</p></li>
+<li><p><strong>cpp_sources</strong> (<em>list</em><em>[</em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>None</em>) -- Doxygen に読ませる C++ のソースの場所 (<code class="docutils literal notranslate"><span class="pre">confdir</span></code> からの相対パス)。
+指定すると Breathe と <a class="reference internal" href="#module-docspipeline.doxygen" title="docspipeline.doxygen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.doxygen</span></code></a> を有効にする。</p></li>
+<li><p><strong>cpp_predefined</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) -- Doxygen のマクロ定義 (<code class="docutils literal notranslate"><span class="pre">PREDEFINED</span></code>)。</p></li>
+<li><p><strong>license_note</strong> (<em>str</em>) -- 出典・ライセンスの注記。HTML のフッターと Confluence の各ページ末尾に固定する。</p></li>
+<li><p><strong>extra_extensions</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) -- 追加の Sphinx 拡張。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の名前空間へ <code class="docutils literal notranslate"><span class="pre">update</span></code> する設定の辞書。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.confluence">Confluence 公開まわりの設定と安全装置。</p>
+<p>公開の設定は環境変数から読む。API トークンを設定ファイル・ログ・文書に残さないための
+方針で、このモジュールはトークンの値を保持するだけでなく、出力から伏せる処理 (<a class="reference internal" href="#docspipeline.confluence.mask_secrets" title="docspipeline.confluence.mask_secrets"><code class="xref py py-func docutils literal notranslate"><span class="pre">mask_secrets()</span></code></a>)
+も持つ。</p>
+<p>公開には 3 つのモードがある。既定は <code class="docutils literal notranslate"><span class="pre">local</span></code> で、ネットワークには一切つながない。</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">local</span></code></dt><dd><p>Confluence 形式の出力をローカルに作るだけ (公開しない)。</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">dryrun</span></code></dt><dd><p>Confluence に接続して、何が作成・更新されるかを確認する。ページは変更しない。</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">publish</span></code></dt><dd><p>親ページ配下へ実際に公開する。</p>
+</dd>
+</dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.confluence.REQUIRED_ENV">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">REQUIRED_ENV</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('CONFLUENCE_SERVER_URL',</span> <span class="pre">'CONFLUENCE_SPACE_KEY',</span> <span class="pre">'CONFLUENCE_PARENT_PAGE',</span> <span class="pre">'CONFLUENCE_SERVER_USER',</span> <span class="pre">'CONFLUENCE_API_TOKEN')</span></span><a class="headerlink" href="#docspipeline.confluence.REQUIRED_ENV" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">dryrun</span></code> / <code class="docutils literal notranslate"><span class="pre">publish</span></code> で必須の環境変数。値は出力に出さず、名前だけを報告する。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.confluence.SECRET_ENV">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">SECRET_ENV</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('CONFLUENCE_API_TOKEN',)</span></span><a class="headerlink" href="#docspipeline.confluence.SECRET_ENV" title="Link to this definition">¶</a></dt>
+<dd><p>値を伏せる対象の環境変数。</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="docspipeline.confluence.ConfluenceSettingsError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">ConfluenceSettingsError</span></span><a class="headerlink" href="#docspipeline.confluence.ConfluenceSettingsError" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Confluence の設定が足りない、または安全でないときの例外。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.confluence.current_mode">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">current_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.confluence.current_mode" title="Link to this definition">¶</a></dt>
+<dd><p>環境変数から公開モードを決める。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>environ</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>) -- 環境変数。省略すると <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">local</span></code> / <code class="docutils literal notranslate"><span class="pre">dryrun</span></code> / <code class="docutils literal notranslate"><span class="pre">publish</span></code> のいずれか。未設定なら <code class="docutils literal notranslate"><span class="pre">local</span></code>。</p>
+</dd>
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docspipeline.confluence.ConfluenceSettingsError" title="docspipeline.confluence.ConfluenceSettingsError"><strong>ConfluenceSettingsError</strong></a> -- 未知のモードが指定されたとき。
+    黙って <code class="docutils literal notranslate"><span class="pre">local</span></code> に倒すと、公開したつもりで公開されない事故になる。</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.confluence.missing_env">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">missing_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.confluence.missing_env" title="Link to this definition">¶</a></dt>
+<dd><p>公開に必要で、未設定の環境変数の名前を返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>environ</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.confluence.sphinx_settings">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">sphinx_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">footer_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.confluence.sphinx_settings" title="Link to this definition">¶</a></dt>
+<dd><p>Sphinx Confluence ビルダーの設定を組み立てる。</p>
+<p>公開の可否に関わる項目は、環境変数に頼らず必ずここで明示する。ビルダーは未設定の
+<code class="docutils literal notranslate"><span class="pre">confluence_*</span></code> を同名の環境変数から補うので、明示しないと、環境に
+<code class="docutils literal notranslate"><span class="pre">CONFLUENCE_PUBLISH</span></code> が残っているだけで意図せず公開されうる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>environ</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>) -- 環境変数。省略すると <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>。</p></li>
+<li><p><strong>footer_file</strong> (<em>str</em><em> | </em><em>None</em>) -- 各ページの末尾に付ける XHTML ファイルのパス (出典・ライセンスの注記)。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の名前空間へ取り込む設定の辞書。</p>
+</dd>
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docspipeline.confluence.ConfluenceSettingsError" title="docspipeline.confluence.ConfluenceSettingsError"><strong>ConfluenceSettingsError</strong></a> -- <code class="docutils literal notranslate"><span class="pre">dryrun</span></code> / <code class="docutils literal notranslate"><span class="pre">publish</span></code> で必須の設定が足りないとき。</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.confluence.mask_secrets">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.confluence.</span></span><span class="sig-name descname"><span class="pre">mask_secrets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.confluence.mask_secrets" title="Link to this definition">¶</a></dt>
+<dd><p>文字列中のトークンの値を <code class="docutils literal notranslate"><span class="pre">***</span></code> に置き換える。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) -- ログなどの出力。</p></li>
+<li><p><strong>environ</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>) -- 環境変数。省略すると <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>トークンを伏せた文字列。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.mmdc"><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> (mermaid-cli) の探索と実行。Sphinx に依存しない。</p>
+<p><a class="reference internal" href="#module-docspipeline.mermaid" title="docspipeline.mermaid"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.mermaid</span></code></a> (Sphinx 拡張) と、<a class="reference internal" href="#module-docspipeline.doctor" title="docspipeline.doctor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.doctor</span></code></a> (環境の確認) の両方が使う。
+Sphinx が入っていない環境でも <code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> の各コマンドが動くように、拡張の側 (Sphinx を
+<code class="docutils literal notranslate"><span class="pre">import</span></code> する) とは別のモジュールにしている。</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.mmdc.THEME_VARIABLES">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">THEME_VARIABLES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'clusterBkg':</span> <span class="pre">'#f2f4f7',</span> <span class="pre">'clusterBorder':</span> <span class="pre">'#d0d5dd',</span> <span class="pre">'edgeLabelBackground':</span> <span class="pre">'#ffffff',</span> <span class="pre">'fontFamily':</span> <span class="pre">'Noto</span> <span class="pre">Sans</span> <span class="pre">JP,</span> <span class="pre">Hiragino</span> <span class="pre">Sans,</span> <span class="pre">Meiryo,</span> <span class="pre">sans-serif',</span> <span class="pre">'lineColor':</span> <span class="pre">'#667085',</span> <span class="pre">'primaryBorderColor':</span> <span class="pre">'#d0d5dd',</span> <span class="pre">'primaryColor':</span> <span class="pre">'#ffffff',</span> <span class="pre">'primaryTextColor':</span> <span class="pre">'#101828'}</span></span><a class="headerlink" href="#docspipeline.mmdc.THEME_VARIABLES" title="Link to this definition">¶</a></dt>
+<dd><p>図の色とフォント。GitHub (Markdown のまま表示) と、Sphinx (<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> で SVG にした HTML) の
+両方で、同じ見た目にするための値。色はこのリポジトリの構成図 (diagrams.net) と揃えてある。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.mmdc.FLOWCHART_CONFIG">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">FLOWCHART_CONFIG</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'nodeSpacing':</span> <span class="pre">40,</span> <span class="pre">'padding':</span> <span class="pre">14,</span> <span class="pre">'rankSpacing':</span> <span class="pre">56,</span> <span class="pre">'wrappingWidth':</span> <span class="pre">480}</span></span><a class="headerlink" href="#docspipeline.mmdc.FLOWCHART_CONFIG" title="Link to this definition">¶</a></dt>
+<dd><p>流れ図の設定。<code class="docutils literal notranslate"><span class="pre">wrappingWidth</span></code> を大きくしないと、日本語の長い行が、単語の途中で折り返される。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.mmdc.SEQUENCE_CONFIG">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">SEQUENCE_CONFIG</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'actorMargin':</span> <span class="pre">30,</span> <span class="pre">'messageMargin':</span> <span class="pre">34,</span> <span class="pre">'mirrorActors':</span> <span class="pre">False,</span> <span class="pre">'width':</span> <span class="pre">150,</span> <span class="pre">'wrap':</span> <span class="pre">False}</span></span><a class="headerlink" href="#docspipeline.mmdc.SEQUENCE_CONFIG" title="Link to this definition">¶</a></dt>
+<dd><p>順序図の設定。下に同じ参加者を繰り返さず (<code class="docutils literal notranslate"><span class="pre">mirrorActors</span></code>)、横幅を詰めて、文字が小さくならないようにする。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.mmdc.MERMAID_INIT">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">MERMAID_INIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'%%{init:</span> <span class="pre">{&quot;theme&quot;:&quot;base&quot;,&quot;fontFamily&quot;:&quot;Noto</span> <span class="pre">Sans</span> <span class="pre">JP,</span> <span class="pre">Hiragino</span> <span class="pre">Sans,</span> <span class="pre">Meiryo,</span> <span class="pre">sans-serif&quot;,&quot;themeVariables&quot;:{&quot;fontFamily&quot;:&quot;Noto</span> <span class="pre">Sans</span> <span class="pre">JP,</span> <span class="pre">Hiragino</span> <span class="pre">Sans,</span> <span class="pre">Meiryo,</span> <span class="pre">sans-serif&quot;,&quot;primaryColor&quot;:&quot;#ffffff&quot;,&quot;primaryBorderColor&quot;:&quot;#d0d5dd&quot;,&quot;primaryTextColor&quot;:&quot;#101828&quot;,&quot;lineColor&quot;:&quot;#667085&quot;,&quot;clusterBkg&quot;:&quot;#f2f4f7&quot;,&quot;clusterBorder&quot;:&quot;#d0d5dd&quot;,&quot;edgeLabelBackground&quot;:&quot;#ffffff&quot;},&quot;flowchart&quot;:{&quot;wrappingWidth&quot;:480,&quot;nodeSpacing&quot;:40,&quot;rankSpacing&quot;:56,&quot;padding&quot;:14},&quot;sequence&quot;:{&quot;mirrorActors&quot;:false,&quot;wrap&quot;:false,&quot;width&quot;:150,&quot;actorMargin&quot;:30,&quot;messageMargin&quot;:34}}}%%'</span></span><a class="headerlink" href="#docspipeline.mmdc.MERMAID_INIT" title="Link to this definition">¶</a></dt>
+<dd><p>各 Mermaid ブロックの 1 行目に置く、標準の初期化の行 (<code class="docutils literal notranslate"><span class="pre">%%{init:</span> <span class="pre">...}%%</span></code>)。
+GitHub は、この行から色とフォントを読む。<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">check-mermaid</span></code> が、全ブロックにあるかを確かめる。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.mmdc.MERMAID_CLASSDEFS">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">MERMAID_CLASSDEFS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'</span>&#160;&#160;&#160; <span class="pre">classDef</span> <span class="pre">input</span> <span class="pre">fill:#dae8fc,stroke:#1a73e8,color:#101828\n</span>&#160;&#160;&#160; <span class="pre">classDef</span> <span class="pre">proc</span> <span class="pre">fill:#e6f4f1,stroke:#0f9d8a,color:#101828\n</span>&#160;&#160;&#160; <span class="pre">classDef</span> <span class="pre">out</span> <span class="pre">fill:#fff7ed,stroke:#e8710a,color:#101828\n</span>&#160;&#160;&#160; <span class="pre">classDef</span> <span class="pre">stop</span> <span class="pre">fill:#fef3f2,stroke:#d92d20,color:#101828\n</span>&#160;&#160;&#160; <span class="pre">classDef</span> <span class="pre">plain</span> <span class="pre">fill:#ffffff,stroke:#d0d5dd,color:#101828'</span></span><a class="headerlink" href="#docspipeline.mmdc.MERMAID_CLASSDEFS" title="Link to this definition">¶</a></dt>
+<dd><p>図の部品に色を付ける <code class="docutils literal notranslate"><span class="pre">classDef</span></code> の標準の組。入力 = 青、Sphinx・処理 = 緑、出力・公開 = オレンジ、
+止まる・失敗 = 赤、補助 = 白。ブロックの末尾に貼って使う。</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.mmdc.MERMAID_CONFIG">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">MERMAID_CONFIG</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'flowchart':</span> <span class="pre">{'htmlLabels':</span> <span class="pre">False,</span> <span class="pre">'nodeSpacing':</span> <span class="pre">40,</span> <span class="pre">'padding':</span> <span class="pre">14,</span> <span class="pre">'rankSpacing':</span> <span class="pre">56,</span> <span class="pre">'wrappingWidth':</span> <span class="pre">480},</span> <span class="pre">'fontFamily':</span> <span class="pre">'Noto</span> <span class="pre">Sans</span> <span class="pre">JP,</span> <span class="pre">Hiragino</span> <span class="pre">Sans,</span> <span class="pre">Meiryo,</span> <span class="pre">sans-serif',</span> <span class="pre">'htmlLabels':</span> <span class="pre">False,</span> <span class="pre">'sequence':</span> <span class="pre">{'actorMargin':</span> <span class="pre">30,</span> <span class="pre">'messageMargin':</span> <span class="pre">34,</span> <span class="pre">'mirrorActors':</span> <span class="pre">False,</span> <span class="pre">'width':</span> <span class="pre">150,</span> <span class="pre">'wrap':</span> <span class="pre">False},</span> <span class="pre">'theme':</span> <span class="pre">'base',</span> <span class="pre">'themeVariables':</span> <span class="pre">{'clusterBkg':</span> <span class="pre">'#f2f4f7',</span> <span class="pre">'clusterBorder':</span> <span class="pre">'#d0d5dd',</span> <span class="pre">'edgeLabelBackground':</span> <span class="pre">'#ffffff',</span> <span class="pre">'fontFamily':</span> <span class="pre">'Noto</span> <span class="pre">Sans</span> <span class="pre">JP,</span> <span class="pre">Hiragino</span> <span class="pre">Sans,</span> <span class="pre">Meiryo,</span> <span class="pre">sans-serif',</span> <span class="pre">'lineColor':</span> <span class="pre">'#667085',</span> <span class="pre">'primaryBorderColor':</span> <span class="pre">'#d0d5dd',</span> <span class="pre">'primaryColor':</span> <span class="pre">'#ffffff',</span> <span class="pre">'primaryTextColor':</span> <span class="pre">'#101828'}}</span></span><a class="headerlink" href="#docspipeline.mmdc.MERMAID_CONFIG" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> に渡す設定。文字を HTML (foreignObject) ではなく SVG の <code class="docutils literal notranslate"><span class="pre">&lt;text&gt;</span></code> で描かせる。
+foreignObject は SVG を画像として取り込む先 (Confluence など) で文字が消えることがある。
+図に <code class="docutils literal notranslate"><span class="pre">%%{init}%%</span></code> が無くても、同じ見た目になるよう、色とフォントもここに入れる。</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="docspipeline.mmdc.MermaidRenderError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">MermaidRenderError</span></span><a class="headerlink" href="#docspipeline.mmdc.MermaidRenderError" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の実行に失敗したときの例外。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.split_command">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">split_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">windows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.split_command" title="Link to this definition">¶</a></dt>
+<dd><p>コマンドの文字列を、引数の列に分ける。</p>
+<p>POSIX の規則だと、Windows のパスの <code class="docutils literal notranslate"><span class="pre">\</span></code> が消える (<code class="docutils literal notranslate"><span class="pre">C:\Users\me</span></code> → <code class="docutils literal notranslate"><span class="pre">C:Usersme</span></code>)。
+Windows では、<code class="docutils literal notranslate"><span class="pre">\</span></code> を残し、引用符だけを外す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) -- <code class="docutils literal notranslate"><span class="pre">DOCSPIPELINE_MMDC</span></code> などの値。</p></li>
+<li><p><strong>windows</strong> (<em>bool</em><em> | </em><em>None</em>) -- Windows の規則で分けるか。省略すると、実行中の OS に合わせる。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.command_exists">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">command_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.command_exists" title="Link to this definition">¶</a></dt>
+<dd><p>コマンドの先頭 (実行ファイル) が、実在するか。<code class="docutils literal notranslate"><span class="pre">PATH</span></code> の検索と、パスの直接指定の両方を見る。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cmd</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.find_mmdc">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">find_mmdc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configured</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confdir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.find_mmdc" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の起動コマンドを探す。</p>
+<p>探す順序: 設定値 → 環境変数 <code class="docutils literal notranslate"><span class="pre">DOCSPIPELINE_MMDC</span></code> → <code class="docutils literal notranslate"><span class="pre">PATH</span></code> →
+<code class="docutils literal notranslate"><span class="pre">confdir</span></code> とその親の <code class="docutils literal notranslate"><span class="pre">node_modules/.bin</span></code>。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p>コマンドの引数列。見つからなければ <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</dd>
+<dt class="field-even">パラメータ<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>configured</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>confdir</strong> (<em>str</em><em> | </em><em>Path</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.render">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'svg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">puppeteer_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.render" title="Link to this definition">¶</a></dt>
+<dd><p>Mermaid のコードを画像にして <code class="docutils literal notranslate"><span class="pre">out_dir</span></code> に置く。</p>
+<p>ファイル名は内容のハッシュ。同じ図は再変換しない。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<em>str</em>) -- Mermaid のコード。</p></li>
+<li><p><strong>out_dir</strong> (<em>Path</em>) -- 出力先のディレクトリ。</p></li>
+<li><p><strong>cmd</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) -- <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の起動コマンド。</p></li>
+<li><p><strong>fmt</strong> (<em>str</em>) -- 出力形式 (<code class="docutils literal notranslate"><span class="pre">svg</span></code> または <code class="docutils literal notranslate"><span class="pre">png</span></code>)。</p></li>
+<li><p><strong>puppeteer_config</strong> (<em>str</em><em> | </em><em>None</em>) -- <code class="docutils literal notranslate"><span class="pre">mmdc</span> <span class="pre">-p</span></code> に渡す設定ファイル (サンドボックス無効化など)。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>作成 (または既存) の画像ファイルのパス。</p>
+</dd>
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docspipeline.mmdc.MermaidRenderError" title="docspipeline.mmdc.MermaidRenderError"><strong>MermaidRenderError</strong></a> -- <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が失敗したとき。</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.mermaid_blocks">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">mermaid_blocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.mermaid_blocks" title="Link to this definition">¶</a></dt>
+<dd><p>Markdown の行から、Mermaid のコードブロックの位置を探す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lines</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) -- ファイルの行 (改行なし)。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>各ブロックの <code class="docutils literal notranslate"><span class="pre">(開きの囲みの行,</span> <span class="pre">閉じの囲みの行)</span></code> (0 始まり)。閉じが無ければ、末尾まで。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple[int, int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.check_mermaid_text">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">check_mermaid_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.check_mermaid_text" title="Link to this definition">¶</a></dt>
+<dd><p>標準の <code class="docutils literal notranslate"><span class="pre">%%{init}%%</span></code> の行で始まっていない Mermaid ブロックの、開きの行 (1 始まり) を返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mmdc.fix_mermaid_text">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mmdc.</span></span><span class="sig-name descname"><span class="pre">fix_mermaid_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mmdc.fix_mermaid_text" title="Link to this definition">¶</a></dt>
+<dd><p>標準の <code class="docutils literal notranslate"><span class="pre">%%{init}%%</span></code> の行を、全ブロックの先頭に入れる。</p>
+<p>別の <code class="docutils literal notranslate"><span class="pre">%%{init</span> <span class="pre">...}%%</span></code> で始まるブロックは、標準の行に置き換える。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.mermaid">Mermaid の図をビルド時に画像 (SVG) へ変換する Sphinx 拡張。</p>
+<p>Confluence では Mermaid がそのまま描画されない可能性がある。このため HTML でも
+Confluence でも、同じ画像を取り込む。変換には <a class="reference external" href="https://github.com/mermaid-js/mermaid-cli">mermaid-cli</a> (<code class="docutils literal notranslate"><span class="pre">mmdc</span></code>) を使う。</p>
+<p>使い方:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">mermaid</span><span class="p">::</span>
+   <span class="p">:</span><span class="n">alt</span><span class="p">:</span> <span class="n">全体の流れ</span>
+
+   <span class="n">flowchart</span> <span class="n">LR</span>
+       <span class="n">A</span> <span class="o">--&gt;</span> <span class="n">B</span>
+</pre></div>
+</div>
+<p>Markdown では、言語名を <code class="docutils literal notranslate"><span class="pre">mermaid</span></code> にしたコードフェンスがそのまま使える (<code class="docutils literal notranslate"><span class="pre">myst_fence_as_directive</span></code>)。</p>
+<p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の探索と実行は、Sphinx に依存しない <a class="reference internal" href="#module-docspipeline.mmdc" title="docspipeline.mmdc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.mmdc</span></code></a> にある。
+<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が無いときの挙動は <code class="docutils literal notranslate"><span class="pre">docspipeline_mermaid_missing</span></code> で決める。</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">literal</span></code></dt><dd><p>コードをそのまま表示する (手元の確認用。既定)。</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">warn</span></code></dt><dd><p>警告を出したうえで、コードをそのまま表示する。</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">error</span></code></dt><dd><p>ビルドを失敗させる (CI 用)。</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.mermaid.MermaidDirective">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.mermaid.</span></span><span class="sig-name descname"><span class="pre">MermaidDirective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineno</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_machine</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mermaid.MermaidDirective" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">SphinxDirective</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> 指示子。</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.mermaid.MermaidDirective.has_content">
+<span class="sig-name descname"><span class="pre">has_content</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#docspipeline.mermaid.MermaidDirective.has_content" title="Link to this definition">¶</a></dt>
+<dd><p>May the directive have content?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.mermaid.MermaidDirective.required_arguments">
+<span class="sig-name descname"><span class="pre">required_arguments</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#docspipeline.mermaid.MermaidDirective.required_arguments" title="Link to this definition">¶</a></dt>
+<dd><p>Number of required directive arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.mermaid.MermaidDirective.option_spec">
+<span class="sig-name descname"><span class="pre">option_spec</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'alt':</span> <span class="pre">&lt;function</span> <span class="pre">MermaidDirective.&lt;lambda&gt;&gt;,</span> <span class="pre">'caption':</span> <span class="pre">&lt;function</span> <span class="pre">MermaidDirective.&lt;lambda&gt;&gt;}</span></span><a class="headerlink" href="#docspipeline.mermaid.MermaidDirective.option_spec" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of option names to validator functions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="docspipeline.mermaid.MermaidDirective.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mermaid.MermaidDirective.run" title="Link to this definition">¶</a></dt>
+<dd><p>本文を画像に変換して返す。変換できないときは <code class="docutils literal notranslate"><span class="pre">docspipeline_mermaid_missing</span></code> に従う。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<em>Node</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.mermaid.setup">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.mermaid.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.mermaid.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Sphinx 拡張の登録。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>Sphinx</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.doxygen">Sphinx のビルド開始時に Doxygen を走らせて XML を作る拡張。</p>
+<p>C++ の文書は Doxygen が XML にし、Breathe が Sphinx へ取り込む。この拡張は、その前段
+(Doxygen の実行) を <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> の中に閉じ込めて、別の手順を覚えなくて済むようにする。</p>
+<p>Doxygen が出す警告 (コメントの書式の誤りなど) は Sphinx の警告として転送するので、
+<code class="docutils literal notranslate"><span class="pre">-W</span></code> で CI を止められる。</p>
+<p>Doxygen が手元に無い環境では、環境変数 <code class="docutils literal notranslate"><span class="pre">DOCSPIPELINE_SKIP_DOXYGEN=1</span></code> で飛ばせる。
+その場合、Breathe の指示子が「XML が無い」という警告を出す。<code class="docutils literal notranslate"><span class="pre">-W</span></code> ではビルドが失敗するので、
+手元で C++ 以外を確認したいときは <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">build</span> <span class="pre">--no-strict</span></code> と組み合わせる。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.doxygen.make_doxyfile">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.doxygen.</span></span><span class="sig-name descname"><span class="pre">make_doxyfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predefined</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doxygen.make_doxyfile" title="Link to this definition">¶</a></dt>
+<dd><p>XML だけを出す最小の Doxyfile を作る。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> (<em>str</em>) -- Doxygen の <code class="docutils literal notranslate"><span class="pre">PROJECT_NAME</span></code>。</p></li>
+<li><p><strong>inputs</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) -- 読み込むソースの場所。</p></li>
+<li><p><strong>output</strong> (<em>str</em>) -- 出力先 (この下の <code class="docutils literal notranslate"><span class="pre">xml/</span></code> が Breathe の入力になる)。</p></li>
+<li><p><strong>predefined</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) -- <code class="docutils literal notranslate"><span class="pre">PREDEFINED</span></code> に渡すマクロ。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>Doxyfile の中身。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.doxygen.run_doxygen">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.doxygen.</span></span><span class="sig-name descname"><span class="pre">run_doxygen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doxygen.run_doxygen" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">builder-inited</span></code> で Doxygen を走らせ、警告を Sphinx の警告として転送する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sphinx.errors.ExtensionError</strong> -- <code class="docutils literal notranslate"><span class="pre">doxygen</span></code> が無い、または失敗したとき。</p>
+</dd>
+<dt class="field-even">パラメータ<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>app</strong> (<em>Sphinx</em>)</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.doxygen.setup">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.doxygen.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doxygen.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Sphinx 拡張の登録。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>Sphinx</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.prompt">手順に添える「プロンプトのコピー」ブロック (<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">prompt::</span></code>)。</p>
+<p>手順の説明に、そのまま Claude Code に渡せるプロンプトを載せ、HTML ではコピーボタンを付ける。
+読む人は、手順を自分で言い直さずに、そのまま貼り付けられる。</p>
+<p>使い方 (reStructuredText):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>.. prompt:: 新しいリポジトリに docs/ を作る
+
+   このリポジトリに DocsPipeline で docs/ を作ってください。
+   docspipeline init と docspipeline build を実行し、警告が出たら原因を直してください。
+</pre></div>
+</div>
+<p>Markdown (MyST) では:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```{prompt} 新しいリポジトリに docs/ を作る
+このリポジトリに ...
+```
+</pre></div>
+</div>
+<p>出力:</p>
+<ul class="simple">
+<li><p><strong>HTML</strong>: 題名・本文・「プロンプトをコピー」ボタン。ボタンは JavaScript で足す
+(JavaScript が無くても、本文は読めて、選択してコピーできる)。</p></li>
+<li><p><strong>Confluence などの HTML 以外</strong>: 題名と、普通のコードブロック。ボタンは出ない。</p></li>
+</ul>
+<p>プロンプトに <strong>秘密情報を入れない</strong>。トークンやパスワードらしき値 (<code class="docutils literal notranslate"><span class="pre">API_TOKEN=abcdef123456</span></code> の形) が
+含まれていると、警告を出す。<code class="docutils literal notranslate"><span class="pre">-W</span></code> ならビルドが失敗する。</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.prompt.SECRET_PATTERN">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.prompt.</span></span><span class="sig-name descname"><span class="pre">SECRET_PATTERN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile('(?:TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY)\\w*\\s*[=:]\\s*[\'\\&quot;]?(?![&lt;$.])[^\\s\'\\&quot;&lt;&gt;$]{8,}',</span> <span class="pre">re.IGNORECASE)</span></span><a class="headerlink" href="#docspipeline.prompt.SECRET_PATTERN" title="Link to this definition">¶</a></dt>
+<dd><p>秘密情報らしき <code class="docutils literal notranslate"><span class="pre">名前=値</span></code> の形。名前に TOKEN / SECRET / PASSWORD / API_KEY を含み、値が 8 文字以上。
+値の例 (<code class="docutils literal notranslate"><span class="pre">&lt;値&gt;</span></code>・<code class="docutils literal notranslate"><span class="pre">$変数</span></code>・<code class="docutils literal notranslate"><span class="pre">...</span></code>) は、除く。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.prompt.find_secret">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.prompt.</span></span><span class="sig-name descname"><span class="pre">find_secret</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.prompt.find_secret" title="Link to this definition">¶</a></dt>
+<dd><p>秘密情報らしき記述を見つけて、値を伏せた形で返す。見つからなければ <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.prompt.PromptDirective">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.prompt.</span></span><span class="sig-name descname"><span class="pre">PromptDirective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineno</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_machine</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.prompt.PromptDirective" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">SphinxDirective</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">prompt::</span></code> 指示子。引数は題名 (省略できる)。本文がプロンプト。</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.prompt.PromptDirective.has_content">
+<span class="sig-name descname"><span class="pre">has_content</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#docspipeline.prompt.PromptDirective.has_content" title="Link to this definition">¶</a></dt>
+<dd><p>May the directive have content?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.prompt.PromptDirective.required_arguments">
+<span class="sig-name descname"><span class="pre">required_arguments</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#docspipeline.prompt.PromptDirective.required_arguments" title="Link to this definition">¶</a></dt>
+<dd><p>Number of required directive arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.prompt.PromptDirective.optional_arguments">
+<span class="sig-name descname"><span class="pre">optional_arguments</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#docspipeline.prompt.PromptDirective.optional_arguments" title="Link to this definition">¶</a></dt>
+<dd><p>Number of optional arguments after the required arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="docspipeline.prompt.PromptDirective.final_argument_whitespace">
+<span class="sig-name descname"><span class="pre">final_argument_whitespace</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#docspipeline.prompt.PromptDirective.final_argument_whitespace" title="Link to this definition">¶</a></dt>
+<dd><p>May the final argument contain whitespace?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="docspipeline.prompt.PromptDirective.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.prompt.PromptDirective.run" title="Link to this definition">¶</a></dt>
+<dd><p>題名と本文を、標準のノード (container・paragraph・literal_block) で組み立てる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<em>Node</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.prompt.setup">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.prompt.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.prompt.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Sphinx 拡張の登録。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>Sphinx</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.guard">設定の誤りを、Sphinx の設定エラーとして整った形で報告する拡張。</p>
+<p><a class="reference internal" href="#docspipeline.config.build_config" title="docspipeline.config.build_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">docspipeline.config.build_config()</span></code></a> は <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の中で例外を投げず、エラーの文を
+<code class="docutils literal notranslate"><span class="pre">docspipeline_config_error</span></code> に入れて返す。この拡張が、設定の読み込みが終わった時点でそれを
+<code class="docutils literal notranslate"><span class="pre">sphinx.errors.ConfigError</span></code> にする。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.guard.setup">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.guard.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.guard.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Sphinx 拡張の登録。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>app</strong> (<em>Sphinx</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.files">Python のソースファイルの列挙。<code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> の複数のモジュールが共有する。</p>
+<p>探さない場所の規則を一か所に置く。<code class="docutils literal notranslate"><span class="pre">coverage</span></code>・<code class="docutils literal notranslate"><span class="pre">map</span></code>・<code class="docutils literal notranslate"><span class="pre">init</span></code> で規則が食い違うと、
+同じパッケージなのに、数えるファイルが変わってしまう (仮想環境の中身が API として並ぶ、など)。</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.files.SKIP_DIRS">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.files.</span></span><span class="sig-name descname"><span class="pre">SKIP_DIRS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'.git',</span> <span class="pre">'.tox',</span> <span class="pre">'.venv',</span> <span class="pre">'__pycache__',</span> <span class="pre">'_build',</span> <span class="pre">'build',</span> <span class="pre">'dist',</span> <span class="pre">'node_modules',</span> <span class="pre">'venv'}</span></span><a class="headerlink" href="#docspipeline.files.SKIP_DIRS" title="Link to this definition">¶</a></dt>
+<dd><p>探さない場所。仮想環境・キャッシュ・生成物・外部のコード。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.files.iter_python_files">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.files.</span></span><span class="sig-name descname"><span class="pre">iter_python_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roots</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.files.iter_python_files" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">roots</span></code> 配下の <code class="docutils literal notranslate"><span class="pre">.py</span></code> ファイルを、生成物や仮想環境を除いて列挙する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roots</strong> (<em>Iterable</em><em>[</em><em>Path</em><em>]</em>) -- ディレクトリ、または <code class="docutils literal notranslate"><span class="pre">.py</span></code> ファイル。</p>
+</dd>
+<dt class="field-even">列挙<span class="colon">:</span></dt>
+<dd class="field-even"><p>見つかったファイル (各 <code class="docutils literal notranslate"><span class="pre">root</span></code> の中は整列済み)。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Iterator</em>[<em>Path</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.files.MARKDOWN_SKIP_DIRS">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.files.</span></span><span class="sig-name descname"><span class="pre">MARKDOWN_SKIP_DIRS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'.git',</span> <span class="pre">'.tox',</span> <span class="pre">'.venv',</span> <span class="pre">'__pycache__',</span> <span class="pre">'_build',</span> <span class="pre">'_doxygen',</span> <span class="pre">'_generated',</span> <span class="pre">'build',</span> <span class="pre">'dist',</span> <span class="pre">'node_modules',</span> <span class="pre">'site',</span> <span class="pre">'venv'}</span></span><a class="headerlink" href="#docspipeline.files.MARKDOWN_SKIP_DIRS" title="Link to this definition">¶</a></dt>
+<dd><p>Markdown の検査で、さらに除く場所 (Sphinx と Doxygen の生成物)。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.files.iter_markdown_files">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.files.</span></span><span class="sig-name descname"><span class="pre">iter_markdown_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roots</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.files.iter_markdown_files" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">roots</span></code> 配下の <code class="docutils literal notranslate"><span class="pre">.md</span></code> ファイルを、生成物や仮想環境を除いて列挙する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roots</strong> (<em>Iterable</em><em>[</em><em>Path</em><em>]</em>) -- ディレクトリ、または <code class="docutils literal notranslate"><span class="pre">.md</span></code> ファイル。</p>
+</dd>
+<dt class="field-even">列挙<span class="colon">:</span></dt>
+<dd class="field-even"><p>見つかったファイル (各 <code class="docutils literal notranslate"><span class="pre">root</span></code> の中は整列済み)。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Iterator</em>[<em>Path</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.docstring_coverage">docstring が無い公開 API の一覧 (カバレッジの確認)。</p>
+<p>Sphinx の autodoc は docstring が無い項目を黙って飛ばすので、<code class="docutils literal notranslate"><span class="pre">-W</span></code> でも気づけない。
+このモジュールはソースを構文解析 (<code class="docutils literal notranslate"><span class="pre">ast</span></code>) して、公開 API のうち docstring が無いものを数える。
+コードは <code class="docutils literal notranslate"><span class="pre">import</span></code> しない。副作用のあるモジュールや、<code class="docutils literal notranslate"><span class="pre">hou</span></code> のように環境が要るモジュールでも安全に使える。</p>
+<p>公開 API とは、次のものをいう。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_</span></code> で始まらない名前のモジュール・クラス・関数・メソッド</p></li>
+<li><p>モジュールに <code class="docutils literal notranslate"><span class="pre">__all__</span></code> があるときは、そこに載っている名前だけ</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">&#64;overload</span></code> と、プロパティの <code class="docutils literal notranslate"><span class="pre">setter</span></code> / <code class="docutils literal notranslate"><span class="pre">deleter</span></code> は数えない (docstring を書く場所ではないため)。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.Item">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.docstring_coverage.</span></span><span class="sig-name descname"><span class="pre">Item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">documented</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.docstring_coverage.Item" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>カバレッジの対象 1 件。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>Path</em>)</p></li>
+<li><p><strong>qualname</strong> (<em>str</em>)</p></li>
+<li><p><strong>kind</strong> (<em>str</em>)</p></li>
+<li><p><strong>line</strong> (<em>int</em>)</p></li>
+<li><p><strong>documented</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.Report">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.docstring_coverage.</span></span><span class="sig-name descname"><span class="pre">Report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.docstring_coverage.Report" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>カバレッジの集計。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>items</strong> (<em>tuple</em><em>[</em><a class="reference internal" href="#docspipeline.docstring_coverage.Item" title="docspipeline.docstring_coverage.Item"><em>Item</em></a><em>, </em><em>...</em><em>]</em>)</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.Report.missing">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">missing</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#docspipeline.docstring_coverage.Item" title="docspipeline.docstring_coverage.Item"><span class="pre">Item</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#docspipeline.docstring_coverage.Report.missing" title="Link to this definition">¶</a></dt>
+<dd><p>docstring が無い項目。</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.Report.percent">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">percent</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#docspipeline.docstring_coverage.Report.percent" title="Link to this definition">¶</a></dt>
+<dd><p>docstring がある項目の割合 (対象が無ければ 100)。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.scan_file">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.docstring_coverage.</span></span><span class="sig-name descname"><span class="pre">scan_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.docstring_coverage.scan_file" title="Link to this definition">¶</a></dt>
+<dd><p>1 ファイルの公開 API を調べる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>Path</em>) -- Python のソースファイル。</p></li>
+<li><p><strong>module_name</strong> (<em>str</em><em> | </em><em>None</em>) -- 結果に使うモジュール名。省略するとファイル名から付ける。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>見つかった項目。</p>
+</dd>
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> -- ファイルが構文エラーのとき (ファイル名と行を含む)。</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="#docspipeline.docstring_coverage.Item" title="docspipeline.docstring_coverage.Item"><em>Item</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.scan">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.docstring_coverage.</span></span><span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roots</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.docstring_coverage.scan" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">roots</span></code> 配下の公開 API を調べて集計する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> -- 存在しないパスがあるとき、または構文エラーのファイルがあるとき。
+    存在しないパスを「100%」と報告すると、パスの打ち間違いや移動で、検査が黙って空になる。</p>
+</dd>
+<dt class="field-even">パラメータ<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>roots</strong> (<em>Iterable</em><em>[</em><em>Path</em><em>]</em>)</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docspipeline.docstring_coverage.Report" title="docspipeline.docstring_coverage.Report"><em>Report</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.docstring_coverage.format_report">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.docstring_coverage.</span></span><span class="sig-name descname"><span class="pre">format_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">report</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.docstring_coverage.format_report" title="Link to this definition">¶</a></dt>
+<dd><p>人が読む形に整形する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>report</strong> (<a class="reference internal" href="#docspipeline.docstring_coverage.Report" title="docspipeline.docstring_coverage.Report"><em>Report</em></a>)</p></li>
+<li><p><strong>base</strong> (<em>Path</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.structure_map">ソースを構文解析して作る、パッケージの構造の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)。</p>
+<p>コードを <code class="docutils literal notranslate"><span class="pre">import</span></code> せずに <code class="docutils literal notranslate"><span class="pre">ast</span></code> だけで読み、モジュールどうしの依存を取り出す。
+結果は「機械的な地図」で、次の三つに使う。</p>
+<ul class="simple">
+<li><p><strong>アーキテクチャ文書の下書き</strong>: モジュールの一覧と依存の図を Markdown で出す。
+推定を含むので、人が確認してから使う。そのまま公開しない。</p></li>
+<li><p><strong>依存の向きの点検</strong>: 循環していないか、あるべきでない依存が無いか。</p></li>
+<li><p><strong>手書きの図とのずれの検出</strong>: 構成図が、実際の依存と一致しているか。</p></li>
+</ul>
+<p>外部へは何も送信しない (ローカルの読み取りだけ)。</p>
+<p>見つける依存は 2 種類。</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">import</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">import</span></code> 文による依存 (相対 <code class="docutils literal notranslate"><span class="pre">import</span></code> を含む)。</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">reference</span></code></dt><dd><p>モジュールの名前と <strong>完全に一致する文字列</strong> による参照
+(Sphinx の <code class="docutils literal notranslate"><span class="pre">extensions</span> <span class="pre">=</span> <span class="pre">[&quot;pkg.ext&quot;]</span></code> のような、名前での読み込み)。</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">import</span></code> は、モジュールを読み込んだときに実行されるものだけ。次の 2 つは、実行時の循環にならないので、
+別に扱う (循環の検出の対象にしない)。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> の中の import (型検査のときだけ)。依存として数えない。</p></li>
+<li><p>関数の中の import (<code class="docutils literal notranslate"><span class="pre">deferred</span></code>)。呼ばれたときに初めて読み込まれる。循環を断つ定番の書き方。</p></li>
+</ul>
+<p>見つけられないもの: <code class="docutils literal notranslate"><span class="pre">importlib.import_module(変数)</span></code> のような動的な読み込み、部分的に組み立てた名前。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.structure_map.Module">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.structure_map.</span></span><span class="sig-name descname"><span class="pre">Module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">public_api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imports</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">references</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deferred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.Module" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>1 つのモジュール。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>)</p></li>
+<li><p><strong>path</strong> (<em>Path</em>)</p></li>
+<li><p><strong>is_package</strong> (<em>bool</em>)</p></li>
+<li><p><strong>summary</strong> (<em>str</em>)</p></li>
+<li><p><strong>lines</strong> (<em>int</em>)</p></li>
+<li><p><strong>public_api</strong> (<em>int</em>)</p></li>
+<li><p><strong>imports</strong> (<em>frozenset</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>references</strong> (<em>frozenset</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>external</strong> (<em>frozenset</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>deferred</strong> (<em>frozenset</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.structure_map.Graph">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.structure_map.</span></span><span class="sig-name descname"><span class="pre">Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.Graph" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>パッケージ全体の地図。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>package</strong> (<em>str</em>)</p></li>
+<li><p><strong>modules</strong> (<em>tuple</em><em>[</em><a class="reference internal" href="#docspipeline.structure_map.Module" title="docspipeline.structure_map.Module"><em>Module</em></a><em>, </em><em>...</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="docspipeline.structure_map.Graph.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.Graph.get" title="Link to this definition">¶</a></dt>
+<dd><p>名前でモジュールを引く。</p>
+<dl class="field-list simple">
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>KeyError</strong> -- 無いとき。</p>
+</dd>
+<dt class="field-even">パラメータ<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>name</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docspipeline.structure_map.Module" title="docspipeline.structure_map.Module"><em>Module</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="docspipeline.structure_map.Graph.edges">
+<span class="sig-name descname"><span class="pre">edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'import'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.Graph.edges" title="Link to this definition">¶</a></dt>
+<dd><p>依存の組 <code class="docutils literal notranslate"><span class="pre">(使う側,</span> <span class="pre">使われる側)</span></code> を返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kind</strong> (<em>str</em>) -- <code class="docutils literal notranslate"><span class="pre">import</span></code>・<code class="docutils literal notranslate"><span class="pre">reference</span></code>・<code class="docutils literal notranslate"><span class="pre">deferred</span></code> のいずれか。
+<code class="docutils literal notranslate"><span class="pre">import</span></code> はモジュール直下で実行される import、
+<code class="docutils literal notranslate"><span class="pre">reference</span></code> はモジュール名と一致する文字列、
+<code class="docutils literal notranslate"><span class="pre">deferred</span></code> は関数の中の import で、呼ばれたときに初めて読み込まれる。</p></li>
+<li><p><strong>include_root</strong> (<em>bool</em>) -- パッケージ自身 (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>) への依存を含めるか。
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">__version__</span></code> のような依存で、図が読みにくくなるので既定では除く。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>set[tuple[str, str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="docspipeline.structure_map.Graph.cycles">
+<span class="sig-name descname"><span class="pre">cycles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.Graph.cycles" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">import</span></code> の循環を、強連結成分として返す (無ければ空)。</p>
+<p>パッケージ自身 (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>) を経由する循環も含める。<code class="docutils literal notranslate"><span class="pre">__init__</span></code> が子を import し、
+子が <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pkg</span> <span class="pre">import</span> <span class="pre">X</span></code> する形は、循環 import の典型だから。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="docspipeline.structure_map.Graph.entry_points">
+<span class="sig-name descname"><span class="pre">entry_points</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.Graph.entry_points" title="Link to this definition">¶</a></dt>
+<dd><p>どのモジュールからも使われていないモジュール (入口の候補)。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.structure_map.scan_package">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.structure_map.</span></span><span class="sig-name descname"><span class="pre">scan_package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.scan_package" title="Link to this definition">¶</a></dt>
+<dd><p>パッケージのディレクトリを読んで、地図を作る。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>root</strong> (<em>Path</em>) -- <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> を持つディレクトリ。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>モジュールの一覧と依存。</p>
+</dd>
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> -- <code class="docutils literal notranslate"><span class="pre">root</span></code> がパッケージ (<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> を持つディレクトリ) でないとき、
+    または構文エラーのファイルがあるとき。</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#docspipeline.structure_map.Graph" title="docspipeline.structure_map.Graph"><em>Graph</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.structure_map.to_mermaid">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.structure_map.</span></span><span class="sig-name descname"><span class="pre">to_mermaid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.to_mermaid" title="Link to this definition">¶</a></dt>
+<dd><p>依存の図を Mermaid で返す。実線は <code class="docutils literal notranslate"><span class="pre">import</span></code>、点線は文字列による参照。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>graph</strong> (<a class="reference internal" href="#docspipeline.structure_map.Graph" title="docspipeline.structure_map.Graph"><em>Graph</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.structure_map.to_markdown">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.structure_map.</span></span><span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.to_markdown" title="Link to this definition">¶</a></dt>
+<dd><p>アーキテクチャ文書の下書きを Markdown (MyST) で返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>graph</strong> (<a class="reference internal" href="#docspipeline.structure_map.Graph" title="docspipeline.structure_map.Graph"><em>Graph</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.structure_map.to_json">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.structure_map.</span></span><span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.structure_map.to_json" title="Link to this definition">¶</a></dt>
+<dd><p>機械で読める形 (JSON) で返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>graph</strong> (<a class="reference internal" href="#docspipeline.structure_map.Graph" title="docspipeline.structure_map.Graph"><em>Graph</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.scaffold"><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">init</span></code>: 対象リポジトリに <code class="docutils literal notranslate"><span class="pre">docs/</span></code> の雛形と CI の設定を作る。</p>
+<p>雛形は <code class="docutils literal notranslate"><span class="pre">docspipeline/templates/project</span></code> にあり、<code class="docutils literal notranslate"><span class="pre">&#64;&#64;名前&#64;&#64;</span></code> の印を値に置き換えて書き出す。
+点で始まるファイルはパッケージのデータに含まれないことがあるので、雛形の側では点を付けない
+(<code class="docutils literal notranslate"><span class="pre">gitignore.tmpl</span></code> → <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code>)。</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="docspipeline.scaffold.ScaffoldError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">ScaffoldError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.ScaffoldError" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>雛形を作れないときの例外。既存のファイルがあるときに投げる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>existing</strong> (<em>list</em><em>[</em><em>pathlib.Path</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.scaffold.Options">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">Options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">author</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hou</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_coverage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.Options" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">init</span></code> の入力。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>Path</em>)</p></li>
+<li><p><strong>project</strong> (<em>str</em>)</p></li>
+<li><p><strong>author</strong> (<em>str</em>)</p></li>
+<li><p><strong>package</strong> (<em>tuple</em><em>[</em><em>str</em><em>, </em><em>...</em><em>]</em>)</p></li>
+<li><p><strong>cpp</strong> (<em>tuple</em><em>[</em><em>str</em><em>, </em><em>...</em><em>]</em>)</p></li>
+<li><p><strong>hou</strong> (<em>bool</em>)</p></li>
+<li><p><strong>min_coverage</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.scaffold.title_rule">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">title_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.title_rule" title="Link to this definition">¶</a></dt>
+<dd><p>reStructuredText の見出しの下線を返す。</p>
+<p>全角の文字は幅 2 として数える。足りないと docutils が警告するため。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.scaffold.python_modules">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">python_modules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.python_modules" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">source_root</span></code> の下にある公開モジュールの名前を返す (<code class="docutils literal notranslate"><span class="pre">import</span></code> はしない)。</p>
+<p><code class="docutils literal notranslate"><span class="pre">_</span></code> で始まる名前と、<code class="docutils literal notranslate"><span class="pre">tests</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> の下は除く。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source_root</strong> (<em>Path</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.scaffold.api_modules">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">api_modules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package_paths</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.api_modules" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">api.rst</span></code> に並べる <code class="docutils literal notranslate"><span class="pre">automodule</span></code> の指示子を作る。</p>
+<p>子のモジュールがあるパッケージは、<code class="docutils literal notranslate"><span class="pre">__init__</span></code> の再公開で同じ項目が二重に出るのを避けるため
+<code class="docutils literal notranslate"><span class="pre">:no-members:</span></code> にする。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>docs</strong> (<em>Path</em>)</p></li>
+<li><p><strong>package_paths</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.scaffold.plan">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.plan" title="Link to this definition">¶</a></dt>
+<dd><p>書き出すファイルと中身を決める。ファイルには触れない。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opts</strong> (<a class="reference internal" href="#docspipeline.scaffold.Options" title="docspipeline.scaffold.Options"><em>Options</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[<em>Path</em>, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.scaffold.missing_sources">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">missing_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.missing_sources" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">--package</span></code> / <code class="docutils literal notranslate"><span class="pre">--cpp</span></code> で指定された、実在しないソースの場所を返す (<code class="docutils literal notranslate"><span class="pre">docs/</span></code> からの相対で解決)。</p>
+<p>打ち間違いのまま作ると、API ページが空で、CI が何も検査しない文書になる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opts</strong> (<a class="reference internal" href="#docspipeline.scaffold.Options" title="docspipeline.scaffold.Options"><em>Options</em></a>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<em>Path</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.scaffold.write">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.scaffold.</span></span><span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opts</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.scaffold.write" title="Link to this definition">¶</a></dt>
+<dd><p>雛形を書き出して、作ったファイルを返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docspipeline.scaffold.ScaffoldError" title="docspipeline.scaffold.ScaffoldError"><strong>ScaffoldError</strong></a> -- 既存のファイルがあり、<code class="docutils literal notranslate"><span class="pre">force</span></code> が偽のとき。何も書かずに止まる。</p>
+</dd>
+<dt class="field-even">パラメータ<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>opts</strong> (<a class="reference internal" href="#docspipeline.scaffold.Options" title="docspipeline.scaffold.Options"><em>Options</em></a>)</p></li>
+<li><p><strong>force</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<em>Path</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.diagrams">diagrams.net の図の取り扱い。</p>
+<p>図は元ファイル (<code class="docutils literal notranslate"><span class="pre">名前.drawio</span></code>) と、書き出した SVG (<code class="docutils literal notranslate"><span class="pre">名前.drawio.svg</span></code> または <code class="docutils literal notranslate"><span class="pre">名前.svg</span></code>) の
+両方をリポジトリに置く。SVG だけが文書に取り込まれるので、元ファイルだけをコミットすると図が出ない。</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.diagrams.SKIP_DIRS">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.diagrams.</span></span><span class="sig-name descname"><span class="pre">SKIP_DIRS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'_build',</span> <span class="pre">'_doxygen',</span> <span class="pre">'_generated',</span> <span class="pre">'node_modules'}</span></span><a class="headerlink" href="#docspipeline.diagrams.SKIP_DIRS" title="Link to this definition">¶</a></dt>
+<dd><p>探さない場所。生成物・外部のコード・隠しディレクトリ。</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.diagrams.find_missing_exports">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.diagrams.</span></span><span class="sig-name descname"><span class="pre">find_missing_exports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.diagrams.find_missing_exports" title="Link to this definition">¶</a></dt>
+<dd><p>書き出した SVG が隣に無い <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> を返す。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>docs</strong> (<em>Path</em>) -- 探す場所。生成物 (<code class="docutils literal notranslate"><span class="pre">_build</span></code>・<code class="docutils literal notranslate"><span class="pre">_generated</span></code>・<code class="docutils literal notranslate"><span class="pre">_doxygen</span></code>)・<code class="docutils literal notranslate"><span class="pre">node_modules</span></code>・
+隠しディレクトリの下は除く。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>SVG が無い <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> のパス (整列済み)。</p>
+</dd>
+<dt class="field-odd">例外<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> -- <code class="docutils literal notranslate"><span class="pre">docs</span></code> が無いとき。打ち間違いで、検査が黙って空になるのを防ぐ。</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<em>Path</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.doctor"><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">doctor</span></code>: 手元の環境で、どの機能が使えるかを確認する。</p>
+<p>「図がコードのまま出る」「C++ の節が空」といった症状の原因は、たいてい外部のコマンドが無いことにある。
+どこを見ればよいかを、1 コマンドで示す。API トークンの <strong>値は出さず</strong>、設定の有無だけを示す。</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="docspipeline.doctor.Check">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.doctor.</span></span><span class="sig-name descname"><span class="pre">Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ok</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doctor.Check" title="Link to this definition">¶</a></dt>
+<dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>確認の結果 1 件。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>)</p></li>
+<li><p><strong>ok</strong> (<em>bool</em>)</p></li>
+<li><p><strong>detail</strong> (<em>str</em>)</p></li>
+<li><p><strong>required</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.doctor.run_checks">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.doctor.</span></span><span class="sig-name descname"><span class="pre">run_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">environ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doctor.run_checks" title="Link to this definition">¶</a></dt>
+<dd><p>環境を調べる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>environ</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>) -- 環境変数。省略すると <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>確認の結果。<code class="docutils literal notranslate"><span class="pre">required</span></code> の項目が失敗すると、文書をビルドできない。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="#docspipeline.doctor.Check" title="docspipeline.doctor.Check"><em>Check</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.doctor.format_checks">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.doctor.</span></span><span class="sig-name descname"><span class="pre">format_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doctor.format_checks" title="Link to this definition">¶</a></dt>
+<dd><p>人が読む形に整形する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>checks</strong> (<em>list</em><em>[</em><a class="reference internal" href="#docspipeline.doctor.Check" title="docspipeline.doctor.Check"><em>Check</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.doctor.exit_code">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.doctor.</span></span><span class="sig-name descname"><span class="pre">exit_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doctor.exit_code" title="Link to this definition">¶</a></dt>
+<dd><p>必須の項目が 1 つでも失敗していれば 1。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>checks</strong> (<em>list</em><em>[</em><a class="reference internal" href="#docspipeline.doctor.Check" title="docspipeline.doctor.Check"><em>Check</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.cli"><code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> コマンド。</p>
+<p>各コマンドは薄く保つ。雛形づくりは <a class="reference internal" href="#module-docspipeline.scaffold" title="docspipeline.scaffold"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.scaffold</span></code></a>、環境の確認は
+<a class="reference internal" href="#module-docspipeline.doctor" title="docspipeline.doctor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.doctor</span></code></a> にある。</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_build">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_build" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">build</span></code>: Sphinx でビルドする。Confluence 形式でも公開はしない (<code class="docutils literal notranslate"><span class="pre">local</span></code> 固定)。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_linkcheck">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_linkcheck</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_linkcheck" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">linkcheck</span></code>: 外部リンクの切れを確認する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_coverage">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_coverage" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">coverage</span></code>: docstring が無い公開 API を一覧し、基準に満たなければ失敗にする。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_check_diagrams">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_check_diagrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_check_diagrams" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">check-diagrams</span></code>: 書き出した SVG が無い <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> があれば失敗にする。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_confluence_check">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_confluence_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_confluence_check" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">confluence-check</span></code>: 認証・権限・親ページを確認する (ページは変更しない)。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_publish">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_publish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_publish" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">publish</span></code>: Confluence 形式でビルドする。公開するのは <code class="docutils literal notranslate"><span class="pre">--mode</span> <span class="pre">publish</span></code> のときだけ。</p>
+<p><code class="docutils literal notranslate"><span class="pre">dryrun</span></code> と <code class="docutils literal notranslate"><span class="pre">publish</span></code> では、先に接続テストを行い、失敗したらビルドしない。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_init">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_init" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">init</span></code>: <code class="docutils literal notranslate"><span class="pre">docs/</span></code> の雛形と CI の設定を作る。既存のファイルは <code class="docutils literal notranslate"><span class="pre">--force</span></code> なしでは上書きしない。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_check_mermaid">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_check_mermaid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_check_mermaid" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">check-mermaid</span></code>: 全ての Mermaid ブロックが、標準の <code class="docutils literal notranslate"><span class="pre">%%{init}%%</span></code> の行で始まっているかを確かめる。</p>
+<p>GitHub (Markdown のまま) と Sphinx (<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> で SVG にした HTML) で、図の色とフォントを揃えるため。
+<code class="docutils literal notranslate"><span class="pre">--fix</span></code> で、足りない行を入れる。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_mermaid_style">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_mermaid_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_mermaid_style" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">mermaid-style</span></code>: 標準の <code class="docutils literal notranslate"><span class="pre">%%{init}%%</span></code> の行と <code class="docutils literal notranslate"><span class="pre">classDef</span></code> の組を表示する (貼り付け用)。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_doctor">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_doctor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_doctor" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">doctor</span></code>: 使える機能を確認する。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.cmd_map">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_map" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">map</span></code>: ソースを構文解析して、依存の地図を作る。ローカルで読むだけで、外部へは送信しない。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>)</p>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.build_parser">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">build_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.build_parser" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> の引数の定義を作る。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ArgumentParser</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="docspipeline.cli.main">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.main" title="Link to this definition">¶</a></dt>
+<dd><p>CLI の入口。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<em>Sequence</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) -- 引数。省略すると <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code> を使う。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>終了コード。設定の誤りは 2。</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-docspipeline.stubs.hou">Houdini の <code class="docutils literal notranslate"><span class="pre">hou</span></code> モジュールのスタブ。</p>
+<p>Houdini の外では <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">hou</span></code> ができず、<code class="docutils literal notranslate"><span class="pre">hou</span></code> を使うコードは autodoc で読み込めない。
+このモジュールは、<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">hou</span></code> と、<code class="docutils literal notranslate"><span class="pre">hou.Node</span></code> のような属性の参照・継承・呼び出しを
+エラーなしで通すための偽物で、文書生成とテストの両方から使う。</p>
+<p>Houdini の中では本物の <code class="docutils literal notranslate"><span class="pre">hou</span></code> が先に見つかるように、スタブの場所は <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> の
+末尾に足す (<code class="docutils literal notranslate"><span class="pre">docspipeline.config.STUBS_DIR</span></code>)。</p>
+<p>このスタブは何も実装していない。値を返す挙動が要るテストは、テスト側で
+<code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> などを使って必要な関数だけを差し替えること。</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.stubs.hou.IS_STUB">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.stubs.hou.</span></span><span class="sig-name descname"><span class="pre">IS_STUB</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#docspipeline.stubs.hou.IS_STUB" title="Link to this definition">¶</a></dt>
+<dd><p>スタブであることを判定するための印。</p>
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="lecture/13-capstone.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第 13 回 総合演習</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">API リファレンス</a><ul>
+<li><a class="reference internal" href="#docspipeline.config.is_offline"><code class="docutils literal notranslate"><span class="pre">is_offline()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.config.build_config"><code class="docutils literal notranslate"><span class="pre">build_config()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.REQUIRED_ENV"><code class="docutils literal notranslate"><span class="pre">REQUIRED_ENV</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.SECRET_ENV"><code class="docutils literal notranslate"><span class="pre">SECRET_ENV</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.ConfluenceSettingsError"><code class="docutils literal notranslate"><span class="pre">ConfluenceSettingsError</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.current_mode"><code class="docutils literal notranslate"><span class="pre">current_mode()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.missing_env"><code class="docutils literal notranslate"><span class="pre">missing_env()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.sphinx_settings"><code class="docutils literal notranslate"><span class="pre">sphinx_settings()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.confluence.mask_secrets"><code class="docutils literal notranslate"><span class="pre">mask_secrets()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.THEME_VARIABLES"><code class="docutils literal notranslate"><span class="pre">THEME_VARIABLES</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.FLOWCHART_CONFIG"><code class="docutils literal notranslate"><span class="pre">FLOWCHART_CONFIG</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.SEQUENCE_CONFIG"><code class="docutils literal notranslate"><span class="pre">SEQUENCE_CONFIG</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.MERMAID_INIT"><code class="docutils literal notranslate"><span class="pre">MERMAID_INIT</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.MERMAID_CLASSDEFS"><code class="docutils literal notranslate"><span class="pre">MERMAID_CLASSDEFS</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.MERMAID_CONFIG"><code class="docutils literal notranslate"><span class="pre">MERMAID_CONFIG</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.MermaidRenderError"><code class="docutils literal notranslate"><span class="pre">MermaidRenderError</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.split_command"><code class="docutils literal notranslate"><span class="pre">split_command()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.command_exists"><code class="docutils literal notranslate"><span class="pre">command_exists()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.find_mmdc"><code class="docutils literal notranslate"><span class="pre">find_mmdc()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.mermaid_blocks"><code class="docutils literal notranslate"><span class="pre">mermaid_blocks()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.check_mermaid_text"><code class="docutils literal notranslate"><span class="pre">check_mermaid_text()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mmdc.fix_mermaid_text"><code class="docutils literal notranslate"><span class="pre">fix_mermaid_text()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mermaid.MermaidDirective"><code class="docutils literal notranslate"><span class="pre">MermaidDirective</span></code></a><ul>
+<li><a class="reference internal" href="#docspipeline.mermaid.MermaidDirective.has_content"><code class="docutils literal notranslate"><span class="pre">MermaidDirective.has_content</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mermaid.MermaidDirective.required_arguments"><code class="docutils literal notranslate"><span class="pre">MermaidDirective.required_arguments</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mermaid.MermaidDirective.option_spec"><code class="docutils literal notranslate"><span class="pre">MermaidDirective.option_spec</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.mermaid.MermaidDirective.run"><code class="docutils literal notranslate"><span class="pre">MermaidDirective.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#docspipeline.mermaid.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doxygen.make_doxyfile"><code class="docutils literal notranslate"><span class="pre">make_doxyfile()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doxygen.run_doxygen"><code class="docutils literal notranslate"><span class="pre">run_doxygen()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doxygen.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.SECRET_PATTERN"><code class="docutils literal notranslate"><span class="pre">SECRET_PATTERN</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.find_secret"><code class="docutils literal notranslate"><span class="pre">find_secret()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.PromptDirective"><code class="docutils literal notranslate"><span class="pre">PromptDirective</span></code></a><ul>
+<li><a class="reference internal" href="#docspipeline.prompt.PromptDirective.has_content"><code class="docutils literal notranslate"><span class="pre">PromptDirective.has_content</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.PromptDirective.required_arguments"><code class="docutils literal notranslate"><span class="pre">PromptDirective.required_arguments</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.PromptDirective.optional_arguments"><code class="docutils literal notranslate"><span class="pre">PromptDirective.optional_arguments</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.PromptDirective.final_argument_whitespace"><code class="docutils literal notranslate"><span class="pre">PromptDirective.final_argument_whitespace</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.prompt.PromptDirective.run"><code class="docutils literal notranslate"><span class="pre">PromptDirective.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#docspipeline.prompt.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.guard.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.files.SKIP_DIRS"><code class="docutils literal notranslate"><span class="pre">SKIP_DIRS</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.files.iter_python_files"><code class="docutils literal notranslate"><span class="pre">iter_python_files()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.files.MARKDOWN_SKIP_DIRS"><code class="docutils literal notranslate"><span class="pre">MARKDOWN_SKIP_DIRS</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.files.iter_markdown_files"><code class="docutils literal notranslate"><span class="pre">iter_markdown_files()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.Item"><code class="docutils literal notranslate"><span class="pre">Item</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.Report"><code class="docutils literal notranslate"><span class="pre">Report</span></code></a><ul>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.Report.missing"><code class="docutils literal notranslate"><span class="pre">Report.missing</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.Report.percent"><code class="docutils literal notranslate"><span class="pre">Report.percent</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.scan_file"><code class="docutils literal notranslate"><span class="pre">scan_file()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.scan"><code class="docutils literal notranslate"><span class="pre">scan()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.docstring_coverage.format_report"><code class="docutils literal notranslate"><span class="pre">format_report()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.Module"><code class="docutils literal notranslate"><span class="pre">Module</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.Graph"><code class="docutils literal notranslate"><span class="pre">Graph</span></code></a><ul>
+<li><a class="reference internal" href="#docspipeline.structure_map.Graph.get"><code class="docutils literal notranslate"><span class="pre">Graph.get()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.Graph.edges"><code class="docutils literal notranslate"><span class="pre">Graph.edges()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.Graph.cycles"><code class="docutils literal notranslate"><span class="pre">Graph.cycles()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.Graph.entry_points"><code class="docutils literal notranslate"><span class="pre">Graph.entry_points()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#docspipeline.structure_map.scan_package"><code class="docutils literal notranslate"><span class="pre">scan_package()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.to_mermaid"><code class="docutils literal notranslate"><span class="pre">to_mermaid()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.to_markdown"><code class="docutils literal notranslate"><span class="pre">to_markdown()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.structure_map.to_json"><code class="docutils literal notranslate"><span class="pre">to_json()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.ScaffoldError"><code class="docutils literal notranslate"><span class="pre">ScaffoldError</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.Options"><code class="docutils literal notranslate"><span class="pre">Options</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.title_rule"><code class="docutils literal notranslate"><span class="pre">title_rule()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.python_modules"><code class="docutils literal notranslate"><span class="pre">python_modules()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.api_modules"><code class="docutils literal notranslate"><span class="pre">api_modules()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.plan"><code class="docutils literal notranslate"><span class="pre">plan()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.missing_sources"><code class="docutils literal notranslate"><span class="pre">missing_sources()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.scaffold.write"><code class="docutils literal notranslate"><span class="pre">write()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.diagrams.SKIP_DIRS"><code class="docutils literal notranslate"><span class="pre">SKIP_DIRS</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.diagrams.find_missing_exports"><code class="docutils literal notranslate"><span class="pre">find_missing_exports()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doctor.Check"><code class="docutils literal notranslate"><span class="pre">Check</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doctor.run_checks"><code class="docutils literal notranslate"><span class="pre">run_checks()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doctor.format_checks"><code class="docutils literal notranslate"><span class="pre">format_checks()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.doctor.exit_code"><code class="docutils literal notranslate"><span class="pre">exit_code()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_build"><code class="docutils literal notranslate"><span class="pre">cmd_build()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_linkcheck"><code class="docutils literal notranslate"><span class="pre">cmd_linkcheck()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_coverage"><code class="docutils literal notranslate"><span class="pre">cmd_coverage()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_check_diagrams"><code class="docutils literal notranslate"><span class="pre">cmd_check_diagrams()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_confluence_check"><code class="docutils literal notranslate"><span class="pre">cmd_confluence_check()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_publish"><code class="docutils literal notranslate"><span class="pre">cmd_publish()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_init"><code class="docutils literal notranslate"><span class="pre">cmd_init()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_check_mermaid"><code class="docutils literal notranslate"><span class="pre">cmd_check_mermaid()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_mermaid_style"><code class="docutils literal notranslate"><span class="pre">cmd_mermaid_style()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_doctor"><code class="docutils literal notranslate"><span class="pre">cmd_doctor()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.cmd_map"><code class="docutils literal notranslate"><span class="pre">cmd_map()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.build_parser"><code class="docutils literal notranslate"><span class="pre">build_parser()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.stubs.hou.IS_STUB"><code class="docutils literal notranslate"><span class="pre">IS_STUB</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=c033477b"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/dp_prompt.js?v=654ff740"></script>
+    <script src="_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

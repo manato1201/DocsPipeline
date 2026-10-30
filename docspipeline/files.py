@@ -29,3 +29,25 @@ def iter_python_files(roots: Iterable[Path]) -> Iterator[Path]:
         for path in sorted(root.rglob("*.py")):
             if not SKIP_DIRS.intersection(path.relative_to(root).parts):
                 yield path
+
+
+#: Markdown の検査で、さらに除く場所 (Sphinx と Doxygen の生成物)。
+MARKDOWN_SKIP_DIRS = SKIP_DIRS | {"_generated", "_doxygen", "site"}
+
+
+def iter_markdown_files(roots: Iterable[Path]) -> Iterator[Path]:
+    """``roots`` 配下の ``.md`` ファイルを、生成物や仮想環境を除いて列挙する。
+
+    Args:
+        roots: ディレクトリ、または ``.md`` ファイル。
+
+    Yields:
+        見つかったファイル (各 ``root`` の中は整列済み)。
+    """
+    for root in roots:
+        if root.is_file():
+            yield root
+            continue
+        for path in sorted(root.rglob("*.md")):
+            if not MARKDOWN_SKIP_DIRS.intersection(path.relative_to(root).parts):
+                yield path

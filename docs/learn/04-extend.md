@@ -33,7 +33,7 @@ docspipeline build docs          # 自分の文書が、警告なしで通る
 2. コマンドを足す: `cli.py` に `cmd_check_diagrams(args)` (docstring 必須。`coverage --fail-under 100` が CI で止める)。
 3. 引数を登録する: `build_parser()` に `sub.add_parser("check-diagrams", ...)` と `set_defaults(func=...)`。
 4. テストを書く: `tests/test_cli.py` の `test_check_diagrams`。`run("check-diagrams", str(tmp_path))` の終了コードと出力を確かめる。
-5. 文書: `docs/usage.rst` の表に 1 行。CI で使うなら `ci.yml` と `templates/project/github/workflows/docs.yml.tmpl` にも。
+5. 文書: `docs/usage.md` の表に 1 行。CI で使うなら `ci.yml` と `templates/project/github/workflows/docs.yml.tmpl` にも。
 
 ```{prompt} レシピ 1 を Claude Code に任せる
 docspipeline に、<コマンド名> コマンドを足してください。<何をするコマンドか、1 行で>
@@ -42,17 +42,16 @@ docs/learn/04-extend.md の「レシピ 1」の手順どおりに進めてくだ
 1. 先に、失敗するテストを tests/ に書く (終了コードと出力を確かめる)。
 2. 計算の部分を、cli.py ではなく、別の小さなモジュールの関数にする。
 3. cmd_<名前> (docstring つき) と build_parser の登録を足す。
-4. docs/usage.rst の表に 1 行足す。
+4. docs/usage.md の表に 1 行足す。
 5. python -m pytest -q、ruff check .、ruff format --check .、docspipeline build docs がすべて通ることを確かめる。
 入力の打ち間違い (存在しないパスなど) は、黙って成功させず、終了コード 2 のエラーにする。
 ```
 
-```{admonition} 約束
-:class: note
-* 終了コードは、成功 `0`、失敗 `1`、**設定の誤り `2`**。
-* 出力は日本語で、**何を直せばよいか** まで書く (「失敗」だけにしない)。
-* 外のプロセスを起動する部分は `cli._run` を通す (トークンの伏せ字処理がかかる)。
-```
+> **約束**
+>
+> * 終了コードは、成功 `0`、失敗 `1`、**設定の誤り `2`**。
+> * 出力は日本語で、**何を直せばよいか** まで書く (「失敗」だけにしない)。
+> * 外のプロセスを起動する部分は `cli._run` を通す (トークンの伏せ字処理がかかる)。
 
 ## レシピ 2: `build_config` に引数を足す
 
@@ -63,13 +62,12 @@ docs/learn/04-extend.md の「レシピ 1」の手順どおりに進めてくだ
 3. 辞書に入れるキーを決める。Sphinx 標準の名前か、`docspipeline_*` (自前の名前。拡張の `setup()` で `add_config_value` する)。
 4. `templates/project/docs/conf.py.tmpl` に出すか決める (出すなら `scaffold._values` に値を足し、`@@名前@@` で埋める)。
 5. テスト: `tests/test_build.py` のように、サンプルを **実際にビルド** して確かめる。
-6. 文書: `docs/usage.rst` か該当ページ。
+6. 文書: `docs/usage.md` か該当ページ。
 
-```{admonition} よくある誤り
-:class: warning
-Sphinx は **知らない設定名を黙って無視する**。綴りを間違えても、エラーにならない。
-`docspipeline_*` を足したら、`setup()` に `add_config_value` を書いたか、必ず確かめる。
-```
+> **よくある誤り**
+>
+> Sphinx は **知らない設定名を黙って無視する**。綴りを間違えても、エラーにならない。
+> `docspipeline_*` を足したら、`setup()` に `add_config_value` を書いたか、必ず確かめる。
 
 ## レシピ 3: 新しい Sphinx 拡張を足す
 
@@ -133,11 +131,10 @@ docs/learn/04-extend.md の「レシピ 4」の手順どおりに進めてくだ
 * 目で見る: `docs/diagrams/<名前>.drawio.svg` を、ブラウザで開く (`file://` で直接開ける)。
 * 自動: `tests/test_diagrams.py` が、**カードの重なり・キャンバスや枠からのはみ出し・番号の欠け・生成物と定義のずれ** を見つける。カードの間隔を詰めすぎたときは、ここで落ちる。
 
-```{admonition} 手で直したいとき
-:class: tip
-diagrams.net で `.drawio` を開いて直しても構わない。ただし **`build_diagrams.py` の定義も同じ内容に直す**。
-でないと、次に作り直したときに、手の修正が消え、`tests/test_diagrams.py` も落ちる。
-```
+> **手で直したいとき**
+>
+> diagrams.net で `.drawio` を開いて直しても構わない。ただし **`build_diagrams.py` の定義も同じ内容に直す**。
+> でないと、次に作り直したときに、手の修正が消え、`tests/test_diagrams.py` も落ちる。
 
 ## レシピ 5: 雛形 (`init` の出力) を足す・直す
 
@@ -148,12 +145,11 @@ diagrams.net で `.drawio` を開いて直しても構わない。ただし **`b
 5. テスト: `tests/test_cli.py` の `test_init_*`。**`@@` が残っていないこと** も確かめる。
 6. 確認: 新しいディレクトリで `docspipeline init . ...` → `docspipeline build docs` が、警告なしで通る。
 
-```{admonition} パッケージに入っているか
-:class: warning
-点で始まるファイルは、パッケージのデータに含まれないことがある (`.gitignore.tmpl` で一度失敗した)。
-雛形の側の名前に点を付けず、書き出すときに付ける (`gitignore.tmpl` → `.gitignore`)。
-`pip wheel . --no-deps` で作った wheel の中身を、一度は確かめること。
-```
+> **パッケージに入っているか**
+>
+> 点で始まるファイルは、パッケージのデータに含まれないことがある (`.gitignore.tmpl` で一度失敗した)。
+> 雛形の側の名前に点を付けず、書き出すときに付ける (`gitignore.tmpl` → `.gitignore`)。
+> `pip wheel . --no-deps` で作った wheel の中身を、一度は確かめること。
 
 ## レシピ 6: Confluence の設定を足す (安全に)
 
@@ -167,7 +163,7 @@ diagrams.net で `.drawio` を開いて直しても構わない。ただし **`b
 3. `local` と `publish` の **両方** で、値が期待どおりかをテストする (`tests/test_confluence.py`)。
 4. 環境変数を新しく要求するなら、`REQUIRED_ENV` に足す (足りないときに、名前だけを示して止まるようになる)。
 5. 秘密の値が増えるなら、`SECRET_ENV` に足す (出力から伏せ字になる)。
-6. `docs/confluence.rst` の表を更新する。
+6. `docs/confluence.md` の表を更新する。
 
 ## レシピ 7: プロンプトのブロックを足す・直す
 
@@ -185,10 +181,9 @@ diagrams.net で `.drawio` を開いて直しても構わない。ただし **`b
 * 確かめる経路: 成功 / 失敗 (コピーが拒否される) / `https` でないページ (代替の経路) / JavaScript が無い。
 * ライトとダークの両方で、見た目を見る。
 
-```{admonition} 約束
-:class: note
-プロンプトの **本文に、環境変数の値を書かない**。手順書は、コピーされ、別の場所に貼られる。
-```
+> **約束**
+>
+> プロンプトの **本文に、環境変数の値を書かない**。手順書は、コピーされ、別の場所に貼られる。
 
 ## 使うときの注意
 

@@ -1,0 +1,37 @@
+API リファレンス
+================
+
+docstring から自動生成する。直接編集せず、コードの docstring を直すこと。
+
+.. automodule:: docspipeline
+   :no-members:
+
+.. automodule:: docspipeline.config
+
+.. automodule:: docspipeline.confluence
+
+.. automodule:: docspipeline.mmdc
+
+.. automodule:: docspipeline.mermaid
+
+.. automodule:: docspipeline.doxygen
+
+.. automodule:: docspipeline.prompt
+
+.. automodule:: docspipeline.guard
+
+.. automodule:: docspipeline.files
+
+.. automodule:: docspipeline.docstring_coverage
+
+.. automodule:: docspipeline.structure_map
+
+.. automodule:: docspipeline.scaffold
+
+.. automodule:: docspipeline.diagrams
+
+.. automodule:: docspipeline.doctor
+
+.. automodule:: docspipeline.cli
+
+.. automodule:: docspipeline.stubs.hou

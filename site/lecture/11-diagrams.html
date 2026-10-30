@@ -1,0 +1,1318 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="第 12 回 CI と運用" href="12-ci-and-operations.html"><link rel="prev" title="第 10 回 テスト" href="10-testing.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>第 11 回 図を作る - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00-introduction.html">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-ast.html">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07-sphinx-extensions.html">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10-testing.html">第 10 回 テスト</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13-capstone.html">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/lecture/11-diagrams.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="id1">
+<h1>第 11 回 図を作る<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>所要時間の目安: 4 時間 / 前提: 第 1・2・4・5 回 (特に dataclass と文字列処理)</p>
+</div></blockquote>
+<section id="id2">
+<h2>この回のゴール<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>読みやすい図</strong> の条件 (番号・まとまり・色の意味・ラベル) を、説明できる。</p></li>
+<li><p>SVG の最小の部品 (<code class="docutils literal notranslate"><span class="pre">rect</span></code>・<code class="docutils literal notranslate"><span class="pre">text</span></code>・<code class="docutils literal notranslate"><span class="pre">polyline</span></code>・<code class="docutils literal notranslate"><span class="pre">marker</span></code>・<code class="docutils literal notranslate"><span class="pre">viewBox</span></code>) を、手で書ける。</p></li>
+<li><p><strong>折れ線の途中の点</strong> を求めるアルゴリズム (ラベルの位置) を、説明できる。</p></li>
+<li><p>図を <strong>データ</strong> (dataclass) で定義し、そこから <strong>SVG と drawio の両方</strong> を作る仕組みを、読める。</p></li>
+<li><p>図の <strong>重なり・はみ出し</strong> を、テストで検出する方法を、説明できる。</p></li>
+<li><p>図の矢印を、<strong>実際のコードの依存と、一致させる</strong> 方法を、説明できる。</p></li>
+<li><p>Mermaid の <strong>標準の見た目</strong> (init の行・5 色の <code class="docutils literal notranslate"><span class="pre">classDef</span></code>) を、守る仕組みを、説明できる。</p></li>
+<li><p><strong>新しい図を足す手順</strong> を、実行できる。</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>1. 読みやすい図の条件<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>図は、<strong>文章で伝えにくい「つながり」と「順序」を、一目で伝える</strong> ために描きます。ところが、描けば読みやすくなる、わけではありません。
+このリポジトリの図は、次の 3 つの <strong>型</strong> を、手本にして作り直しました。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>型</p></th>
+<th class="head"><p>特徴</p></th>
+<th class="head"><p>使いどころ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>番号つきの流れ</strong></p></td>
+<td><p>丸い番号が、実行の順を示す。矢印にひとこと添える</p></td>
+<td><p>手順・公開の流れ・ビルドの流れ</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>まとまりの枠 (パネル)</strong></p></td>
+<td><p>用途ごとに枠でくくり、枠に題名。部品は <strong>アイコン + 名前 + 等幅の説明</strong></p></td>
+<td><p>全体像・モジュールの地図</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>強調する経路</strong></p></td>
+<td><p>主な経路だけ <strong>色を変える</strong> (オレンジ)。止まる所は赤</p></td>
+<td><p>「ここが大事」を示したいとき</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>そこから導いた <strong>作図の約束</strong> です。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>約束</p></th>
+<th class="head"><p>理由</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1 枚の図で、<strong>1 つのこと</strong> を伝える</p></td>
+<td><p>欲張ると、線が交差して読めなくなる</p></td>
+</tr>
+<tr class="row-odd"><td><p>順序があるなら、<strong>1 から番号</strong> を付ける</p></td>
+<td><p>矢印をたどらなくても、順が分かる</p></td>
+</tr>
+<tr class="row-even"><td><p>関係の近い部品は、<strong>枠でくくる</strong></p></td>
+<td><p>目が、まとまりで追える</p></td>
+</tr>
+<tr class="row-odd"><td><p>矢印の <strong>色に意味</strong> を持たせる (青 = 主・灰の破線 = 補助・オレンジ = 強調・赤の破線 = 止まる)</p></td>
+<td><p>凡例を読まなくても、重みが分かる</p></td>
+</tr>
+<tr class="row-even"><td><p>矢印には、<strong>何が流れるか</strong> を添える</p></td>
+<td><p>「→」だけでは、意味が分からない</p></td>
+</tr>
+<tr class="row-odd"><td><p>部品は <strong>名前 (太字) + 説明 (等幅・灰色)</strong> の 2 段</p></td>
+<td><p>名前を先に拾い、必要なら説明を読める</p></td>
+</tr>
+<tr class="row-even"><td><p>線は <strong>直角に折る</strong>。交差は避ける</p></td>
+<td><p>斜めの線は、行き先が曖昧になる</p></td>
+</tr>
+<tr class="row-odd"><td><p>図の <strong>矢印は、実際の依存と一致</strong> させる</p></td>
+<td><p>図が嘘になると、読者が誤解する (テストで守る)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<img alt="" src="../_images/mermaid-1c699fc8d0282193.svg" />
+<p><strong>手で描いた図は、コードが変わると、古くなります</strong>。そこで、図を <strong>データ</strong> で定義し、そこから <strong>機械で作り</strong>、
+元との <strong>ずれ</strong> を、テストで見つけます (第 0 回の「文書もコード」)。</p>
+<p>実物を見ましょう。公開の流れの図です。</p>
+<p><img alt="main への反映から、CI の確認、環境変数の確認、接続テスト、ビルド、Confluence の親ページ配下への反映まで。番号は実行順" src="../_images/publish-flow.drawio.svg" /></p>
+<p>(番号 1〜7 が実行順。灰色のカードが処理、オレンジが外への反映。赤い文字は「止まる条件」。)</p>
+</section>
+<section id="id4">
+<h2>2. 図の種類を選ぶ<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>種類</p></th>
+<th class="head"><p>向いているもの</p></th>
+<th class="head"><p>このリポジトリでの使い所</p></th>
+<th class="head"><p>作り方</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>構成図</strong> (diagrams.net)</p></td>
+<td><p>全体像・部品の配置・アイコン</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">docs/diagrams/*.drawio(.svg)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kit.py</span></code> で生成</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>フローチャート</strong> (Mermaid)</p></td>
+<td><p>手順・判断の分かれ道</p></td>
+<td><p>各文書の手順</p></td>
+<td><p>Markdown の中に書く</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>シーケンス図</strong> (Mermaid)</p></td>
+<td><p>登場者どうしの、時間順のやりとり</p></td>
+<td><p>ビルドの呼び出し</p></td>
+<td><p>Markdown の中に書く</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>表</strong></p></td>
+<td><p>属性の比較・対応</p></td>
+<td><p>全体</p></td>
+<td><p>Markdown</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>選び方</strong>: ①配置や見た目に気を配りたい → 構成図。②文書の中で、文章と一緒に更新したい → Mermaid。③比べたいだけ → 表。
+<strong>図が要らない場合</strong> もあります。3 行で言えることは、文章で書きます。</p>
+</section>
+<section id="svg">
+<h2>3. SVG の基礎<a class="headerlink" href="#svg" title="Link to this heading">¶</a></h2>
+<p><strong>SVG</strong> は、図を <strong>XML の文章</strong> で表す形式です。拡大しても、ぼやけません。ブラウザでそのまま表示できます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xml.dom.minidom</span>
+
+<span class="n">svg</span> <span class="o">=</span> <span class="s2">"""&lt;svg xmlns="http://www.w3.org/2000/svg" width="300" height="120" viewBox="0 0 300 120"&gt;</span>
+<span class="s2">&lt;defs&gt;&lt;marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"&gt;&lt;path d="M0 0L10 5L0 10z" fill="#1a73e8"/&gt;&lt;/marker&gt;&lt;/defs&gt;</span>
+<span class="s2">&lt;rect x="20" y="30" width="80" height="60" rx="12" fill="#ffffff" stroke="#d0d5dd"/&gt;</span>
+<span class="s2">&lt;rect x="200" y="30" width="80" height="60" rx="12" fill="#ffffff" stroke="#d0d5dd"/&gt;</span>
+<span class="s2">&lt;polyline points="100,60 200,60" fill="none" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrow)"/&gt;</span>
+<span class="s2">&lt;text x="60" y="65" text-anchor="middle" font-size="14"&gt;入力&lt;/text&gt;</span>
+<span class="s2">&lt;text x="240" y="65" text-anchor="middle" font-size="14"&gt;出力&lt;/text&gt;</span>
+<span class="s2">&lt;/svg&gt;"""</span>
+
+<span class="n">doc</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">svg</span><span class="p">)</span>                      <span class="c1"># XML として正しいか (壊れていれば例外)</span>
+<span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rect"</span><span class="p">,</span> <span class="s2">"polyline"</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">,</span> <span class="s2">"marker"</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">tag</span><span class="si">:</span><span class="s2">9</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="n">tag</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+rect      2
+polyline  1
+text      2
+marker    1
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>部品</p></th>
+<th class="head"><p>働き</p></th>
+<th class="head"><p>主な属性</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;svg&gt;</span></code></p></td>
+<td><p>図全体</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">width</span></code>・<code class="docutils literal notranslate"><span class="pre">height</span></code> (表示の大きさ)、<strong><code class="docutils literal notranslate"><span class="pre">viewBox=&quot;x</span> <span class="pre">y</span> <span class="pre">幅</span> <span class="pre">高さ&quot;</span></code></strong> (内部の座標の範囲)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;rect&gt;</span></code></p></td>
+<td><p>四角</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x</span></code>・<code class="docutils literal notranslate"><span class="pre">y</span></code> (左上)、<code class="docutils literal notranslate"><span class="pre">width</span></code>・<code class="docutils literal notranslate"><span class="pre">height</span></code>、<code class="docutils literal notranslate"><span class="pre">rx</span></code> (角の丸み)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;text&gt;</span></code></p></td>
+<td><p>文字</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x</span></code>・<code class="docutils literal notranslate"><span class="pre">y</span></code> (<strong>文字の下端</strong> の位置)、<code class="docutils literal notranslate"><span class="pre">text-anchor</span></code> (<code class="docutils literal notranslate"><span class="pre">start</span></code>・<code class="docutils literal notranslate"><span class="pre">middle</span></code>・<code class="docutils literal notranslate"><span class="pre">end</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;polyline&gt;</span></code></p></td>
+<td><p>折れ線</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">points=&quot;x1,y1</span> <span class="pre">x2,y2</span> <span class="pre">...&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;marker&gt;</span></code></p></td>
+<td><p>矢じり</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;polyline</span> <span class="pre">marker-end=&quot;url(#id)&quot;&gt;</span></code> で、線の終わりに付ける</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;g&gt;</span></code></p></td>
+<td><p>まとめ</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">transform=&quot;translate(x,y)&quot;</span></code> で、中身を動かす</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>座標の向き</strong>: 左上が原点 <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0)</span></code>。<strong>右が x の正、下が y の正</strong> です (数学の座標と、y が逆)。
+<code class="docutils literal notranslate"><span class="pre">viewBox</span></code> を <code class="docutils literal notranslate"><span class="pre">width</span></code>/<code class="docutils literal notranslate"><span class="pre">height</span></code> と同じにしておけば、座標は <strong>そのまま px</strong> です。このキットは、そうしています。</p>
+</section>
+<section id="id5">
+<h2>4. 文字幅の見積り<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>SVG では、<strong>文字がどれだけ横に伸びるか</strong> を、描く側が知る必要があります (ラベルの白い背景、カードの占有範囲、パネルの題名のタグ)。
+ブラウザのように測れないので、<strong>見積り</strong> ます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tools/diagrams/kit.py::text_width</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">text_width</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mono</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""文字列の幅 (px) の見積り。全角は 1 文字ぶん、半角は約 0.55 (等幅は 0.6) 文字ぶん。</span>
+
+<span class="sd">    小数第 2 位に丸める。Python 3.12 から、浮動小数点の ``sum`` の誤差の出方が変わり、</span>
+<span class="sd">    丸めないと、版によって生成物 (.drawio / .svg) の末尾の桁が違ってしまう。</span>
+<span class="sd">    """</span>
+    <span class="n">ascii_w</span> <span class="o">=</span> <span class="mf">0.6</span> <span class="k">if</span> <span class="n">mono</span> <span class="k">else</span> <span class="mf">0.55</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">size</span> <span class="k">if</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">east_asian_width</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="s2">"WF"</span> <span class="k">else</span> <span class="n">size</span> <span class="o">*</span> <span class="n">ascii_w</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>全角</strong> (<code class="docutils literal notranslate"><span class="pre">W</span></code>・<code class="docutils literal notranslate"><span class="pre">F</span></code>) は、フォントサイズと同じ幅。</p></li>
+<li><p><strong>半角</strong> は、約 0.55 倍 (等幅フォントは 0.6 倍)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unicodedata.east_asian_width(c)</span></code>: 文字の <strong>東アジア幅</strong> の区分。日本語・全角記号は <code class="docutils literal notranslate"><span class="pre">W</span></code>/<code class="docutils literal notranslate"><span class="pre">F</span></code>、英数字は <code class="docutils literal notranslate"><span class="pre">Na</span></code>。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="s2">"tools"</span> <span class="o">/</span> <span class="s2">"diagrams"</span><span class="p">))</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">text_width</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"構成図 (全角 3 文字, 15px)      :"</span><span class="p">,</span> <span class="n">text_width</span><span class="p">(</span><span class="s2">"構成図"</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"abc (半角 3 文字, 15px)         :"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">text_width</span><span class="p">(</span><span class="s2">"abc"</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"abc (等幅 3 文字, 15px)         :"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">text_width</span><span class="p">(</span><span class="s2">"abc"</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"構成 abc (全角 2 + 半角 4, 15px):"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">text_width</span><span class="p">(</span><span class="s2">"構成 abc"</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+構成図 (全角 3 文字, 15px)      : 45
+abc (半角 3 文字, 15px)         : 24.75
+abc (等幅 3 文字, 15px)         : 27.0
+構成 abc (全角 2 + 半角 4, 15px): 63.0
+</pre></div>
+</div>
+<p>(<code class="docutils literal notranslate"><span class="pre">構成</span> <span class="pre">abc</span></code> には、半角の空白が 1 つ含まれる。数えると、全角 2・半角 4。)</p>
+<p><strong>見積りの限界</strong>: フォントごとの正確な幅ではありません。そのため、<strong>余白を持たせ</strong>、次の節の <strong>重なり検査</strong> で、実際に当たっていないかを確かめます。</p>
+<p><strong>落とし穴: 浮動小数点の <code class="docutils literal notranslate"><span class="pre">sum</span></code> は、Python の版で、答えの末尾が違う</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"小数第 2 位に丸めれば、版によらず:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"丸めた値どうしは、比べられる:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+小数第 2 位に丸めれば、版によらず: 1.0
+丸めた値どうしは、比べられる: True
+</pre></div>
+</div>
+<p>(丸めずに 10 個の 0.1 を足すと、Python 3.11 では <code class="docutils literal notranslate"><span class="pre">0.9999999999999999</span></code>、3.12 以降では <code class="docutils literal notranslate"><span class="pre">1.0</span></code> です。実際に、3 つの版で確かめました。)</p>
+<p>Python 3.12 から、<code class="docutils literal notranslate"><span class="pre">sum</span></code> が浮動小数点の足し算の誤差を減らす計算 (補償つきの足し算) になりました。
+そのため、<code class="docutils literal notranslate"><span class="pre">text_width</span></code> を丸めずに使うと、<strong>同じコードが、版によって <code class="docutils literal notranslate"><span class="pre">320.2</span></code> と <code class="docutils literal notranslate"><span class="pre">320.2000000000002</span></code> を作り</strong>、
+<strong>生成した <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> が、版ごとにずれます</strong>。CI は Python 3.11 と 3.13 の <strong>両方</strong> でテストするので、片方だけで作り直した図は、もう一方で落ちます。
+そこで <code class="docutils literal notranslate"><span class="pre">text_width</span></code> は、<strong>小数第 2 位に丸めて</strong> 返します (誤差は 1e-13 程度なので、丸めの境目に当たることは、まず無い)。
+実際に、このリポジトリで、3.11 でだけ <code class="docutils literal notranslate"><span class="pre">test_generated_files_match_the_definitions</span></code> が落ちて、見つかりました。
+<strong>浮動小数点の結果を、文字列として保存・比較するときは、丸める</strong> のが定石です。</p>
+</section>
+<section id="id6">
+<h2>5. 折れ線の途中の点: ラベルの位置<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>矢印のラベルは、<strong>矢印の途中</strong> に置きたい。折れ線は、いくつもの線分でできているので、
+「<strong>全長の 50% の所</strong>」を求めるには、<strong>線分ごとの長さを足し引き</strong> します。</p>
+<img alt="" src="../_images/mermaid-819e60fcf2ef50d8.svg" />
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tools/diagrams/kit.py::Diagram._path_point</span>
+<span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_path_point</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="n">segs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span> <span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">segs</span>
+    <span class="p">]</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">segs</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;=</span> <span class="n">length</span> <span class="ow">or</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">==</span> <span class="n">segs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">target</span> <span class="o">/</span> <span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">f</span>
+        <span class="n">target</span> <span class="o">-=</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>読み解きましょう。</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">segs</span></code>: 隣り合う点の組 = 線分の列。<code class="docutils literal notranslate"><span class="pre">lengths</span></code>: 各線分の長さ。縦横の線 (折れ線の多くはこれ) は、<strong>差の絶対値の和</strong> で足りる。斜めは、ピタゴラスの定理 (<code class="docutils literal notranslate"><span class="pre">√(dx²</span> <span class="pre">+</span> <span class="pre">dy²)</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">=</span> <span class="pre">sum(lengths)</span> <span class="pre">*</span> <span class="pre">t</span></code>: 全長の <code class="docutils literal notranslate"><span class="pre">t</span></code> の割合の所まで、<strong>あと何 px 歩くか</strong>。</p></li>
+<li><p>線分を順に見る。<code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">&lt;=</span> <span class="pre">length</span></code> なら、<strong>この線分の上</strong> にある。そうでなければ、<code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">-=</span> <span class="pre">length</span></code> して次へ。</p></li>
+<li><p>最後の線分では、<code class="docutils literal notranslate"><span class="pre">(a,</span> <span class="pre">b)</span> <span class="pre">==</span> <span class="pre">segs[-1]</span></code> により、<strong>必ず返す</strong> (浮動小数点の誤差で、取りこぼさないため)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">==</span> <span class="pre">0</span></code> (同じ点が続く) のときは、<code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">=</span> <span class="pre">0</span></code> で <strong>0 除算を避ける</strong>。<code class="docutils literal notranslate"><span class="pre">min(target</span> <span class="pre">/</span> <span class="pre">length,</span> <span class="pre">1)</span></code> で、行き過ぎも防ぐ。</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="s2">"tools"</span> <span class="o">/</span> <span class="s2">"diagrams"</span><span class="p">))</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Diagram</span>
+
+<span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">)]</span>          <span class="c1"># 右へ 100、下へ 50: 全長 150</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Diagram</span><span class="o">.</span><span class="n">_path_point</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"t=</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> → (</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"同じ点が続く:"</span><span class="p">,</span> <span class="n">Diagram</span><span class="o">.</span><span class="n">_path_point</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="mf">0.5</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+t=0    → (0, 0)
+t=0.5  → (75, 0)
+t=0.8  → (100, 20)
+t=1    → (100, 50)
+同じ点が続く: (30.0, 0.0)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t=0.5</span></code> → 目標 75。最初の線分 (長さ 100) の上で、<code class="docutils literal notranslate"><span class="pre">(75,</span> <span class="pre">0)</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t=0.8</span></code> → 目標 120。最初の線分を過ぎ (残り 20)、2 本目 (長さ 50) の上で、<code class="docutils literal notranslate"><span class="pre">(100,</span> <span class="pre">20)</span></code>。</p></li>
+<li><p><strong>計算量</strong>: 線分の数 <code class="docutils literal notranslate"><span class="pre">n</span></code> に対して <code class="docutils literal notranslate"><span class="pre">O(n)</span></code>。図の矢印は、せいぜい数本の線分なので、問題にならない。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>6. 図をデータで定義する<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p>図の部品を、<strong>dataclass</strong> で表します (第 1 回)。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>クラス</p></th>
+<th class="head"><p>表すもの</p></th>
+<th class="head"><p>主なフィールド</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Panel</span></code></p></td>
+<td><p>用途ごとにまとめる枠</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">w,</span> <span class="pre">h,</span> <span class="pre">title,</span> <span class="pre">subtitle,</span> <span class="pre">fill,</span> <span class="pre">stroke,</span> <span class="pre">tab</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Card</span></code></p></td>
+<td><p>アイコン + 名前 + 説明</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cx,</span> <span class="pre">cy</span></code> (アイコンの中心)、<code class="docutils literal notranslate"><span class="pre">label</span></code>, <code class="docutils literal notranslate"><span class="pre">sub</span></code>, <code class="docutils literal notranslate"><span class="pre">icon</span></code>, <code class="docutils literal notranslate"><span class="pre">accent</span></code>, <code class="docutils literal notranslate"><span class="pre">badge</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Edge</span></code></p></td>
+<td><p>折れ線の矢印</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">points</span></code>、<code class="docutils literal notranslate"><span class="pre">label</span></code>、<code class="docutils literal notranslate"><span class="pre">color</span></code>、<code class="docutils literal notranslate"><span class="pre">dashed</span></code>、<code class="docutils literal notranslate"><span class="pre">label_t</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Note</span></code></p></td>
+<td><p>補足の文字</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">lines,</span> <span class="pre">color,</span> <span class="pre">anchor</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Diagram</span></code></p></td>
+<td><p>1 枚の図</p></td>
+<td><p>上の 4 つの一覧 + <code class="docutils literal notranslate"><span class="pre">to_svg()</span></code> + <code class="docutils literal notranslate"><span class="pre">to_drawio()</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">html</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="s2">"tools"</span> <span class="o">/</span> <span class="s2">"diagrams"</span><span class="p">))</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Card</span><span class="p">,</span> <span class="n">Diagram</span><span class="p">,</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Panel</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">Diagram</span><span class="p">(</span><span class="s2">"demo"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">220</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Panel</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="s2">"処理"</span><span class="p">,</span> <span class="n">tab</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="n">d</span><span class="o">.</span><span class="n">cards</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="n">Card</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"入力"</span><span class="p">,</span> <span class="s2">"docs/*.md"</span><span class="p">,</span> <span class="s2">"doc"</span><span class="p">,</span> <span class="s2">"#1a73e8"</span><span class="p">,</span> <span class="n">badge</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">Card</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"出力"</span><span class="p">,</span> <span class="s2">"_build/html"</span><span class="p">,</span> <span class="s2">"globe"</span><span class="p">,</span> <span class="s2">"#344054"</span><span class="p">,</span> <span class="n">badge</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">d</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Edge</span><span class="p">([(</span><span class="mi">134</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="p">(</span><span class="mi">266</span><span class="p">,</span> <span class="mi">100</span><span class="p">)],</span> <span class="s2">"変換"</span><span class="p">,</span> <span class="s2">"blue"</span><span class="p">))</span>
+
+<span class="n">drawio</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">to_drawio</span><span class="p">()</span>                               <span class="c1"># diagrams.net で開ける XML</span>
+<span class="n">svg</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">to_svg</span><span class="p">(</span><span class="n">drawio</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>                       <span class="c1"># 文書に埋め込む SVG (元の XML を、中に持つ)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"drawio の図形・矢印の数 :"</span><span class="p">,</span> <span class="n">drawio</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"&lt;mxCell"</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>           <span class="c1"># 先頭の 2 つ (id=0, 1) は枠組み</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"SVG の矢印 (polyline)    :"</span><span class="p">,</span> <span class="n">svg</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"&lt;polyline"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"SVG の文字 (text)        :"</span><span class="p">,</span> <span class="n">svg</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">"&lt;text"</span><span class="p">))</span>
+<span class="n">embedded</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">unescape</span><span class="p">(</span><span class="n">svg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'content="'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"SVG が drawio を内蔵      :"</span><span class="p">,</span> <span class="n">embedded</span> <span class="o">==</span> <span class="n">drawio</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+drawio の図形・矢印の数 : 13
+SVG の矢印 (polyline)    : 2
+SVG の文字 (text)        : 8
+SVG が drawio を内蔵      : True
+</pre></div>
+</div>
+<p><strong>同じ定義から、2 つの形式</strong> を作ります。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.drawio</span></code>: diagrams.net で <strong>開いて、手直しできる</strong> 元データ (XML)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.drawio.svg</span></code>: 文書に <strong>画像として埋め込む</strong> SVG。さらに、<code class="docutils literal notranslate"><span class="pre">&lt;svg</span> <span class="pre">content=&quot;...&quot;&gt;</span></code> の中に <strong>元の <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> を内蔵</strong> している。
+diagrams.net は、この SVG を <strong>そのまま開き直して</strong>、編集できる。</p></li>
+</ul>
+<p>(<code class="docutils literal notranslate"><span class="pre">.drawio</span></code> だけをコミットすると、Sphinx は画像として表示できません。<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">check-diagrams</span></code> が、<code class="docutils literal notranslate"><span class="pre">.drawio</span></code> に <code class="docutils literal notranslate"><span class="pre">.drawio.svg</span></code> が揃っているかを確かめます。)</p>
+<section id="id8">
+<h3>描画の順序<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">to_svg</span></code> の中は、<strong>描く順序が、前後関係を決めます</strong> (SVG は、後に書いたものが <strong>手前</strong> に出る)。</p>
+<img alt="" src="../_images/mermaid-8c7b2f7923f1bf9a.svg" />
+<ul class="simple">
+<li><p><strong>ラベルを最後</strong> に描くのは、白い背景で <strong>線を隠して、文字を読みやすく</strong> するため。</p></li>
+<li><p><strong>カードを矢印の後</strong> に描くのは、矢印が <strong>カードの下に潜る</strong> ようにして、端がずれても目立たなくするため。</p></li>
+</ul>
+</section>
+<section id="drawio">
+<h3>drawio の構造<a class="headerlink" href="#drawio" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">.drawio</span></code> は、<code class="docutils literal notranslate"><span class="pre">&lt;mxfile&gt;</span></code> の中に <code class="docutils literal notranslate"><span class="pre">&lt;mxGraphModel&gt;</span></code> があり、図形が <code class="docutils literal notranslate"><span class="pre">&lt;mxCell&gt;</span></code> として並びます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋: tools/diagrams/kit.py::Diagram.to_drawio</span>
+<span class="n">cells</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'&lt;mxCell id="0"/&gt;'</span><span class="p">,</span> <span class="s1">'&lt;mxCell id="1" parent="0"/&gt;'</span><span class="p">]</span>
+<span class="o">...</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="o">...</span>
+                <span class="sa">f</span><span class="s1">'&lt;mxCell id="c</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">" value="</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">quote</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s1">" style="</span><span class="si">{</span><span class="n">style</span><span class="si">}</span><span class="s1">" </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> parent="1"&gt;'</span>
+                <span class="sa">f</span><span class="s1">'&lt;mxGeometry x="</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">" y="</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s1">" width="</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s1">" height="</span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s1">" as="geometry"/&gt;&lt;/mxCell&gt;'</span>
+<span class="o">...</span>
+            <span class="sa">f</span><span class="s1">'&lt;mxfile host="app.diagrams.net"&gt;&lt;diagram id="</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" name="</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s1">&lt;/diagram&gt;&lt;/mxfile&gt;</span><span class="se">\n</span><span class="s1">'</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">id=&quot;0&quot;</span></code> と <code class="docutils literal notranslate"><span class="pre">id=&quot;1&quot;</span></code> は、diagrams.net の <strong>決まった根</strong> (レイヤー)。</p></li>
+<li><p>図形は <code class="docutils literal notranslate"><span class="pre">vertex=&quot;1&quot;</span></code>、矢印は <code class="docutils literal notranslate"><span class="pre">edge=&quot;1&quot;</span></code>。位置は <code class="docutils literal notranslate"><span class="pre">&lt;mxGeometry&gt;</span></code>、見た目は <code class="docutils literal notranslate"><span class="pre">style</span></code> の <code class="docutils literal notranslate"><span class="pre">キー=値;</span></code> の並び。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">html.escape(value,</span> <span class="pre">quote=True)</span></code>: 文字に <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>・<code class="docutils literal notranslate"><span class="pre">&amp;</span></code>・<code class="docutils literal notranslate"><span class="pre">&quot;</span></code> が含まれても、<strong>XML が壊れない</strong> ように変換する (第 2 回)。</p></li>
+</ul>
+</section>
+</section>
+<section id="id9">
+<h2>7. 図の品質をテストする<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>図は、描いたあと <strong>目で見て確かめる</strong> 必要があります。ただ、人の目は、変更のたびに見直せません。
+<strong>機械で見つけられる欠陥</strong> (重なり・はみ出し) は、テストにします。</p>
+<section id="id10">
+<h3>重なり<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<p>各カードの <strong>占有範囲</strong> (<code class="docutils literal notranslate"><span class="pre">bbox</span></code>: アイコンと文字を含む長方形) が、他と重なっていないかを調べます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_diagrams.py::_overlap</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_overlap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""余白 (margin) を含めて重なるか。ぴったり接しているだけでも、読みにくいので重なりとみなす。"""</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">and</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">and</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span>
+</pre></div>
+</div>
+<p><strong>2 つの長方形が重なる条件</strong>: x 方向 <strong>と</strong> y 方向の <strong>両方</strong> で、区間が重なる。</p>
+<ul class="simple">
+<li><p>x 方向: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">の左</span> <span class="pre">&lt;</span> <span class="pre">b</span> <span class="pre">の右</span></code> かつ <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">の左</span> <span class="pre">&lt;</span> <span class="pre">a</span> <span class="pre">の右</span></code>。y 方向も同じ。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">margin</span></code>: <strong>ぴったり接する</strong> だけでも、読みにくいので、余白ぶん広げて判定する。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="s2">"tools"</span> <span class="o">/</span> <span class="s2">"diagrams"</span><span class="p">))</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Card</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">overlap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">and</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">and</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">collisions</span><span class="p">(</span><span class="n">cards</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">a</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cards</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">cards</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">overlap</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">bbox</span><span class="p">)]</span>
+
+
+<span class="n">roomy</span> <span class="o">=</span> <span class="p">[</span><span class="n">Card</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"入力"</span><span class="p">,</span> <span class="s2">"docs/*.md"</span><span class="p">),</span> <span class="n">Card</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"出力"</span><span class="p">,</span> <span class="s2">"_build/html"</span><span class="p">)]</span>
+<span class="n">tight</span> <span class="o">=</span> <span class="p">[</span><span class="n">Card</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"入力"</span><span class="p">,</span> <span class="s2">"docs/*.md"</span><span class="p">),</span> <span class="n">Card</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"出力"</span><span class="p">,</span> <span class="s2">"_build/html"</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"間隔が十分      :"</span><span class="p">,</span> <span class="n">collisions</span><span class="p">(</span><span class="n">roomy</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"間隔が足りない  :"</span><span class="p">,</span> <span class="n">collisions</span><span class="p">(</span><span class="n">tight</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"入力のカードの占有範囲 (左, 上, 右, 下):"</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">roomy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">bbox</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+間隔が十分      : []
+間隔が足りない  : [('入力', '出力')]
+入力のカードの占有範囲 (左, 上, 右, 下): (68.0, 68.0, 132.0, 178.0)
+</pre></div>
+</div>
+</section>
+<section id="id11">
+<h3>はみ出し<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>キャンバス</strong>: カード・パネル・矢印の点が、<code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">〜</span> <span class="pre">幅</span></code> / <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">〜</span> <span class="pre">高さ</span></code> の中にあるか。</p></li>
+<li><p><strong>パネル</strong>: パネルの中に置いたカードの文字が、<strong>枠の外に出ていない</strong> か。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_diagrams.py::test_cards_stay_inside_their_panel</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">NAMES</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_cards_stay_inside_their_panel</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">build_diagrams</span><span class="o">.</span><span class="n">DIAGRAMS</span><span class="p">[</span><span class="n">name</span><span class="p">]()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">cards</span><span class="p">:</span>
+        <span class="n">containing</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">panels</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="o">.</span><span class="n">cx</span> <span class="o">&lt;=</span> <span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">w</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="o">.</span><span class="n">cy</span> <span class="o">&lt;=</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">h</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">containing</span><span class="p">:</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">_top</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">bbox</span>
+            <span class="k">assert</span> <span class="n">left</span> <span class="o">&gt;=</span> <span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="n">right</span> <span class="o">&lt;=</span> <span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">w</span> <span class="ow">and</span> <span class="n">bottom</span> <span class="o">&lt;=</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2"> が </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> からはみ出す"</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+<p>(<code class="docutils literal notranslate"><span class="pre">parametrize</span></code> で、4 枚の図すべてに、同じ検査をする。)</p>
+</section>
+<section id="id12">
+<h3>生成物のずれ<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_diagrams.py::test_svg_embeds_the_drawio_source_and_both_are_valid_xml</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">NAMES</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_svg_embeds_the_drawio_source_and_both_are_valid_xml</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">drawio</span> <span class="o">=</span> <span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s2">"docs"</span> <span class="o">/</span> <span class="s2">"diagrams"</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.drawio"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">svg</span> <span class="o">=</span> <span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s2">"docs"</span> <span class="o">/</span> <span class="s2">"diagrams"</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.drawio.svg"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">drawio</span><span class="p">)</span>
+    <span class="n">xml</span><span class="o">.</span><span class="n">dom</span><span class="o">.</span><span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">svg</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">unescape</span><span class="p">(</span><span class="n">svg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'content="'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">drawio</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>両方が、<strong>正しい XML</strong> として読める。</p></li>
+<li><p>SVG の中に内蔵した XML が、<code class="docutils literal notranslate"><span class="pre">.drawio</span></code> と <strong>一致</strong> する。<strong>SVG だけを手で直す</strong> と、ここで落ちる。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">test_generated_files_match_the_definitions</span></code> は、<code class="docutils literal notranslate"><span class="pre">build_diagrams.main([&quot;--check&quot;])</span></code> を呼び、
+<strong>定義から作り直した結果</strong> と、コミットしたファイルが <strong>一致</strong> するかを確かめます。
+定義を変えて、作り直しを忘れると、ここで落ちます。</p>
+</section>
+</section>
+<section id="id13">
+<h2>8. 図を、実際のコードと一致させる<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<p>構成図の中で、最も <strong>嘘になりやすい</strong> のは、<strong>依存の矢印</strong> です。コードを変えても、図は、自然には直らないから。
+<code class="docutils literal notranslate"><span class="pre">module-map</span></code> の矢印は、<strong>実際の依存と、同じ読み取りで突き合わせて</strong> います (第 5 回の <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_diagrams.py::_real_edges</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_real_edges</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">structure_map</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">structure_map</span><span class="o">.</span><span class="n">scan_package</span><span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s2">"docspipeline"</span><span class="p">)</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s2">"docspipeline."</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">),</span> <span class="n">dst</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">src</span> <span class="o">!=</span> <span class="s2">"docspipeline.__main__"</span>  <span class="c1"># python -m の入口だけの依存は、図に描かない</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_diagrams.py::test_module_map_imports_match_the_real_imports</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_module_map_imports_match_the_real_imports</span><span class="p">():</span>
+    <span class="n">drawn</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">build_diagrams</span><span class="o">.</span><span class="n">MODULE_IMPORTS</span><span class="p">)</span>
+    <span class="n">real</span> <span class="o">=</span> <span class="n">_real_edges</span><span class="p">(</span><span class="s2">"import"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">drawn</span> <span class="o">-</span> <span class="n">real</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">"実際には無い依存を描いている: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">drawn</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">real</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">{</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">real</span> <span class="o">-</span> <span class="n">drawn</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">build_diagrams</span><span class="o">.</span><span class="n">UTILITY_MODULES</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">missing</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">"図に無い依存がある (MODULE_IMPORTS に足す): </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>2 つの集合の <strong>差</strong> を、両方向で調べます。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">drawn</span> <span class="pre">-</span> <span class="pre">real</span></code>: <strong>図にあって、実際に無い</strong> = 嘘の矢印 (もう無い依存を、描き続けている)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">real</span> <span class="pre">-</span> <span class="pre">drawn</span></code>: <strong>実際にあって、図に無い</strong> = 描き漏れ (新しい依存を、足し忘れた)。ただし、共通部品 (<code class="docutils literal notranslate"><span class="pre">files</span></code>) への矢印は、図を埋めてしまうので、省く (<code class="docutils literal notranslate"><span class="pre">UTILITY_MODULES</span></code>)。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">docspipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">structure_map</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">docspipeline</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"tools"</span> <span class="o">/</span> <span class="s2">"diagrams"</span><span class="p">))</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">build_diagrams</span>
+
+<span class="n">prefix</span> <span class="o">=</span> <span class="s2">"docspipeline."</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">structure_map</span><span class="o">.</span><span class="n">scan_package</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">real</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">),</span> <span class="n">d</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="s2">"import"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s2">"docspipeline.__main__"</span>
+<span class="p">}</span>
+<span class="n">drawn</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">build_diagrams</span><span class="o">.</span><span class="n">MODULE_IMPORTS</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"図の矢印の数        :"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">drawn</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"嘘の矢印            :"</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">drawn</span> <span class="o">-</span> <span class="n">real</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"描き漏れ            :"</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">real</span> <span class="o">-</span> <span class="n">drawn</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">build_diagrams</span><span class="o">.</span><span class="n">UTILITY_MODULES</span><span class="p">))</span>
+
+<span class="n">drawn_with_a_lie</span> <span class="o">=</span> <span class="n">drawn</span> <span class="o">|</span> <span class="p">{(</span><span class="s2">"config"</span><span class="p">,</span> <span class="s2">"cli"</span><span class="p">)}</span>                       <span class="c1"># わざと、実際には無い矢印を足す</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"嘘を足した場合       :"</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">drawn_with_a_lie</span> <span class="o">-</span> <span class="n">real</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+図の矢印の数        : 11
+嘘の矢印            : []
+描き漏れ            : []
+嘘を足した場合       : [('config', 'cli')]
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>本物の図は、<strong>嘘も描き漏れも無い</strong> (両方 <code class="docutils literal notranslate"><span class="pre">[]</span></code>)。</p></li>
+<li><p>わざと足した矢印 <code class="docutils literal notranslate"><span class="pre">config</span> <span class="pre">→</span> <span class="pre">cli</span></code> は、<strong>嘘の矢印として検出</strong> される (実際には、<code class="docutils literal notranslate"><span class="pre">config</span></code> が import するのは <code class="docutils literal notranslate"><span class="pre">confluence</span></code> だけ。<code class="docutils literal notranslate"><span class="pre">cli</span></code> と <code class="docutils literal notranslate"><span class="pre">config</span></code> の間に、import の関係は無い)。</p></li>
+</ul>
+<p><strong>図を最新に保つ最も確実な方法は、「ずれたら、テストが落ちる」ようにすること</strong> です。</p>
+</section>
+<section id="mermaid">
+<h2>9. Mermaid の標準の見た目<a class="headerlink" href="#mermaid" title="Link to this heading">¶</a></h2>
+<p>文書の中の手順やフローは、<strong>Mermaid</strong> で書きます。1 つの図を、<strong>2 つの場所</strong> で、同じ見た目にする必要があります。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>表示される場所</p></th>
+<th class="head"><p>描くのは</p></th>
+<th class="head"><p>見た目の指定元</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>GitHub (Markdown のまま)</p></td>
+<td><p>GitHub の Mermaid</p></td>
+<td><p>ブロックの <strong>1 行目の <code class="docutils literal notranslate"><span class="pre">%%{init:</span> <span class="pre">...}%%</span></code></strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Sphinx の HTML</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> (mermaid-cli) で SVG に</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> に渡す設定 (<code class="docutils literal notranslate"><span class="pre">MERMAID_CONFIG</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>両者の見た目を、<strong>同じ値</strong> から作ります。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋ファイル: docspipeline/mmdc.py</span>
+<span class="n">FONT_FAMILY</span> <span class="o">=</span> <span class="s2">"Noto Sans JP, Hiragino Sans, Meiryo, sans-serif"</span>
+<span class="n">THEME_VARIABLES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"fontFamily"</span><span class="p">:</span> <span class="n">FONT_FAMILY</span><span class="p">,</span>
+    <span class="s2">"primaryColor"</span><span class="p">:</span> <span class="s2">"#ffffff"</span><span class="p">,</span>
+    <span class="s2">"lineColor"</span><span class="p">:</span> <span class="s2">"#667085"</span><span class="p">,</span>
+    <span class="s2">"clusterBkg"</span><span class="p">:</span> <span class="s2">"#f2f4f7"</span><span class="p">,</span>
+<span class="n">FLOWCHART_CONFIG</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"wrappingWidth"</span><span class="p">:</span> <span class="mi">480</span><span class="p">,</span> <span class="s2">"nodeSpacing"</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span> <span class="s2">"rankSpacing"</span><span class="p">:</span> <span class="mi">56</span><span class="p">,</span> <span class="s2">"padding"</span><span class="p">:</span> <span class="mi">14</span><span class="p">}</span>
+<span class="n">SEQUENCE_CONFIG</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mirrorActors"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"wrap"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">"actorMargin"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s2">"messageMargin"</span><span class="p">:</span> <span class="mi">34</span><span class="p">}</span>
+<span class="n">MERMAID_INIT</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"</span><span class="si">%%</span><span class="s2">{init: "</span>
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>設定</p></th>
+<th class="head"><p>目的</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">theme:</span> <span class="pre">base</span></code> + <code class="docutils literal notranslate"><span class="pre">themeVariables</span></code></p></td>
+<td><p>色を、構成図 (diagrams.net) と <strong>揃える</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fontFamily</span></code> (<strong>設定の最上位</strong> に)</p></td>
+<td><p>文字のフォントを、日本語に対応したものに。最上位に置かないと、効かない</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flowchart.wrappingWidth:</span> <span class="pre">480</span></code></p></td>
+<td><p>日本語の長い行が、<strong>単語の途中で折り返される</strong> のを防ぐ</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sequence.wrap:</span> <span class="pre">false</span></code> / <code class="docutils literal notranslate"><span class="pre">mirrorActors:</span> <span class="pre">false</span></code></p></td>
+<td><p>順序図の幅を詰め、下に同じ参加者を繰り返さない</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">htmlLabels:</span> <span class="pre">false</span></code> (<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> のみ)</p></td>
+<td><p>文字を <code class="docutils literal notranslate"><span class="pre">&lt;text&gt;</span></code> で描く。<code class="docutils literal notranslate"><span class="pre">foreignObject</span></code> は、画像として取り込む先 (Confluence) で <strong>文字が消える</strong> ことがある</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="classdef">
+<h3>5 色の classDef<a class="headerlink" href="#classdef" title="Link to this heading">¶</a></h3>
+<p>部品の <strong>役割</strong> を色で示します。色の意味は、図が変わっても、<strong>同じ</strong> です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋ファイル: docspipeline/mmdc.py</span>
+    <span class="n">classDef</span> <span class="nb">input</span> <span class="n">fill</span><span class="p">:</span><span class="c1">#dae8fc,stroke:#1a73e8,color:#101828</span>
+    <span class="n">classDef</span> <span class="n">proc</span> <span class="n">fill</span><span class="p">:</span><span class="c1">#e6f4f1,stroke:#0f9d8a,color:#101828</span>
+    <span class="n">classDef</span> <span class="n">out</span> <span class="n">fill</span><span class="p">:</span><span class="c1">#fff7ed,stroke:#e8710a,color:#101828</span>
+    <span class="n">classDef</span> <span class="n">stop</span> <span class="n">fill</span><span class="p">:</span><span class="c1">#fef3f2,stroke:#d92d20,color:#101828</span>
+    <span class="n">classDef</span> <span class="n">plain</span> <span class="n">fill</span><span class="p">:</span><span class="c1">#ffffff,stroke:#d0d5dd,color:#101828"""</span>
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>クラス</p></th>
+<th class="head"><p>色</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">input</span></code></p></td>
+<td><p>青</p></td>
+<td><p>入力・始まり</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">proc</span></code></p></td>
+<td><p>緑</p></td>
+<td><p>Sphinx・処理</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">out</span></code></p></td>
+<td><p>オレンジ</p></td>
+<td><p>出力・公開</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stop</span></code></p></td>
+<td><p>赤</p></td>
+<td><p>止まる・失敗</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plain</span></code></p></td>
+<td><p>白</p></td>
+<td><p>補助</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>使うときは、ノードに <code class="docutils literal notranslate"><span class="pre">:::クラス名</span></code> を付けます (<code class="docutils literal notranslate"><span class="pre">A[&quot;開始&quot;]:::input</span></code>)。</p>
+</section>
+<section id="id14">
+<h3>1 行目を、機械で揃える<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">%%{init:</span> <span class="pre">...}%%</span></code> の行は、長く、<strong>手で写すと間違える</strong> 行です。コマンドで確かめ、入れます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/mmdc.py::check_mermaid_text</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_mermaid_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""標準の ``%%{init}%%`` の行で始まっていない Mermaid ブロックの、開きの行 (1 始まり) を返す。"""</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">mermaid_blocks</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">_first_content_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="n">first</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="n">MERMAID_INIT</span><span class="p">:</span>
+            <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">missing</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/mmdc.py::fix_mermaid_text</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fix_mermaid_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""標準の ``%%{init}%%`` の行を、全ブロックの先頭に入れる。</span>
+
+<span class="sd">    別の ``%%{init ...}%%`` で始まるブロックは、標準の行に置き換える。</span>
+<span class="sd">    """</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">mermaid_blocks</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="n">_FENCE_OPEN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">])</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"indent"</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">_first_content_line</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lines</span><span class="p">[</span><span class="n">first</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"</span><span class="si">%%</span><span class="s2">{init"</span><span class="p">):</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">first</span><span class="p">]</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">MERMAID_INIT</span>
+        <span class="k">elif</span> <span class="n">first</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="n">first</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="n">MERMAID_INIT</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">MERMAID_INIT</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mermaid_blocks</span></code>: コードブロックの囲み (<code class="docutils literal notranslate"><span class="pre">```</span></code> や <code class="docutils literal notranslate"><span class="pre">~~~</span></code>、<code class="docutils literal notranslate"><span class="pre">:::{mermaid}</span></code>) を探す (第 2 回の正規表現と、囲みの長さの扱い)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">check_mermaid_text</span></code>: 各ブロックの <strong>最初の中身の行</strong> が、標準の行と一致するか。違う行番号の一覧を返す。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fix_mermaid_text</span></code>: <strong>後ろのブロックから</strong> 順に直す (行を挿入すると、後ろの行番号がずれるため。第 2 回の「後ろから置換」と同じ考え方)。別の <code class="docutils literal notranslate"><span class="pre">%%{init</span></code> で始まるものは、標準に置き換える。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.mmdc</span><span class="w"> </span><span class="kn">import</span> <span class="n">MERMAID_INIT</span><span class="p">,</span> <span class="n">check_mermaid_text</span><span class="p">,</span> <span class="n">fix_mermaid_text</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="s2">"説明</span><span class="se">\n\n</span><span class="s2">```mermaid</span><span class="se">\n</span><span class="s2">flowchart LR</span><span class="se">\n</span><span class="s2">    A --&gt; B</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"直す前: 足りないブロックの開きの行 ="</span><span class="p">,</span> <span class="n">check_mermaid_text</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+<span class="n">fixed</span> <span class="o">=</span> <span class="n">fix_mermaid_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"直した後: 足りないブロック            ="</span><span class="p">,</span> <span class="n">check_mermaid_text</span><span class="p">(</span><span class="n">fixed</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ブロックの 1 行目が標準の行?          ="</span><span class="p">,</span> <span class="n">fixed</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">MERMAID_INIT</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"もう一度直しても同じ (冪等)?          ="</span><span class="p">,</span> <span class="n">fix_mermaid_text</span><span class="p">(</span><span class="n">fixed</span><span class="p">)</span> <span class="o">==</span> <span class="n">fixed</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"標準の行の長さ                        ="</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">MERMAID_INIT</span><span class="p">),</span> <span class="s2">"文字"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+直す前: 足りないブロックの開きの行 = [3]
+直した後: 足りないブロック            = []
+ブロックの 1 行目が標準の行?          = True
+もう一度直しても同じ (冪等)?          = True
+標準の行の長さ                        = 537 文字
+</pre></div>
+</div>
+<p><strong>冪等</strong> (べきとう): 何度実行しても、結果が同じ。<code class="docutils literal notranslate"><span class="pre">--fix</span></code> を、毎回の CI や、手元で、安心して回せます。</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docspipeline<span class="w"> </span>check-mermaid<span class="w"> </span>docs<span class="w">          </span><span class="c1"># 標準の行が無いブロックを、一覧する (CI で使う)</span>
+docspipeline<span class="w"> </span>check-mermaid<span class="w"> </span>docs<span class="w"> </span>--fix<span class="w">    </span><span class="c1"># 全ブロックに、標準の行を入れる</span>
+docspipeline<span class="w"> </span>mermaid-style<span class="w">               </span><span class="c1"># 標準の行と classDef の組を表示する (貼り付け用)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id15">
+<h2>10. 新しい図を足す手順<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<img alt="" src="../_images/mermaid-057544a32fe358b0.svg" />
+<p>構成図の関数の骨組みです (<code class="docutils literal notranslate"><span class="pre">build_internals</span></code> の冒頭)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋: tools/diagrams/build_diagrams.py::build_internals</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_internals</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Diagram</span><span class="p">:</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Diagram</span><span class="p">(</span><span class="s2">"build-internals"</span><span class="p">,</span> <span class="mi">1200</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">panels</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Panel</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">1120</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="s2">"ビルドの流れ"</span><span class="p">,</span> <span class="s2">"sphinx -b html docs (docspipeline build の中身)"</span><span class="p">)]</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">cards</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="n">Card</span><span class="p">(</span><span class="mi">130</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">"ビルドを始める"</span><span class="p">,</span> <span class="s2">"docspipeline build"</span><span class="p">,</span> <span class="s2">"terminal"</span><span class="p">,</span> <span class="n">GRAY</span><span class="p">,</span> <span class="n">badge</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">edges</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="n">Edge</span><span class="p">([(</span><span class="mi">164</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="p">(</span><span class="mi">346</span><span class="p">,</span> <span class="mi">200</span><span class="p">)],</span> <span class="s2">"実行"</span><span class="p">,</span> <span class="s2">"blue"</span><span class="p">),</span>
+    <span class="k">return</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p><strong>座標の決め方のコツ</strong></p>
+<ol class="arabic simple">
+<li><p>まず、<strong>列と行の格子</strong> を決める (例: x = 130, 380, 630, 880 / y = 200, 450)。</p></li>
+<li><p>カードの中心を格子に置く。カードの大きさは 64px なので、<strong>矢印は、中心 ± 34px</strong> から出して入れる (端に、少し隙間を空ける)。</p></li>
+<li><p>折り返す矢印は、<strong>他のカードを避ける通り道</strong> (上の例では、y = 340 の帯) を決めてから、点を並べる。</p></li>
+<li><p>描いたら、<strong>画像にして見る</strong> (ブラウザで開く)。テストは重なりを見つけるが、<strong>読みやすさ</strong> は、人が確かめる。</p></li>
+</ol>
+<p><strong>よくある失敗</strong></p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>失敗</p></th>
+<th class="head"><p>原因</p></th>
+<th class="head"><p>対策</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>文字が、枠からはみ出す</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">text_width</span></code> の見積りが小さい / 説明が長い</p></td>
+<td><p>説明を短く、または <code class="docutils literal notranslate"><span class="pre">sub2</span></code> で 2 行に。テストが検出する</p></td>
+</tr>
+<tr class="row-odd"><td><p>矢印が、カードの上を横切る</p></td>
+<td><p>通り道を決めていない</p></td>
+<td><p>折れ線の点を足して迂回する</p></td>
+</tr>
+<tr class="row-even"><td><p>ラベルが、矢印の曲がり角に重なる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">label_t</span></code> が曲がり角の近く</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">label_t</span></code> を動かす (<code class="docutils literal notranslate"><span class="pre">module-map</span></code> の <code class="docutils literal notranslate"><span class="pre">doctor</span> <span class="pre">→</span> <span class="pre">mmdc</span></code> は 0.4)</p></td>
+</tr>
+<tr class="row-odd"><td><p>図が大きすぎて、文字が小さい</p></td>
+<td><p>1 枚に詰め込みすぎ</p></td>
+<td><p>図を分ける (全体像 / 詳細)</p></td>
+</tr>
+<tr class="row-even"><td><p>SVG だけを直して、<code class="docutils literal notranslate"><span class="pre">.drawio</span></code> と食い違う</p></td>
+<td><p>手で編集した</p></td>
+<td><p>定義を直して作り直す。テストが検出する</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id16">
+<h2>ハンズオン<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">tools/diagrams/build_diagrams.py</span></code> を実行し、<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code> で、<strong>差分が無い</strong> (決定的に作られる) ことを確かめる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tools/diagrams/build_diagrams.py</span></code> の <code class="docutils literal notranslate"><span class="pre">publish_flow</span></code> で、カード 1 つの <code class="docutils literal notranslate"><span class="pre">cx</span></code> を <strong>わざと 30 動かして</strong>、<code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_diagrams.py</span></code> を実行する。落ちるテストの名前を読む (元に戻すこと)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODULE_IMPORTS</span></code> に、実際には無い <code class="docutils literal notranslate"><span class="pre">(&quot;config&quot;,</span> <span class="pre">&quot;cli&quot;)</span></code> を足して、<code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">tests/test_diagrams.py::test_module_map_imports_match_the_real_imports</span></code> が落ちる様子を見る (戻すこと)。</p></li>
+<li><p>手元の Markdown に、標準の行の無い Mermaid ブロックを書き、<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">check-mermaid</span></code> で検出し、<code class="docutils literal notranslate"><span class="pre">--fix</span></code> で直す。</p></li>
+</ol>
+</section>
+<section id="id17">
+<h2>確認問題<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>SVG の座標で、y の向きは、数学の座標と、どう違いますか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">viewBox</span></code> と <code class="docutils literal notranslate"><span class="pre">width</span></code>/<code class="docutils literal notranslate"><span class="pre">height</span></code> が、同じ値のとき、座標は何の単位になりますか。</p></li>
+<li><p>折れ線 <code class="docutils literal notranslate"><span class="pre">[(0,0),</span> <span class="pre">(100,0),</span> <span class="pre">(100,50)]</span></code> の、全長の 80% の点は、どこですか。計算を示してください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_path_point</span></code> で、最後の線分に <code class="docutils literal notranslate"><span class="pre">or</span> <span class="pre">(a,</span> <span class="pre">b)</span> <span class="pre">==</span> <span class="pre">segs[-1]</span></code> がある理由を説明してください。</p></li>
+<li><p>2 つの長方形が重なる条件を、x 方向と y 方向に分けて説明してください。</p></li>
+<li><p>図の矢印と実際の依存の一致を、<strong>2 方向の差</strong> で調べるのは、なぜですか。それぞれ、何を検出しますか。</p></li>
+<li><p>SVG の中に、元の <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> を内蔵する利点は何ですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fix_mermaid_text</span></code> が、<strong>後ろのブロックから</strong> 直すのは、なぜですか。</p></li>
+<li><p>(書く問題) <code class="docutils literal notranslate"><span class="pre">Edge</span></code> の <code class="docutils literal notranslate"><span class="pre">label_t=0.5</span></code> の位置の点を、<code class="docutils literal notranslate"><span class="pre">Diagram._path_point</span></code> を使わずに、<strong>縦横の線分だけの折れ線</strong> について計算する関数 <code class="docutils literal notranslate"><span class="pre">midpoint(points)</span></code> を書いてください。<code class="docutils literal notranslate"><span class="pre">[(0,0),</span> <span class="pre">(100,0),</span> <span class="pre">(100,50)]</span></code> で <code class="docutils literal notranslate"><span class="pre">(75,</span> <span class="pre">0)</span></code> を返すこと。</p></li>
+</ol>
+</section>
+<section id="id18">
+<h2>解答<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>数学の座標は、y が <strong>上向きに増える</strong> が、SVG は <strong>下向きに増える</strong> (左上が原点)。</p></li>
+<li><p>px (画面の点)。</p></li>
+<li><p>全長 = 100 + 50 = 150。80% → 120。最初の線分 (100) を過ぎ、残り 20 を、2 本目 (長さ 50) の上で歩く。20 ÷ 50 = 0.4 → <code class="docutils literal notranslate"><span class="pre">(100,</span> <span class="pre">0</span> <span class="pre">+</span> <span class="pre">50</span> <span class="pre">×</span> <span class="pre">0.4)</span></code> = <code class="docutils literal notranslate"><span class="pre">(100,</span> <span class="pre">20)</span></code>。</p></li>
+<li><p>浮動小数点の誤差で、<code class="docutils literal notranslate"><span class="pre">target</span></code> が全長を <strong>わずかに超える</strong> と、どの線分の <code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">&lt;=</span> <span class="pre">length</span></code> も成り立たず、ループを抜けてしまう。
+最後の線分では <strong>必ず返す</strong> ことで、取りこぼさない (<code class="docutils literal notranslate"><span class="pre">min(...,</span> <span class="pre">1)</span></code> で、行き過ぎも防ぐ)。</p></li>
+<li><p>x 方向: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">の左</span> <span class="pre">&lt;</span> <span class="pre">b</span> <span class="pre">の右</span></code> <strong>かつ</strong> <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">の左</span> <span class="pre">&lt;</span> <span class="pre">a</span> <span class="pre">の右</span></code>。y 方向も同じ。<strong>両方</strong> 成り立つとき、重なる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">drawn</span> <span class="pre">-</span> <span class="pre">real</span></code> は <strong>嘘の矢印</strong> (もう無い依存を描き続ける)、<code class="docutils literal notranslate"><span class="pre">real</span> <span class="pre">-</span> <span class="pre">drawn</span></code> は <strong>描き漏れ</strong> (新しい依存を足し忘れ)。片方向だけでは、もう一方を見逃す。</p></li>
+<li><p><strong>1 つのファイル</strong> で、見た目 (SVG) と編集用の元データを持てる。diagrams.net で <strong>そのまま開き直せる</strong> ので、元の <code class="docutils literal notranslate"><span class="pre">.drawio</span></code> を別に探さなくてよい。
+ただし、SVG だけを手で直すと食い違うので、テストで検出する。</p></li>
+<li><p>行を <strong>挿入</strong> すると、後ろの行の番号が <strong>ずれる</strong> から。後ろから直せば、前のブロックの位置は変わらない。</p></li>
+<li><p>例 (実行して確かめてある):</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">midpoint</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;=</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">target</span> <span class="o">/</span> <span class="n">length</span> <span class="k">if</span> <span class="n">length</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">f</span>
+        <span class="n">target</span> <span class="o">-=</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">midpoint</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">)]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">midpoint</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">)]))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+(75.0, 0.0)
+(0.0, 20.0)
+</pre></div>
+</div>
+<p>(縦横の線だけなので、長さは <code class="docutils literal notranslate"><span class="pre">|dx|</span> <span class="pre">+</span> <span class="pre">|dy|</span></code> で足ります。斜めの線がある場合は、ピタゴラスの定理が要ります。)</p>
+</section>
+<section id="id19">
+<h2>まとめ<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>概念</p></th>
+<th class="head"><p>要点</p></th>
+<th class="head"><p>このリポジトリでの例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>読みやすい図</p></td>
+<td><p>番号・まとまり・色の意味・ラベル</p></td>
+<td><p>3 つの型</p></td>
+</tr>
+<tr class="row-odd"><td><p>SVG</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rect</span></code>・<code class="docutils literal notranslate"><span class="pre">text</span></code>・<code class="docutils literal notranslate"><span class="pre">polyline</span></code>・<code class="docutils literal notranslate"><span class="pre">marker</span></code>・<code class="docutils literal notranslate"><span class="pre">viewBox</span></code>。y は下向き</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Diagram.to_svg</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>文字幅の見積り</p></td>
+<td><p>全角 = 1、半角 ≒ 0.55</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">text_width</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>折れ線の途中の点</p></td>
+<td><p>線分の長さを足し引き。<code class="docutils literal notranslate"><span class="pre">O(n)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_path_point</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>図をデータで</p></td>
+<td><p>dataclass → SVG と drawio</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Panel</span></code>・<code class="docutils literal notranslate"><span class="pre">Card</span></code>・<code class="docutils literal notranslate"><span class="pre">Edge</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>図のテスト</p></td>
+<td><p>重なり・はみ出し・生成物の一致</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_diagrams.py</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>図とコードの一致</p></td>
+<td><p>2 方向の差</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MODULE_IMPORTS</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Mermaid の標準</p></td>
+<td><p>init の行 + 5 色の classDef。機械で揃える</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">check-mermaid</span> <span class="pre">--fix</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id20">
+<h2>次回<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="12-ci-and-operations.html"><span class="std std-doc">第 12 回 CI と運用</span></a>: ここまでの検査を <strong>自動で回す</strong> 仕組み (CI) と、HTML 版の配布・運用の手順をまとめます。</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="12-ci-and-operations.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">第 12 回 CI と運用</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="10-testing.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第 10 回 テスト</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">第 11 回 図を作る</a><ul>
+<li><a class="reference internal" href="#id2">この回のゴール</a></li>
+<li><a class="reference internal" href="#id3">1. 読みやすい図の条件</a></li>
+<li><a class="reference internal" href="#id4">2. 図の種類を選ぶ</a></li>
+<li><a class="reference internal" href="#svg">3. SVG の基礎</a></li>
+<li><a class="reference internal" href="#id5">4. 文字幅の見積り</a></li>
+<li><a class="reference internal" href="#id6">5. 折れ線の途中の点: ラベルの位置</a></li>
+<li><a class="reference internal" href="#id7">6. 図をデータで定義する</a><ul>
+<li><a class="reference internal" href="#id8">描画の順序</a></li>
+<li><a class="reference internal" href="#drawio">drawio の構造</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id9">7. 図の品質をテストする</a><ul>
+<li><a class="reference internal" href="#id10">重なり</a></li>
+<li><a class="reference internal" href="#id11">はみ出し</a></li>
+<li><a class="reference internal" href="#id12">生成物のずれ</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id13">8. 図を、実際のコードと一致させる</a></li>
+<li><a class="reference internal" href="#mermaid">9. Mermaid の標準の見た目</a><ul>
+<li><a class="reference internal" href="#classdef">5 色の classDef</a></li>
+<li><a class="reference internal" href="#id14">1 行目を、機械で揃える</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id15">10. 新しい図を足す手順</a></li>
+<li><a class="reference internal" href="#id16">ハンズオン</a></li>
+<li><a class="reference internal" href="#id17">確認問題</a></li>
+<li><a class="reference internal" href="#id18">解答</a></li>
+<li><a class="reference internal" href="#id19">まとめ</a></li>
+<li><a class="reference internal" href="#id20">次回</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/dp_prompt.js?v=654ff740"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

@@ -12,47 +12,19 @@
 
 ### 読む順番
 
-```{list-table}
-:header-rows: 1
-:widths: 6 24 70
-
-* - 順
-  - ファイル
-  - 見るもの
-* - 1
-  - `docspipeline/confluence.py`
-  - **一番短く、一番大事**。モード (`current_mode`)、必須の環境変数 (`REQUIRED_ENV`)、Sphinx に渡す設定 (`sphinx_settings`)、伏せ字 (`mask_secrets`)。外部に触れない純粋な関数だけで、テストしやすい作りの手本
-* - 2
-  - `docspipeline/config.py`
-  - `build_config()`。引数が増えるたびにここを通る。上から順に「パスの登録 → 拡張の一覧 → nitpicky → 辞書の組み立て → Confluence 設定」
-* - 3
-  - `docspipeline/guard.py`
-  - **一番小さな Sphinx 拡張** (30 行弱)。`setup()` と、イベントへの接続の最小の形
-* - 4
-  - `docspipeline/mermaid.py`
-  - 外部コマンド (`mmdc`) を呼ぶ拡張。`find_mmdc` → `render` (ハッシュでキャッシュ) → `MermaidDirective.run` → `_fallback` (三つの方針)
-* - 5
-  - `docspipeline/doxygen.py`
-  - もう一つの外部コマンドの例。`make_doxyfile` (文字列を作るだけ) と `run_doxygen` (実行) が分かれている
-* - 6
-  - `docspipeline/cli.py`
-  - コマンドの入口。一つのコマンドは、一つの `cmd_*` 関数 + `build_parser` の一行
-* - 7
-  - `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`、`structure_map.py`
-  - CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている。`structure_map` は、この地図そのものを作る ([機械の地図](09-structure-map.md))
-* - 7'
-  - `docspipeline/mmdc.py`、`files.py`
-  - `mmdc` の探索と実行、Python ファイルの列挙。どちらも **Sphinx に依存しない葉** で、複数のモジュールが共有する (`files.py` は、`coverage`・`map`・`init` で「探さない場所」の規則を揃える)
-* - 7''
-  - `docspipeline/prompt.py`、`static/`
-  - コピーできるプロンプトの拡張 (`.. prompt::`)。標準のノードだけで組み立て、ボタンは `static/dp_prompt.js` が足す
-* - 8
-  - `docspipeline/stubs/hou.py`
-  - 属性参照・継承・呼び出しをすべて受け流す偽物。`_Meta` と `_Any` の二段構え
-* - 9
-  - `tools/diagrams/kit.py`、`build_diagrams.py`
-  - 図の定義 (パネル・カード・矢印) から、`.drawio` と SVG を作る
-```
+| 順 | ファイル | 見るもの |
+|---|---|---|
+| 1 | `docspipeline/confluence.py` | **一番短く、一番大事**。モード (`current_mode`)、必須の環境変数 (`REQUIRED_ENV`)、Sphinx に渡す設定 (`sphinx_settings`)、伏せ字 (`mask_secrets`)。外部に触れない純粋な関数だけで、テストしやすい作りの手本 |
+| 2 | `docspipeline/config.py` | `build_config()`。引数が増えるたびにここを通る。上から順に「パスの登録 → 拡張の一覧 → nitpicky → 辞書の組み立て → Confluence 設定」 |
+| 3 | `docspipeline/guard.py` | **一番小さな Sphinx 拡張** (30 行弱)。`setup()` と、イベントへの接続の最小の形 |
+| 4 | `docspipeline/mermaid.py` | 外部コマンド (`mmdc`) を呼ぶ拡張。`find_mmdc` → `render` (ハッシュでキャッシュ) → `MermaidDirective.run` → `_fallback` (三つの方針) |
+| 5 | `docspipeline/doxygen.py` | もう一つの外部コマンドの例。`make_doxyfile` (文字列を作るだけ) と `run_doxygen` (実行) が分かれている |
+| 6 | `docspipeline/cli.py` | コマンドの入口。一つのコマンドは、一つの `cmd_*` 関数 + `build_parser` の一行 |
+| 7 | `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`、`structure_map.py` | CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている。`structure_map` は、この地図そのものを作る ([機械の地図](09-structure-map.md)) |
+| 7' | `docspipeline/mmdc.py`、`files.py` | `mmdc` の探索と実行、Python ファイルの列挙。どちらも **Sphinx に依存しない葉** で、複数のモジュールが共有する (`files.py` は、`coverage`・`map`・`init` で「探さない場所」の規則を揃える) |
+| 7'' | `docspipeline/prompt.py`、`static/` | コピーできるプロンプトの拡張 (`.. prompt::`)。標準のノードだけで組み立て、ボタンは `static/dp_prompt.js` が足す |
+| 8 | `docspipeline/stubs/hou.py` | 属性参照・継承・呼び出しをすべて受け流す偽物。`_Meta` と `_Any` の二段構え |
+| 9 | `tools/diagrams/kit.py`、`build_diagrams.py` | 図の定義 (パネル・カード・矢印) から、`.drawio` と SVG を作る |
 
 ### 副作用の置き場所
 

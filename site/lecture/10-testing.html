@@ -1,0 +1,1089 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="第 11 回 図を作る" href="11-diagrams.html"><link rel="prev" title="第 9 回 公開と安全設計" href="09-publishing-safety.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>第 10 回 テスト - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00-introduction.html">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-ast.html">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07-sphinx-extensions.html">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">第 10 回 テスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="11-diagrams.html">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13-capstone.html">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/lecture/10-testing.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="id1">
+<h1>第 10 回 テスト<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>所要時間の目安: 4 時間 / 前提: 第 1〜9 回 (特に第 3・7・9 回)</p>
+</div></blockquote>
+<section id="id2">
+<h2>この回のゴール<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>テストの <strong>種類</strong> (単体・コマンド・実ビルド・生成物・構造・回帰) と、それぞれの役目を説明できる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span></code> の基本 (<code class="docutils literal notranslate"><span class="pre">assert</span></code>・フィクスチャ・<code class="docutils literal notranslate"><span class="pre">parametrize</span></code>・<code class="docutils literal notranslate"><span class="pre">tmp_path</span></code>・<code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code>) を使える。</p></li>
+<li><p><strong>偽物</strong> (偽のコマンド・偽の環境・関数の差し替え) の作り方を、使い分けられる。</p></li>
+<li><p><strong>変異テスト</strong> (テストのテスト) を、手作業でできる。</p></li>
+<li><p><strong>構造テスト</strong> (依存の向き・生成物のずれ) の考え方を、説明できる。</p></li>
+<li><p>不備を見つけたとき、<strong>再現 → 失敗するテスト → 修正 → 効くか確認</strong> の手順で、回帰テストを足せる。</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>1. なぜテストを書くのか<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>ここまでの講義で、<strong>レビューで見つかった不備</strong> が、何度も出てきました。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>不備</p></th>
+<th class="head"><p>もし、テストが無かったら</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>存在しないパスを、「100%」と報告する</p></td>
+<td><p>打ち間違いで、<strong>検査が黙って空</strong> になる。誰も気付かない</p></td>
+</tr>
+<tr class="row-odd"><td><p>増分ビルドが、公開の方針を素通りする</p></td>
+<td><p>図の無いページで、Confluence を <strong>置き換える</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Sphinx が無い環境で、CLI 全体が起動しない</p></td>
+<td><p>利用者が、<strong>最初のコマンドで、つまずく</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>テストは、<strong>「いま動いている」ことの確認</strong> ではなく、「<strong>将来、壊したときに、気付ける</strong>」ための仕組みです。
+人は、変更のたびに、全部を見直せません。<strong>機械に、見張らせます</strong>。</p>
+</section>
+<section id="id4">
+<h2>2. テストの種類<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<img alt="" src="../_images/mermaid-2e0ae0d61a367654.svg" />
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>種類</p></th>
+<th class="head"><p>ファイル (例)</p></th>
+<th class="head"><p>確かめること</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>単体</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_confluence.py</span></code>・<code class="docutils literal notranslate"><span class="pre">test_docstring_coverage.py</span></code>・<code class="docutils literal notranslate"><span class="pre">test_doxygen.py</span></code></p></td>
+<td><p>純粋な関数。<strong>数を多く</strong> 書く</p></td>
+</tr>
+<tr class="row-odd"><td><p>コマンド</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_cli.py</span></code>・<code class="docutils literal notranslate"><span class="pre">test_mermaid.py</span></code></p></td>
+<td><p>引数 → 終了コード・出力。外のプロセスは <strong>偽物</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>実ビルド</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_build.py</span></code>・<code class="docutils literal notranslate"><span class="pre">test_prompt.py</span></code></p></td>
+<td><p>Sphinx を <strong>本当に</strong> 動かす。主要な経路だけ</p></td>
+</tr>
+<tr class="row-odd"><td><p>生成物</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_diagrams.py</span></code>・<code class="docutils literal notranslate"><span class="pre">test_site.py</span></code>・<code class="docutils literal notranslate"><span class="pre">test_lectures.py</span></code></p></td>
+<td><p>生成物が、元と <strong>ずれていない</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>構造</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_structure_map.py</span></code></p></td>
+<td><p><strong>依存の向き</strong> のルール</p></td>
+</tr>
+<tr class="row-odd"><td><p>回帰</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_robustness.py</span></code></p></td>
+<td><p>見つかった不備の <strong>再発防止</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>形は、ピラミッド</strong> です。速くて小さいテストを、<strong>たくさん</strong>、遅くて大きいテストを、<strong>少し</strong>。
+実ビルドのテストは、重要ですが、遅く、原因の切り分けが難しい。<strong>問題の大半を、単体テストで捕まえる</strong> のが、理想です。</p>
+</section>
+<section id="pytest">
+<h2>3. pytest の基本<a class="headerlink" href="#pytest" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pytest</span></code> は、Python のテストの、標準的な道具です。<strong><code class="docutils literal notranslate"><span class="pre">test_</span></code> で始まる関数</strong> を、自動で見つけて、実行します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-B"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pytest"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="s2">"-p"</span><span class="p">,</span> <span class="s2">"no:cacheprovider"</span><span class="p">,</span> <span class="s2">"--tb=no"</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">],</span>
+                       <span class="n">cwd</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">" in [0-9.]+s.*$"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>                         <span class="c1"># 実行時間は、毎回違うので除く</span>
+
+<span class="n">MINI</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">def total(prices, tax=0.1):</span>
+<span class="s1">    """税込みの合計 (小数 2 桁)。"""</span>
+<span class="s1">    if tax &lt; 0:</span>
+<span class="s1">        raise ValueError("税率は 0 以上")</span>
+<span class="s1">    return round(sum(prices) * (1 + tax), 2)</span>
+<span class="s1">'''</span>
+
+<span class="n">TESTS</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">import pytest</span>
+<span class="s1">from mini import total</span>
+
+<span class="s1">def test_total_adds_tax():</span>
+<span class="s1">    assert total([100, 200]) == 330.0</span>
+
+<span class="s1">@pytest.mark.parametrize("prices, expected", [([], 0.0), ([100], 110.0), ([1, 2, 3], 6.6)])</span>
+<span class="s1">def test_total_for_several_inputs(prices, expected):</span>
+<span class="s1">    assert total(prices) == expected</span>
+
+<span class="s1">def test_negative_tax_is_rejected():</span>
+<span class="s1">    with pytest.raises(ValueError, match="税率"):</span>
+<span class="s1">        total([1], tax=-0.1)</span>
+
+<span class="s1">def test_with_a_temporary_directory(tmp_path):</span>
+<span class="s1">    path = tmp_path / "prices.txt"</span>
+<span class="s1">    path.write_text("100</span><span class="se">\\</span><span class="s1">n200</span><span class="se">\\</span><span class="s1">n")</span>
+<span class="s1">    prices = [int(line) for line in path.read_text().splitlines()]</span>
+<span class="s1">    assert total(prices, tax=0) == 300</span>
+
+<span class="s1">def test_capturing_output(capsys):</span>
+<span class="s1">    print("こんにちは")</span>
+<span class="s1">    assert capsys.readouterr().out == "こんにちは</span><span class="se">\\</span><span class="s1">n"</span>
+
+<span class="s1">def test_changing_the_environment(monkeypatch):</span>
+<span class="s1">    import os</span>
+<span class="s1">    monkeypatch.setenv("DEMO", "1")</span>
+<span class="s1">    assert os.environ["DEMO"] == "1"</span>
+<span class="s1">'''</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"mini.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">MINI</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"test_mini.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">TESTS</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+8 passed
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>道具</p></th>
+<th class="head"><p>働き</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong><code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">式</span></code></strong></p></td>
+<td><p>式が偽なら、<strong>失敗</strong>。<code class="docutils literal notranslate"><span class="pre">pytest</span></code> が、式の中の値を、失敗の表示に出してくれる</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong><code class="docutils literal notranslate"><span class="pre">&#64;pytest.mark.parametrize</span></code></strong></p></td>
+<td><p>同じテストを、<strong>入力の組を変えて</strong>、繰り返す。1 つの関数が、3 つのテストになる (上の例で、全部で 8 つ)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong><code class="docutils literal notranslate"><span class="pre">pytest.raises(例外,</span> <span class="pre">match=)</span></code></strong></p></td>
+<td><p>「この処理は、<strong>この例外を投げる</strong>」ことを、確かめる。<code class="docutils literal notranslate"><span class="pre">match</span></code> は、メッセージの正規表現</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong><code class="docutils literal notranslate"><span class="pre">tmp_path</span></code></strong> (フィクスチャ)</p></td>
+<td><p>テストごとの <strong>一時ディレクトリ</strong> (<code class="docutils literal notranslate"><span class="pre">Path</span></code>)。終わると、片付く</p></td>
+</tr>
+<tr class="row-even"><td><p><strong><code class="docutils literal notranslate"><span class="pre">capsys</span></code></strong></p></td>
+<td><p>標準出力・標準エラーを、<strong>捕まえて</strong>、調べる</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong><code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code></strong></p></td>
+<td><p>環境変数・属性・辞書を、<strong>テストの間だけ</strong> 書き換える。終わると、<strong>自動で元に戻る</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>フィクスチャ</strong> とは、テストの <strong>準備物</strong> を、関数の <strong>引数の名前</strong> で受け取る仕組みです
+(<code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">test_x(tmp_path)</span></code> と書くだけで、<code class="docutils literal notranslate"><span class="pre">pytest</span></code> が、一時ディレクトリを作って渡す)。</p>
+</section>
+<section id="id5">
+<h2>4. 偽物の使い分け<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>テストしたい対象が、<strong>外の世界</strong> (環境変数・外部コマンド・ファイル・ネットワーク) に触れると、
+テストが、<strong>遅く・不安定・危険</strong> になります。<strong>偽物に置き換えて</strong>、対象の <strong>ロジックだけ</strong> を、確かめます。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>偽物</p></th>
+<th class="head"><p>使う場面</p></th>
+<th class="head"><p>例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>偽の環境</strong> (辞書を渡す)</p></td>
+<td><p>関数が <code class="docutils literal notranslate"><span class="pre">environ</span></code> を <strong>引数で受ける</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">confluence.sphinx_settings({...})</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>一時ディレクトリ</strong></p></td>
+<td><p>ファイルを作る・読む</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tmp_path</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>偽のコマンド</strong> (実行ファイル)</p></td>
+<td><p>外部コマンドを、<strong>本当に起動</strong> する処理</p></td>
+<td><p>偽の <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> (呼び出しを数える・失敗する)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>関数の差し替え</strong> (<code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code>)</p></td>
+<td><p>内部の関数を、<strong>呼ばれたかだけ</strong> 見たい</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cli._run</span></code> を、記録するだけの関数に</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="id6">
+<h3>関数の差し替え: 「何を起動しようとしたか」だけを見る<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">build</span></code> は、子プロセスで Sphinx を起動します。テストで、<strong>本当に起動する必要はありません</strong>。
+「<strong>どんなコマンドと環境で、起動しようとしたか</strong>」だけを、確かめれば足ります。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli</span>
+
+<span class="n">calls</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">_run</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">:</span> <span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">list</span><span class="p">(</span><span class="n">cmd</span><span class="p">),</span> <span class="n">env</span> <span class="ow">or</span> <span class="p">{}))</span> <span class="ow">or</span> <span class="mi">0</span>     <span class="c1"># 本物の _run を、記録だけの関数に差し替える</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"build --require-mermaid:"</span><span class="p">,</span> <span class="n">cli</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">"build"</span><span class="p">,</span> <span class="s2">"docs"</span><span class="p">,</span> <span class="s2">"--require-mermaid"</span><span class="p">]))</span>
+<span class="n">cmd</span><span class="p">,</span> <span class="n">env</span> <span class="o">=</span> <span class="n">calls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"  -W:"</span><span class="p">,</span> <span class="s2">"-W"</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">,</span> <span class="s2">"/ -E:"</span><span class="p">,</span> <span class="s2">"-E"</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"  モード:"</span><span class="p">,</span> <span class="n">env</span><span class="p">[</span><span class="s2">"DOCSPIPELINE_CONFLUENCE_MODE"</span><span class="p">],</span> <span class="s2">"/ Mermaid の方針:"</span><span class="p">,</span> <span class="n">env</span><span class="p">[</span><span class="s2">"DOCSPIPELINE_MERMAID_MISSING"</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"build (指定なし)        :"</span><span class="p">,</span> <span class="n">cli</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">"build"</span><span class="p">,</span> <span class="s2">"docs"</span><span class="p">]))</span>
+<span class="n">cmd</span><span class="p">,</span> <span class="n">env</span> <span class="o">=</span> <span class="n">calls</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"  -W:"</span><span class="p">,</span> <span class="s2">"-W"</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">,</span> <span class="s2">"/ -E:"</span><span class="p">,</span> <span class="s2">"-E"</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">,</span> <span class="s2">"/ 方針:"</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"DOCSPIPELINE_MERMAID_MISSING"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+build --require-mermaid: 0
+  -W: True / -E: True
+  モード: local / Mermaid の方針: error
+build (指定なし)        : 0
+  -W: True / -E: False / 方針: None
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">-W</span></code> (警告をエラーに) は、どちらでも付く。<code class="docutils literal notranslate"><span class="pre">-E</span></code> と、Mermaid の方針は、<code class="docutils literal notranslate"><span class="pre">--require-mermaid</span></code> のときだけ。
+<strong>子プロセスを起動せずに</strong>、この約束を、<strong>一瞬で</strong> 確かめられました。</p>
+<p>(上の例は、本物の <code class="docutils literal notranslate"><span class="pre">cli._run</span></code> を <strong>直接書き換えて</strong> います。<code class="docutils literal notranslate"><span class="pre">pytest</span></code> の <code class="docutils literal notranslate"><span class="pre">monkeypatch.setattr</span></code> なら、<strong>テストの後に、自動で元に戻ります</strong>。)</p>
+<p>実際のテストの例です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_cli.py::test_publish_runs_connection_test_first_and_stops_on_failure</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_publish_runs_connection_test_first_and_stops_on_failure</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">confluence</span><span class="o">.</span><span class="n">REQUIRED_ENV</span><span class="p">:</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">"x"</span> <span class="o">*</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="n">commands</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">cli</span><span class="p">,</span> <span class="s2">"_run"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">:</span> <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">run</span><span class="p">(</span><span class="s2">"publish"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">"--mode"</span><span class="p">,</span> <span class="s2">"publish"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s2">"connection-test"</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">monkeypatch.setenv</span></code>: 5 つの環境変数を、ダミーの値で設定する。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monkeypatch.setattr(cli,</span> <span class="pre">&quot;_run&quot;,</span> <span class="pre">...)</span></code>: 起動を、<strong>記録して、失敗 (<code class="docutils literal notranslate"><span class="pre">1</span></code>) を返す</strong> 関数に差し替える。</p></li>
+<li><p>確かめること: <strong>接続テストの 1 回目で止まった</strong> (<code class="docutils literal notranslate"><span class="pre">len(commands)</span> <span class="pre">==</span> <span class="pre">1</span></code>)・それが <code class="docutils literal notranslate"><span class="pre">connection-test</span></code> だった。
+= 「接続テストが失敗したら、<strong>ビルドを始めない</strong>」(第 9 回の「早く止まる」)。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3>偽のコマンド: 実行ファイルを、テストの中で作る<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>外部コマンドを <strong>本当に起動</strong> する処理 (<code class="docutils literal notranslate"><span class="pre">mmdc.render</span></code>) は、<strong>偽の実行ファイル</strong> で試します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_mermaid.py::_fake_mmdc</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_fake_mmdc</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""-o の出力先に、固定の SVG を書くだけの偽 mmdc。"""</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"""</span><span class="se">\</span>
+<span class="s2">        #!</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span>
+<span class="s2">        import sys</span>
+<span class="s2">        args = sys.argv[1:]</span>
+<span class="s2">        if not </span><span class="si">{</span><span class="n">ok</span><span class="si">!r}</span><span class="s2">:</span>
+<span class="s2">            print("boom", file=sys.stderr)</span>
+<span class="s2">            sys.exit(3)</span>
+<span class="s2">        out = args[args.index("-o") + 1]</span>
+<span class="s2">        open(out, "w").write('&lt;svg xmlns="http://www.w3.org/2000/svg"/&gt;')</span>
+<span class="s2">        """</span>
+    <span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IEXEC</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>一時ディレクトリに、<strong>Python の小さなスクリプト</strong> を、実行ファイルとして作る (<code class="docutils literal notranslate"><span class="pre">#!{sys.executable}</span></code>・実行権限)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ok=True</span></code>: <code class="docutils literal notranslate"><span class="pre">-o</span></code> の出力先に、<strong>SVG を書く</strong> だけ。<code class="docutils literal notranslate"><span class="pre">ok=False</span></code>: 標準エラーに <code class="docutils literal notranslate"><span class="pre">boom</span></code> と書いて、<strong>終了コード 3</strong>。</p></li>
+<li><p>本物の <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> (Chromium が要る・遅い) の <strong>代わり</strong> に、成功と失敗の、<strong>両方の道</strong> を試せる。</p></li>
+</ul>
+</section>
+</section>
+<section id="id8">
+<h2>5. 変異テスト: テストのテスト<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p><strong>「テストが通る」ことは、「テストが役に立つ」ことを、意味しません。</strong> 何も確かめていないテストも、通ります。
+そこで、<strong>わざとコードを壊して</strong> (変異)、<strong>テストが落ちるか</strong> を確かめます。落ちなければ、そのテストは、その部分を守っていません。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-B"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pytest"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="s2">"-p"</span><span class="p">,</span> <span class="s2">"no:cacheprovider"</span><span class="p">,</span> <span class="s2">"--tb=no"</span><span class="p">],</span>
+                       <span class="n">cwd</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">" in [0-9.]+s.*$"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="n">SOURCE</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">def is_failing(percent, fail_under):</span>
+<span class="s1">    """基準を **下回る** とき True。基準と同じなら、合格 (False)。"""</span>
+<span class="s1">    return percent &lt; fail_under</span>
+<span class="s1">'''</span>
+
+<span class="n">WEAK</span> <span class="o">=</span> <span class="s1">'from m import is_failing</span><span class="se">\n\n</span><span class="s1">def test_clearly_below():</span><span class="se">\n</span><span class="s1">    assert is_failing(10, 80)</span><span class="se">\n</span><span class="s1">'</span>
+<span class="n">STRONG</span> <span class="o">=</span> <span class="n">WEAK</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">def test_exactly_at_the_threshold_passes():</span><span class="se">\n</span><span class="s1">    assert not is_failing(80, 80)</span><span class="se">\n\n</span><span class="s1">def test_above():</span><span class="se">\n</span><span class="s1">    assert not is_failing(99, 80)</span><span class="se">\n</span><span class="s1">'</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="n">mutant</span> <span class="o">=</span> <span class="n">SOURCE</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"percent &lt; fail_under"</span><span class="p">,</span> <span class="s2">"percent &lt;= fail_under"</span><span class="p">)</span>      <span class="c1"># 変異: &lt; を &lt;= に</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">tests</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"弱いテスト"</span><span class="p">,</span> <span class="n">WEAK</span><span class="p">),</span> <span class="p">(</span><span class="s2">"強いテスト"</span><span class="p">,</span> <span class="n">STRONG</span><span class="p">)):</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"test_m.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">tests</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"m.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">SOURCE</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">original</span> <span class="o">=</span> <span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"m.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">mutant</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">mutated</span> <span class="o">=</span> <span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: 元のコード → </span><span class="si">{</span><span class="n">original</span><span class="si">}</span><span class="s2"> / 壊したコード → </span><span class="si">{</span><span class="n">mutated</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+弱いテスト: 元のコード → 1 passed / 壊したコード → 1 passed
+強いテスト: 元のコード → 3 passed / 壊したコード → 1 failed, 2 passed
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>弱いテスト</strong>: 壊したコード (<code class="docutils literal notranslate"><span class="pre">&lt;</span></code> を <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> に変えた) でも、<strong>通ってしまう</strong>。境界 (基準ちょうど) を、見ていないから。</p></li>
+<li><p><strong>強いテスト</strong>: <strong>境界の値</strong> を試すので、壊したコードで <strong>落ちる</strong>。テストが、その部分を守っている証拠。</p></li>
+</ul>
+<blockquote>
+<div><p><strong>落とし穴: バイトコードのキャッシュ</strong>
+上の例で、<code class="docutils literal notranslate"><span class="pre">pytest</span></code> を <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-B</span></code> (バイトコードを書かない) で起動しているのは、理由があります。
+Python は、<code class="docutils literal notranslate"><span class="pre">.py</span></code> を読み込んだ結果 (<code class="docutils literal notranslate"><span class="pre">.pyc</span></code>) を <code class="docutils literal notranslate"><span class="pre">__pycache__</span></code> に保存し、<strong>更新時刻 (秒単位) とファイルの大きさ</strong> が同じなら、<strong>古い <code class="docutils literal notranslate"><span class="pre">.pyc</span></code> を再利用</strong> します。
+変異が「<code class="docutils literal notranslate"><span class="pre">2</span></code> を <code class="docutils literal notranslate"><span class="pre">1</span></code> に変える」ような <strong>同じ長さの書き換え</strong> で、しかも <strong>同じ秒</strong> の中に行われると、
+<strong>変異が反映されず、「テストが通ってしまった」</strong> ように見えます。実際、この講義の例で、<code class="docutils literal notranslate"><span class="pre">-B</span></code> を付けずに繰り返し実行したところ、
+結果が「<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">passed</span></code>」と「<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">failed,</span> <span class="pre">1</span> <span class="pre">passed</span></code>」の間で <strong>ゆれました</strong>。
+テストが「通る」理由が分からないときは、<strong>キャッシュを疑う</strong> (<code class="docutils literal notranslate"><span class="pre">__pycache__</span></code> を消す、または <code class="docutils literal notranslate"><span class="pre">-B</span></code>)。</p>
+</div></blockquote>
+<p>このリポジトリでは、テストを書いたあと、<strong>実際に修正を戻して、テストが落ちることを確かめました</strong>。手順は簡単です。</p>
+<ol class="arabic simple">
+<li><p>修正したファイルの、<strong>直した部分だけ</strong> を、元の (壊れた) 形に戻す。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span></code> を実行する。<strong>狙いのテストが、落ちる</strong> ことを確かめる。</p></li>
+<li><p>修正を戻して、<code class="docutils literal notranslate"><span class="pre">pytest</span></code> が通ることを確かめる。</p></li>
+</ol>
+<p><strong>境界値を試す</strong>: 「基準ちょうど」「0 件」「空文字」「最大値」は、<strong>間違いが潜みやすい</strong> 場所です。</p>
+</section>
+<section id="id9">
+<h2>6. 構造テスト: 設計の約束を、テストにする<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>「Sphinx が無くても、CLI が動く」という <strong>設計の約束</strong> は、普通のテスト (機能のテスト) では、<strong>見えません</strong> (テスト環境には、Sphinx が入っている)。
+そこで、<strong>依存の向き</strong> そのものを、テストにします。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_structure_map.py::test_only_sphinx_extensions_import_sphinx</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_only_sphinx_extensions_import_sphinx</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+    <span class="c1"># core の CLI (init / coverage / map / doctor) は、Sphinx が入っていない環境でも動くこと</span>
+    <span class="n">offenders</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">external</span> <span class="o">&amp;</span> <span class="p">{</span><span class="s2">"sphinx"</span><span class="p">,</span> <span class="s2">"docutils"</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">modules</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">external</span> <span class="o">&amp;</span> <span class="p">{</span><span class="s2">"sphinx"</span><span class="p">,</span> <span class="s2">"docutils"</span><span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">offenders</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">SPHINX_EXTENSIONS</span><span class="p">,</span> <span class="n">offenders</span>
+</pre></div>
+</div>
+<p>(第 5 回の <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code> と同じ読み取りで、各モジュールが <code class="docutils literal notranslate"><span class="pre">import</span></code> する外部ライブラリを調べ、
+<strong>Sphinx・docutils を import してよいのは、拡張だけ</strong> であることを、確かめます。)</p>
+<p>もう 1 つ、<strong>実際に Sphinx を隠して</strong>、import できるかを確かめるテストがあります。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_structure_map.py::test_the_cli_starts_without_sphinx_installed</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_the_cli_starts_without_sphinx_installed</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Sphinx を隠した状態で、core のモジュールを import できる (doctor 経由で Sphinx を引き込んだ不具合の再発防止)。"""</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">"import sys</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"for name in ('sphinx', 'docutils', 'myst_parser'):</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"    sys.modules[name] = None</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"import docspipeline.cli, docspipeline.doctor, docspipeline.config, docspipeline.structure_map</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"print('ok')</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">code</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">ROOT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s2">"ok"</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">sys.modules[name]</span> <span class="pre">=</span> <span class="pre">None</span></code> は、<strong>「その名前の import を、失敗させる」</strong> 印です。これを <strong>先に</strong> 設定してから、
+<code class="docutils literal notranslate"><span class="pre">docspipeline.cli</span></code> などを import し、<strong>エラーにならない</strong> ことを確かめます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">code</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">""</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">70</span><span class="p">]</span>
+
+<span class="n">BLOCK</span> <span class="o">=</span> <span class="s2">"import sys</span><span class="se">\n</span><span class="s2">for n in ('sphinx', 'docutils'):</span><span class="se">\n</span><span class="s2">    sys.modules[n] = None</span><span class="se">\n</span><span class="s2">"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"core (cli)        :"</span><span class="p">,</span> <span class="n">run</span><span class="p">(</span><span class="n">BLOCK</span> <span class="o">+</span> <span class="s2">"import docspipeline.cli, docspipeline.doctor</span><span class="se">\n</span><span class="s2">"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"拡張 (mermaid)    :"</span><span class="p">,</span> <span class="n">run</span><span class="p">(</span><span class="n">BLOCK</span> <span class="o">+</span> <span class="s2">"import docspipeline.mermaid</span><span class="se">\n</span><span class="s2">"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+core (cli)        : (0, '')
+拡張 (mermaid)    : (1, 'ModuleNotFoundError: import of docutils halted; None in sys.modules')
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">core</span></code> (<code class="docutils literal notranslate"><span class="pre">cli</span></code>・<code class="docutils literal notranslate"><span class="pre">doctor</span></code>) は、Sphinx が <strong>無くても</strong> import できる (終了コード 0)。</p></li>
+<li><p>拡張 (<code class="docutils literal notranslate"><span class="pre">mermaid</span></code>) は、docutils / Sphinx を import するので、<strong>失敗する</strong> (終了コード 1。最後の行が、その理由)。これは <strong>想定どおり</strong> (拡張は、Sphinx が要る)。</p></li>
+</ul>
+<p><strong>機能のテストでは、見えない約束</strong> (依存の向き・生成物の一致・設定名の実在) を、<strong>テストとして、書き下す</strong>。これが、構造テストです。</p>
+</section>
+<section id="id10">
+<h2>7. 生成物と文書のテスト<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<p><strong>コードから作るもの</strong> (図・HTML 版・この講義の引用) は、元が変わると、<strong>ずれます</strong>。ずれを、テストで検出します。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>対象</p></th>
+<th class="head"><p>どう確かめるか</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>構成図 (<code class="docutils literal notranslate"><span class="pre">.drawio.svg</span></code>)</p></td>
+<td><p>定義から <strong>作り直した結果</strong> と、コミットしたものが <strong>一致</strong> するか (<code class="docutils literal notranslate"><span class="pre">test_diagrams.py</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>構成図の矢印</p></td>
+<td><p><strong>実際の依存</strong> と、図の矢印が、一致するか (第 11 回)</p></td>
+</tr>
+<tr class="row-even"><td><p>HTML 版 (<code class="docutils literal notranslate"><span class="pre">site/</span></code>)</p></td>
+<td><p>元の文書・ソース・図の <strong>ハッシュ</strong> が、記録と一致するか (第 12 回)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>この講義</strong></p></td>
+<td><p>引用が、<strong>今のソースと一致</strong>。実行例の出力が、<strong>本当の出力と一致</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>最後の行を見ましょう。講義の整合を、確かめるテストです。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_lectures.py::test_quotes_and_excerpts_match_the_current_source</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">LECTURES</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_quotes_and_excerpts_match_the_current_source</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">quote_code</span><span class="o">.</span><span class="n">problems</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span> <span class="o">==</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_lectures.py::_runnable</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_runnable</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="n">quote_code</span><span class="o">.</span><span class="n">fenced_blocks</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">blocks</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">lines</span> <span class="ow">and</span> <span class="n">block</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="n">quote_code</span><span class="o">.</span><span class="n">RUN_MARK</span><span class="p">:</span>
+            <span class="n">nxt</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">nxt</span> <span class="ow">and</span> <span class="n">nxt</span><span class="o">.</span><span class="n">lines</span> <span class="ow">and</span> <span class="n">nxt</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="n">quote_code</span><span class="o">.</span><span class="n">OUTPUT_MARK</span><span class="p">:</span>
+                <span class="n">expected</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">nxt</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">yield</span> <span class="n">block</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="n">expected</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>講義の Markdown から、<strong>コードブロックを取り出し</strong>、<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">実行できる</span></code> で始まるものを、<strong>実際に実行</strong>。</p></li>
+<li><p>直後のブロックが <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">出力</span></code> なら、<strong>標準出力と一致</strong> することを確かめる (<code class="docutils literal notranslate"><span class="pre">result.stdout.strip()</span> <span class="pre">==</span> <span class="pre">expected</span></code>)。</p></li>
+<li><p>実行は、<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-I</span></code> (<strong>隔離モード</strong>: 環境変数・ユーザーの設定に、左右されない) で行う。</p></li>
+</ul>
+<p><strong>文書を、テストできるコード</strong> として扱うと、「<strong>説明が、嘘になる</strong>」ことが、起きなくなります (第 0 回の、docs as code)。</p>
+<section id="id11">
+<h3>決定的であること<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<p>実行例の出力を、<strong>毎回、同じ</strong> にしないと、テストが <strong>不安定</strong> (flaky) になります。よくある原因は、<strong>順序</strong> です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="n">code</span> <span class="o">=</span> <span class="s2">"print(list({'apple', 'banana', 'cherry', 'date'}))"</span>
+<span class="n">orders</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">code</span><span class="p">],</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="s2">"PYTHONHASHSEED"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">)},</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">orders</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"集合を、そのまま出すと、異なる順序の数:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">fixed</span> <span class="o">=</span> <span class="s2">"print(sorted({'apple', 'banana', 'cherry', 'date'}))"</span>
+<span class="n">orders</span> <span class="o">=</span> <span class="p">{</span><span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">fixed</span><span class="p">],</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="s2">"PYTHONHASHSEED"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">)},</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)}</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"整列して出すと、異なる順序の数:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+集合を、そのまま出すと、異なる順序の数: True
+整列して出すと、異なる順序の数: 1
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>集合 (<code class="docutils literal notranslate"><span class="pre">set</span></code>) の反復の順序は、実行ごとに違う</strong> (文字列のハッシュが、実行のたびに、ランダムに決まる)。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">sorted</span></code> で、順序を固定</strong> する。<code class="docutils literal notranslate"><span class="pre">Graph.cycles</span></code> が <code class="docutils literal notranslate"><span class="pre">sorted(...)</span></code> するのも、同じ理由 (第 5 回)。</p></li>
+<li><p>他の原因: 現在時刻・乱数・ファイルの列挙順・並列処理の完了順・<strong>一時ディレクトリの名前</strong> (出力に含めない)。</p></li>
+</ul>
+</section>
+</section>
+<section id="id12">
+<h2>8. 回帰テスト: 不備を見つけたら<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<p>不備を見つけたとき、<strong>直して終わり</strong> にしません。<strong>同じ不備が、二度と入らない</strong> ようにします。</p>
+<img alt="" src="../_images/mermaid-c819572c04448507.svg" />
+<p><strong>① 再現</strong> が大事です。「たぶん、こうなる」ではなく、<strong>実際に動かして、その症状を見る</strong>。
+<strong>②</strong> で、<strong>先に、失敗するテスト</strong> を書くのは、「<strong>テストが、その不備を捕まえられる</strong>」ことを、確かめるためです
+(最初から通るテストは、不備を見ていないかもしれない)。</p>
+<p><code class="docutils literal notranslate"><span class="pre">tests/test_robustness.py</span></code> は、見つかった不備を、<strong>1 つずつ</strong> 記録しています。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>不備</p></th>
+<th class="head"><p>回帰テスト (名前)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>存在しないパスで、検査が空になる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_coverage_of_a_missing_path_is_an_error_not_100_percent</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>構文エラーで、スタックトレース</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_syntax_errors_name_the_file_and_line</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">__init__</span></code> を経由する循環の見逃し</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_cycle_through_the_package_init_is_detected</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>公開系で、Mermaid の方針が無い</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_publish_beyond_local_requires_mermaid_images</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>増分ビルドが方針を素通り</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_publish_and_required_mermaid_rebuild_from_scratch</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>トークンの渡し範囲</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_the_api_token_reaches_only_the_publish_step</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>型検査用の import を、循環と誤認</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_type_checking_import_is_not_a_dependency</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>テストの名前は、「何を守るか」を、文で書きます</strong>。落ちたとき、名前を読むだけで、<strong>何が壊れたか</strong> が分かります。</p>
+</section>
+<section id="id13">
+<h2>9. テストを書く作法<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>作法</p></th>
+<th class="head"><p>理由</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>名前は、振る舞いを、文で</strong> (<code class="docutils literal notranslate"><span class="pre">test_missing_path_is_an_error</span></code>)</p></td>
+<td><p>落ちたとき、読むだけで分かる</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>1 つのテストで、1 つの振る舞い</strong></p></td>
+<td><p>落ちた原因が、一意に分かる</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>準備 → 実行 → 確認</strong> (Arrange・Act・Assert) の順</p></td>
+<td><p>読みやすい</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>ほんとうに確かめたいことだけ</strong> を <code class="docutils literal notranslate"><span class="pre">assert</span></code></p></td>
+<td><p>偶然の詳細 (メッセージの句読点) に頼ると、<strong>無関係な変更で落ちる</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>偽物は、必要最小限</strong></p></td>
+<td><p>偽物だらけだと、<strong>偽物の挙動しか、確かめていない</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>決定的に</strong> (時刻・乱数・順序・一時パスに頼らない)</p></td>
+<td><p>不安定なテストは、<strong>信用されなくなる</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>境界値と、失敗の道</strong> を試す</p></td>
+<td><p>一本道の成功だけでは、壊れやすい所が守られない</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>遅いテストに印</strong> (<code class="docutils literal notranslate"><span class="pre">&#64;pytest.mark.slow</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">&quot;not</span> <span class="pre">slow&quot;</span></code> で、速いものだけ回せる</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id14">
+<h2>ハンズオン<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span> <span class="pre">tests/test_confluence.py</span></code> を実行する。次に、<code class="docutils literal notranslate"><span class="pre">docspipeline/confluence.py</span></code> の <code class="docutils literal notranslate"><span class="pre">&quot;confluence_publish&quot;:</span> <span class="pre">False,</span></code> を <code class="docutils literal notranslate"><span class="pre">True</span></code> に <strong>書き換えて</strong>、もう一度実行する。<strong>落ちるテストの名前</strong> を読む (戻すこと)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span> <span class="pre">-m</span> <span class="pre">&quot;not</span> <span class="pre">slow&quot;</span></code> と <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span></code> の、<strong>実行時間</strong> を比べる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py</span></code> から、好きなテストを 1 つ選び、<strong>何を守っているか</strong> を、一文で書く。</p></li>
+</ol>
+</section>
+<section id="id15">
+<h2>確認問題<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>「テストが通る」ことと、「テストが役に立つ」ことは、なぜ同じではありませんか。</p></li>
+<li><p>変異テストの手順を、説明してください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cli._run</span></code> を、<code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> で差し替えて、テストする利点は何ですか。<strong>何を確かめられなく</strong> なりますか。</p></li>
+<li><p>構造テストは、機能のテストでは捕まえられない、何を捕まえますか。例を挙げてください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sys.modules[&quot;sphinx&quot;]</span> <span class="pre">=</span> <span class="pre">None</span></code> は、何をしますか。なぜ、それをテストで使うのですか。</p></li>
+<li><p>実行例の出力を、<strong>決定的</strong> にするために、何に注意しますか。例を 2 つ挙げてください。</p></li>
+<li><p>不備を直したあと、「<strong>修正を戻して、テストが落ちるか</strong>」を確かめるのは、なぜですか。</p></li>
+<li><p>(書く問題) 第 3 節の <code class="docutils literal notranslate"><span class="pre">total</span></code> に、<strong>「<code class="docutils literal notranslate"><span class="pre">prices</span></code> が空でも、<code class="docutils literal notranslate"><span class="pre">0.0</span></code> を返す」</strong> ことを確かめる回帰テストを足してください。さらに、
+<code class="docutils literal notranslate"><span class="pre">total</span></code> の <code class="docutils literal notranslate"><span class="pre">round(...,</span> <span class="pre">2)</span></code> を <code class="docutils literal notranslate"><span class="pre">round(...,</span> <span class="pre">1)</span></code> に変えた <strong>変異</strong> で、そのテストの組が <strong>落ちる</strong> ことを、確かめてください。</p></li>
+</ol>
+</section>
+<section id="id16">
+<h2>解答<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>何も確かめていない (<code class="docutils literal notranslate"><span class="pre">assert</span></code> が、常に真) テストも、通る。<strong>境界・失敗の道・安全の性質</strong> を見ていないテストは、
+コードが壊れても、通ってしまう。テストが <strong>その部分を守っているか</strong> は、わざと壊して、確かめる。</p></li>
+<li><p>① 守りたい部分の、<strong>条件を 1 つ変える</strong> (<code class="docutils literal notranslate"><span class="pre">&lt;</span></code> を <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>、<code class="docutils literal notranslate"><span class="pre">+</span></code> を <code class="docutils literal notranslate"><span class="pre">-</span></code>、行を消す)。② <code class="docutils literal notranslate"><span class="pre">pytest</span></code> を実行し、<strong>狙いのテストが落ちる</strong> ことを確かめる。
+③ 落ちなければ、<strong>テストが足りない</strong> (境界値を足す)。④ 変異を <strong>戻す</strong>。</p></li>
+<li><p><strong>子プロセスを起動せず</strong>、一瞬で、安全に、「<strong>どんなコマンド・環境で起動しようとしたか</strong>」を確かめられる (引数の組み立て・順序・失敗時の中止)。
+確かめられなくなるのは、<strong>実際に Sphinx が、そのコマンドで動くか</strong> (それは、実ビルドのテストの役目)。</p></li>
+<li><p><strong>設計の約束</strong> (依存の向き・生成物のずれ・名前の実在)。例: 「core が Sphinx を import しない」。
+テスト環境には Sphinx が入っているので、機能のテストでは、違反しても、通ってしまう。</p></li>
+<li><p>以後の <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">sphinx</span></code> を、<strong>失敗させる</strong> (<code class="docutils literal notranslate"><span class="pre">ImportError</span></code>)。<strong>Sphinx が無い環境を、再現する</strong> ため。
+その状態で <code class="docutils literal notranslate"><span class="pre">docspipeline.cli</span></code> が import できれば、「core は、Sphinx に依存しない」と、<strong>実際に</strong> 確かめられる。</p></li>
+<li><p>例: (a) 集合・辞書の <strong>順序</strong> に頼らない (<code class="docutils literal notranslate"><span class="pre">sorted</span></code> で整列)。(b) <strong>一時ディレクトリの名前</strong>・現在時刻・乱数を、出力に含めない (置き換える)。
+(c) ファイルの列挙順 (<code class="docutils literal notranslate"><span class="pre">sorted</span></code>)・並列処理の完了順。</p></li>
+<li><p><strong>テストが、その不備を、本当に捕まえられる</strong> ことを、確かめるため。直しても、テストが通るなら、
+そのテストは、不備を見ていない (直してなくても、通っていた) 可能性がある。</p></li>
+<li><p>例 (実行して確かめてある):</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-B"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pytest"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="s2">"-p"</span><span class="p">,</span> <span class="s2">"no:cacheprovider"</span><span class="p">,</span> <span class="s2">"--tb=no"</span><span class="p">],</span>
+                       <span class="n">cwd</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">" in [0-9.]+s.*$"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="n">SOURCE</span> <span class="o">=</span> <span class="s1">'def total(prices, tax=0.1):</span><span class="se">\n</span><span class="s1">    return round(sum(prices) * (1 + tax), 2)</span><span class="se">\n</span><span class="s1">'</span>
+<span class="n">TESTS</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">from mini import total</span>
+
+<span class="s1">def test_empty_prices_give_zero():</span>
+<span class="s1">    assert total([]) == 0.0</span>
+
+<span class="s1">def test_rounds_to_two_decimals():</span>
+<span class="s1">    assert total([1, 2, 3], tax=0.111) == 6.67</span>
+<span class="s1">'''</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"test_mini.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">TESTS</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"mini.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">SOURCE</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"元のコード:"</span><span class="p">,</span> <span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"mini.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">SOURCE</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"round(sum(prices) * (1 + tax), 2)"</span><span class="p">,</span> <span class="s2">"round(sum(prices) * (1 + tax), 1)"</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"round を 1 桁に:"</span><span class="p">,</span> <span class="n">pytest_summary</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+元のコード: 2 passed
+round を 1 桁に: 1 failed, 1 passed
+</pre></div>
+</div>
+<p>(空の <code class="docutils literal notranslate"><span class="pre">prices</span></code> のテストだけでは、桁数の変異は、捕まえられません。<strong>桁数のテスト</strong> が、それを捕まえます。1 つのテストが、全てを守るわけではない例です。)</p>
+</section>
+<section id="id17">
+<h2>まとめ<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>概念</p></th>
+<th class="head"><p>要点</p></th>
+<th class="head"><p>このリポジトリでの例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>テストの種類</p></td>
+<td><p>単体 → コマンド → 実ビルド。生成物・構造・回帰</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>pytest</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">assert</span></code>・<code class="docutils literal notranslate"><span class="pre">parametrize</span></code>・<code class="docutils literal notranslate"><span class="pre">tmp_path</span></code>・<code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code>・<code class="docutils literal notranslate"><span class="pre">capsys</span></code></p></td>
+<td><p>全てのテスト</p></td>
+</tr>
+<tr class="row-even"><td><p>偽物</p></td>
+<td><p>環境は辞書・コマンドは偽の実行ファイル・内部は差し替え</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_fake_mmdc</span></code>・<code class="docutils literal notranslate"><span class="pre">cli._run</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>変異テスト</p></td>
+<td><p>わざと壊して、落ちるか確かめる</p></td>
+<td><p>修正を戻す確認</p></td>
+</tr>
+<tr class="row-even"><td><p>構造テスト</p></td>
+<td><p>設計の約束を、テストにする</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_structure_map.py</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>文書のテスト</p></td>
+<td><p>引用・実行例が、嘘にならない</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_lectures.py</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>決定的</p></td>
+<td><p>順序・時刻・一時パスに頼らない</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sorted</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>回帰テスト</p></td>
+<td><p>再現 → 失敗するテスト → 修正 → 効くか確認</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_robustness.py</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id18">
+<h2>次回<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="11-diagrams.html"><span class="std std-doc">第 11 回 図を作る</span></a>: SVG・座標・折れ線・drawio・Mermaid で、<strong>読みやすい図</strong> を、コードから作ります。</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="11-diagrams.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">第 11 回 図を作る</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="09-publishing-safety.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第 9 回 公開と安全設計</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">第 10 回 テスト</a><ul>
+<li><a class="reference internal" href="#id2">この回のゴール</a></li>
+<li><a class="reference internal" href="#id3">1. なぜテストを書くのか</a></li>
+<li><a class="reference internal" href="#id4">2. テストの種類</a></li>
+<li><a class="reference internal" href="#pytest">3. pytest の基本</a></li>
+<li><a class="reference internal" href="#id5">4. 偽物の使い分け</a><ul>
+<li><a class="reference internal" href="#id6">関数の差し替え: 「何を起動しようとしたか」だけを見る</a></li>
+<li><a class="reference internal" href="#id7">偽のコマンド: 実行ファイルを、テストの中で作る</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id8">5. 変異テスト: テストのテスト</a></li>
+<li><a class="reference internal" href="#id9">6. 構造テスト: 設計の約束を、テストにする</a></li>
+<li><a class="reference internal" href="#id10">7. 生成物と文書のテスト</a><ul>
+<li><a class="reference internal" href="#id11">決定的であること</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id12">8. 回帰テスト: 不備を見つけたら</a></li>
+<li><a class="reference internal" href="#id13">9. テストを書く作法</a></li>
+<li><a class="reference internal" href="#id14">ハンズオン</a></li>
+<li><a class="reference internal" href="#id15">確認問題</a></li>
+<li><a class="reference internal" href="#id16">解答</a></li>
+<li><a class="reference internal" href="#id17">まとめ</a></li>
+<li><a class="reference internal" href="#id18">次回</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/dp_prompt.js?v=654ff740"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

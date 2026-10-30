@@ -1,0 +1,1308 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="第 5 回 グラフとアルゴリズム" href="05-graph-algorithms.html"><link rel="prev" title="第 3 回 ファイルとプロセス" href="03-files-and-processes.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>第 4 回 構文木 (ast) とソースの静的解析 - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00-introduction.html">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07-sphinx-extensions.html">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10-testing.html">第 10 回 テスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="11-diagrams.html">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13-capstone.html">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/lecture/04-ast.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="ast">
+<h1>第 4 回 構文木 (ast) とソースの静的解析<a class="headerlink" href="#ast" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>所要時間の目安: 3.5 時間 / 前提: 第 1〜3 回</p>
+</div></blockquote>
+<section id="id1">
+<h2>この回のゴール<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>ソースコードを <strong>実行せずに</strong> 読む (静的解析) 利点と限界を説明できる。</p></li>
+<li><p>構文木 (AST) が、どんな <strong>木構造</strong> か説明でき、<code class="docutils literal notranslate"><span class="pre">ast</span></code> で歩ける。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docstring_coverage</span></code> (docstring が無い公開 API の検出) を、<strong>1 行ずつ</strong> 読んで説明できる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">structure_map</span></code> が、<code class="docutils literal notranslate"><span class="pre">import</span></code> 文から <strong>依存を取り出す</strong> 仕組み (相対 import の解決を含む) を説明できる。</p></li>
+<li><p>静的解析の <strong>限界</strong> (見つけられないもの) を、具体例で挙げられる。</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>1. なぜ、コードを「実行せず」に読むのか<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>「このパッケージの公開関数のうち、docstring が無いものを数えたい」。方法は 3 つ考えられます。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>方法</p></th>
+<th class="head"><p>長所</p></th>
+<th class="head"><p>短所</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(a) 正規表現で、<code class="docutils literal notranslate"><span class="pre">def</span></code> の行を探す</p></td>
+<td><p>手軽</p></td>
+<td><p>文字列の中の <code class="docutils literal notranslate"><span class="pre">def</span></code>、コメント、複数行の引数、デコレータ、入れ子を <strong>正しく扱えない</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>(b) <code class="docutils literal notranslate"><span class="pre">import</span></code> して、実行時に調べる (<code class="docutils literal notranslate"><span class="pre">inspect</span></code>)</p></td>
+<td><p>正確</p></td>
+<td><p><strong>コードが実行される</strong> (副作用・遅い)。<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">hou</span></code> のように、環境が無いと <strong>読み込めない</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>(c) <strong>構文木 (<code class="docutils literal notranslate"><span class="pre">ast</span></code>)</strong> で読む</p></td>
+<td><p>正確で、<strong>実行しない</strong></p></td>
+<td><p>実行時にしか決まらないもの (動的な処理) は、見えない</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>DocsPipeline は (c) を選びました。理由は 2 つです。</p>
+<ol class="arabic simple">
+<li><p><strong>安全</strong>: 他人のコードを読むだけで、実行しない。副作用 (ファイルの書き込み・ネットワーク) が起きない。</p></li>
+<li><p><strong>環境に依らない</strong>: Houdini の外でも、Sphinx が無い環境でも、動く。</p></li>
+</ol>
+</section>
+<section id="id3">
+<h2>2. 構文木とは<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>Python は、ソースを読むと、まず <strong>構文木</strong> (AST: Abstract Syntax Tree) に変えます。
+<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">1</span></code> は、次のような木になります。</p>
+<img alt="" src="../_images/mermaid-b9414e5db6bcb20c.svg" />
+<ul class="simple">
+<li><p><strong>節 (ノード)</strong> が、文や式。<strong>子</strong> を持つ。</p></li>
+<li><p>関数定義 (<code class="docutils literal notranslate"><span class="pre">FunctionDef</span></code>) の子には、引数・本体の文が並ぶ。</p></li>
+<li><p>文字列の中の <code class="docutils literal notranslate"><span class="pre">def</span></code> や、コメントは、<strong>木に現れない</strong> (だから、正規表現のような誤認が起きない)。</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ast.parse</span></code> で木を作り、歩いてみましょう。次の関数は、木を <strong>インデントつきで</strong> 表示します
+(ctx や演算子の節は省いて、見やすくしています)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">outline</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">skip</span> <span class="o">=</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">expr_context</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">operator</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">iter_child_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">skip</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">"arg"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">):</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"  "</span> <span class="o">*</span> <span class="n">depth</span> <span class="o">+</span> <span class="n">label</span> <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"  (</span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">extra</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
+        <span class="n">outline</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="n">source</span> <span class="o">=</span> <span class="s2">"def total(items):</span><span class="se">\n</span><span class="s2">    '''合計。'''</span><span class="se">\n</span><span class="s2">    s = 0</span><span class="se">\n</span><span class="s2">    for i in items:</span><span class="se">\n</span><span class="s2">        s += i</span><span class="se">\n</span><span class="s2">    return s</span><span class="se">\n</span><span class="s2">"</span>
+<span class="n">outline</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+FunctionDef  (total)
+  arguments
+    arg  (items)
+  Expr
+    Constant  ('合計。')
+  Assign
+    Name  (s)
+    Constant  (0)
+  For
+    Name  (i)
+    Name  (items)
+    AugAssign
+      Name  (s)
+      Name  (i)
+  Return
+    Name  (s)
+</pre></div>
+</div>
+<p>木の読み方:</p>
+<ul class="simple">
+<li><p>最上位は <code class="docutils literal notranslate"><span class="pre">Module</span></code>。その子が、ファイルの <strong>文の並び</strong> (<code class="docutils literal notranslate"><span class="pre">body</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FunctionDef</span> <span class="pre">(total)</span></code> の子に、引数 <code class="docutils literal notranslate"><span class="pre">arguments</span></code>、そして本体。</p></li>
+<li><p><strong>docstring は、本体の先頭の <code class="docutils literal notranslate"><span class="pre">Expr</span></code> (式文) の中の <code class="docutils literal notranslate"><span class="pre">Constant</span></code> (文字列)</strong> です。特別な構文ではなく、「先頭にある文字列の式」。</p></li>
+</ul>
+<section id="id4">
+<h3>木を歩く 3 つの方法<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>方法</p></th>
+<th class="head"><p>使い方</p></th>
+<th class="head"><p>向く場面</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ast.walk(tree)</span></code></p></td>
+<td><p>全部の節を、順不同で取り出す</p></td>
+<td><p>「全ての <code class="docutils literal notranslate"><span class="pre">import</span></code> が欲しい」。<strong>どこにあっても</strong> よい</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ast.iter_child_nodes(node)</span></code></p></td>
+<td><p><strong>直接の子だけ</strong> を取り出す</p></td>
+<td><p>自分で再帰して、<strong>どこで止めるか</strong> を決める</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ast.NodeVisitor</span></code></p></td>
+<td><p>節の種類ごとのメソッド (<code class="docutils literal notranslate"><span class="pre">visit_FunctionDef</span></code>)</p></td>
+<td><p>節の種類ごとに、処理を分けたい</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>DocsPipeline は、<strong>自分で再帰</strong> します (<code class="docutils literal notranslate"><span class="pre">iter_child_nodes</span></code>)。理由は、「関数の <strong>中</strong> は読まない」「<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> の中は読まない」
+のように、<strong>降りない場所を決めたい</strong> からです。<code class="docutils literal notranslate"><span class="pre">ast.walk</span></code> は、全部に降りてしまいます。</p>
+</section>
+</section>
+<section id="docstring-coverage">
+<h2>3. docstring_coverage を読む<a class="headerlink" href="#docstring-coverage" title="Link to this heading">¶</a></h2>
+<p>目的: <strong>公開 API のうち、docstring が無いものを数える</strong>。</p>
+<p>「公開 API」の定義 (モジュールの先頭の説明から):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_</span></code> で始まらない名前のモジュール・クラス・関数・メソッド。</p></li>
+<li><p>モジュールに <code class="docutils literal notranslate"><span class="pre">__all__</span></code> があるときは、そこに載っている名前だけ。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;overload</span></code> と、プロパティの <code class="docutils literal notranslate"><span class="pre">setter</span></code> / <code class="docutils literal notranslate"><span class="pre">deleter</span></code> は数えない。</p></li>
+</ul>
+<section id="id5">
+<h3>3.1 データ構造<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>第 1 回で読みました (<code class="docutils literal notranslate"><span class="pre">Item</span></code> = 1 件、<code class="docutils literal notranslate"><span class="pre">Report</span></code> = 集計)。もう一度、全体の流れを図にします。</p>
+<img alt="" src="../_images/mermaid-e47093912ea81fb9.svg" />
+</section>
+<section id="all">
+<h3>3.2 <code class="docutils literal notranslate"><span class="pre">__all__</span></code> を静的に読む<a class="headerlink" href="#all" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">__all__</span> <span class="pre">=</span> <span class="pre">[&quot;a&quot;,</span> <span class="pre">&quot;b&quot;]</span></code> は、どの名前を公開するかの宣言です。<strong>実行せずに</strong> 値を取り出します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/docstring_coverage.py::_exported</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_exported</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``__all__`` の中身を返す。無い (または静的に読めない) ときは ``None``。</span>
+
+<span class="sd">    ``__all__ = [...]``・``__all__: list[str] = [...]``・``__all__ += [...]`` を読む。</span>
+<span class="sd">    """</span>
+    <span class="n">names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Assign</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"__all__"</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">targets</span><span class="p">):</span>
+            <span class="n">value_node</span><span class="p">,</span> <span class="n">replace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AnnAssign</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"__all__"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">value_node</span><span class="p">,</span> <span class="n">replace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AugAssign</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"__all__"</span><span class="p">:</span>
+            <span class="n">value_node</span><span class="p">,</span> <span class="n">replace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">value_node</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">replace</span> <span class="ow">or</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">names</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">names</span>
+</pre></div>
+</div>
+<p>読み方:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tree.body</span></code> を、先頭から順に見る (モジュール直下の文だけ)。</p></li>
+<li><p>3 種類の文を扱う: <strong>代入</strong> (<code class="docutils literal notranslate"><span class="pre">Assign</span></code>)、<strong>型注釈つき代入</strong> (<code class="docutils literal notranslate"><span class="pre">AnnAssign</span></code>)、<strong>増分代入</strong> (<code class="docutils literal notranslate"><span class="pre">AugAssign</span></code>、<code class="docutils literal notranslate"><span class="pre">+=</span></code>)。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">replace</span></code> は、「置き換え」(<code class="docutils literal notranslate"><span class="pre">=</span></code>) か、「足す」(<code class="docutils literal notranslate"><span class="pre">+=</span></code>) か。</p></li>
+</ul>
+</li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">ast.literal_eval(value_node)</span></code></strong>: 木の節を、<strong>安全に</strong> Python の値にします (リテラル = 書いてある値だけ)。
+<code class="docutils literal notranslate"><span class="pre">eval</span></code> と違い、<strong>関数呼び出しなど、実行が必要なものは、<code class="docutils literal notranslate"><span class="pre">ValueError</span></code></strong> になります。</p></li>
+<li><p>値が <code class="docutils literal notranslate"><span class="pre">[&quot;a&quot;,</span> <span class="pre">&quot;b&quot;]</span></code> のような <strong>文字列の並び</strong> でなければ、<code class="docutils literal notranslate"><span class="pre">None</span></code> (= 静的に読めない)。
+→ その場合は、「全部を公開」として扱う (安全側: 数え漏らすより、数え過ぎる)。</p></li>
+<li><p>最後に、集合 (<code class="docutils literal notranslate"><span class="pre">set</span></code>) にして返す。</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.docstring_coverage</span><span class="w"> </span><span class="kn">import</span> <span class="n">_exported</span>
+
+<span class="n">samples</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"代入"</span><span class="p">:</span> <span class="s1">'__all__ = ["a", "b"]'</span><span class="p">,</span>
+    <span class="s2">"型注釈つき"</span><span class="p">:</span> <span class="s1">'__all__: list[str] = ["a"]'</span><span class="p">,</span>
+    <span class="s2">"+= で足す"</span><span class="p">:</span> <span class="s1">'__all__ = ["a"]</span><span class="se">\n</span><span class="s1">__all__ += ["b"]'</span><span class="p">,</span>
+    <span class="s2">"動的 (読めない)"</span><span class="p">:</span> <span class="s2">"__all__ = [name for name in dir()]"</span><span class="p">,</span>
+    <span class="s2">"無い"</span><span class="p">:</span> <span class="s2">"x = 1"</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">_exported</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">14</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>  <span class="c1"># 集合の順序は不定なので、整列して出す</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+代入             ['a', 'b']
+型注釈つき          ['a']
++= で足す         ['a', 'b']
+動的 (読めない)      None
+無い             None
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>3.3 デコレータの名前<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">&#64;overload</span></code> や <code class="docutils literal notranslate"><span class="pre">&#64;x.setter</span></code> は、「docstring を書く場所ではない」ので、数えません。デコレータの <strong>名前だけ</strong> を取り出します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/docstring_coverage.py::_decorator_names</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_decorator_names</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span> <span class="o">|</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">dec</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">decorator_list</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">dec</span><span class="o">.</span><span class="n">func</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">)</span> <span class="k">else</span> <span class="n">dec</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">):</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">):</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">names</span>
+</pre></div>
+</div>
+<p>デコレータは、3 つの形があります。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>書き方</p></th>
+<th class="head"><p>木の形</p></th>
+<th class="head"><p>名前の取り出し方</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&#64;overload</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">target.id</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&#64;value.setter</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Attribute</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">target.attr</span></code> (<code class="docutils literal notranslate"><span class="pre">setter</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&#64;dataclass(frozen=True)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Call</span></code> (呼び出し)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dec.func</span></code> を取り出してから、上と同じ</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id7">
+<h3>3.4 1 ファイルを解析する<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/docstring_coverage.py::scan_file</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Item</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""1 ファイルの公開 API を調べる。</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path: Python のソースファイル。</span>
+<span class="sd">        module_name: 結果に使うモジュール名。省略するとファイル名から付ける。</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        見つかった項目。</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: ファイルが構文エラーのとき (ファイル名と行を含む)。</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">lineno</span><span class="si">}</span><span class="s2">: 構文エラー: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">module_name</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span>
+    <span class="n">exported</span> <span class="o">=</span> <span class="n">_exported</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Item</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit_body</span><span class="p">(</span><span class="n">body</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">stmt</span><span class="p">],</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_level</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">body</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">If</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Try</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">With</span><span class="p">)):</span>
+                <span class="c1"># 条件つきの定義 (try: import ... / if sys.version_info ...) も、同じ階層として扱う</span>
+                <span class="n">visit_body</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">top_level</span><span class="p">)</span>
+                <span class="n">visit_body</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">"orelse"</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">top_level</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">"handlers"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">visit_body</span><span class="p">(</span><span class="n">handler</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">top_level</span><span class="p">)</span>
+                <span class="n">visit_body</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">"finalbody"</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">top_level</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">ClassDef</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_public</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">top_level</span> <span class="ow">and</span> <span class="n">exported</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exported</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">qual</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Item</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">qual</span><span class="p">,</span> <span class="s2">"class"</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="n">visit_body</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">qual</span><span class="p">,</span> <span class="n">top_level</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_public</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">top_level</span> <span class="ow">and</span> <span class="n">exported</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exported</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">decorators</span> <span class="o">=</span> <span class="n">_decorator_names</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">decorators</span> <span class="o">&amp;</span> <span class="p">{</span><span class="s2">"overload"</span><span class="p">,</span> <span class="s2">"setter"</span><span class="p">,</span> <span class="s2">"deleter"</span><span class="p">}:</span>
+                    <span class="k">continue</span>
+                <span class="n">kind</span> <span class="o">=</span> <span class="s2">"function"</span> <span class="k">if</span> <span class="n">top_level</span> <span class="k">else</span> <span class="s2">"method"</span>
+                <span class="n">qual</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Item</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">qual</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Item</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="s2">"module"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">visit_body</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">top_level</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">items</span>
+</pre></div>
+</div>
+<p>細部を読みます。</p>
+<ol class="arabic simple">
+<li><p><strong>構文エラーを、場所つきの <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> に</strong>: <code class="docutils literal notranslate"><span class="pre">ast.parse</span></code> が <code class="docutils literal notranslate"><span class="pre">SyntaxError</span></code> を投げたら、
+<code class="docutils literal notranslate"><span class="pre">ファイル名:行:</span> <span class="pre">構文エラー:</span> <span class="pre">理由</span></code> にして、<code class="docutils literal notranslate"><span class="pre">raise</span> <span class="pre">...</span> <span class="pre">from</span> <span class="pre">exc</span></code> で投げ直す。
+(スタックトレースを出さない。<code class="docutils literal notranslate"><span class="pre">coverage</span></code>・<code class="docutils literal notranslate"><span class="pre">map</span></code> が、これを終了コード 2 にする)</p></li>
+<li><p><strong>入れ子の関数 <code class="docutils literal notranslate"><span class="pre">visit_body</span></code></strong> (クロージャ): 外側の <code class="docutils literal notranslate"><span class="pre">items</span></code>・<code class="docutils literal notranslate"><span class="pre">path</span></code>・<code class="docutils literal notranslate"><span class="pre">exported</span></code> を、<strong>そのまま使える</strong>。
+引数に渡さなくて済む。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">if</span></code> / <code class="docutils literal notranslate"><span class="pre">try</span></code> / <code class="docutils literal notranslate"><span class="pre">with</span></code> の中</strong>: <code class="docutils literal notranslate"><span class="pre">visit_body</span></code> を、<strong>同じ階層として</strong> 再帰して呼ぶ。
+<code class="docutils literal notranslate"><span class="pre">try:</span> <span class="pre">import</span> <span class="pre">fast</span> <span class="pre">...</span> <span class="pre">except</span> <span class="pre">ImportError:</span> <span class="pre">def</span> <span class="pre">load():</span> <span class="pre">...</span></code> のような、条件つきの定義を拾うため。</p></li>
+<li><p><strong>クラス</strong>: 非公開・<code class="docutils literal notranslate"><span class="pre">__all__</span></code> に無い名前は、飛ばす。公開なら <code class="docutils literal notranslate"><span class="pre">Item</span></code> を作り、<strong>中身 (メソッド) へ再帰</strong>。
+このとき <code class="docutils literal notranslate"><span class="pre">top_level=False</span></code> にする (メソッドには、<code class="docutils literal notranslate"><span class="pre">__all__</span></code> を適用しない)。</p></li>
+<li><p><strong>関数</strong>: 同様に飛ばす条件を見て、デコレータが <code class="docutils literal notranslate"><span class="pre">overload</span></code>・<code class="docutils literal notranslate"><span class="pre">setter</span></code>・<code class="docutils literal notranslate"><span class="pre">deleter</span></code> なら、数えない。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">ast.get_docstring(node)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code></strong>: docstring があるか。
+(空の docstring <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> も、<code class="docutils literal notranslate"><span class="pre">None</span></code> ではない。空かどうかは見ていない)</p></li>
+<li><p>最後に、モジュール自身の <code class="docutils literal notranslate"><span class="pre">Item</span></code> を足し、本体を走査する。</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.docstring_coverage</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan_file</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="s1">'''"""モジュールの説明。"""</span>
+<span class="s1">__all__ = ["public", "Documented"]</span>
+
+<span class="s1">def public():</span>
+<span class="s1">    """説明あり。"""</span>
+
+<span class="s1">def hidden_by_all():</span>
+<span class="s1">    pass</span>
+
+<span class="s1">def _private():</span>
+<span class="s1">    pass</span>
+
+<span class="s1">class Documented:</span>
+<span class="s1">    """説明あり。"""</span>
+
+<span class="s1">    def method(self):</span>
+<span class="s1">        pass</span>
+
+<span class="s1">    @property</span>
+<span class="s1">    def value(self):</span>
+<span class="s1">        """値。"""</span>
+
+<span class="s1">    @value.setter</span>
+<span class="s1">    def value(self, v):</span>
+<span class="s1">        pass</span>
+
+<span class="s1">class NotListed:</span>
+<span class="s1">    pass</span>
+<span class="s1">'''</span>
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"sample.py"</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">scan_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="s2">"sample"</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">kind</span><span class="si">:</span><span class="s2">9</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">qualname</span><span class="si">:</span><span class="s2">22</span><span class="si">}</span><span class="s2"> 行 </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">line</span><span class="si">:</span><span class="s2">&lt;3</span><span class="si">}</span><span class="s2"> docstring: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">documented</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+module    sample                 行 1   docstring: True
+function  sample.public          行 4   docstring: True
+class     sample.Documented      行 13  docstring: True
+method    sample.Documented.method 行 16  docstring: False
+method    sample.Documented.value 行 20  docstring: True
+</pre></div>
+</div>
+<p>確かめましょう。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">hidden_by_all</span></code>・<code class="docutils literal notranslate"><span class="pre">_private</span></code>・<code class="docutils literal notranslate"><span class="pre">NotListed</span></code> は、<strong>載っていない</strong> (<code class="docutils literal notranslate"><span class="pre">__all__</span></code> に無い / <code class="docutils literal notranslate"><span class="pre">_</span></code> で始まる)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Documented.value</span></code> は <strong>1 件だけ</strong> (<code class="docutils literal notranslate"><span class="pre">setter</span></code> は数えない)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Documented.method</span></code> だけが <code class="docutils literal notranslate"><span class="pre">docstring:</span> <span class="pre">False</span></code>。</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>3.5 パッケージ全体<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/docstring_coverage.py::_is_private_module</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_private_module</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``_`` で始まる名前 (``_compat.py``・``_impl/``) の下にあるか。``__init__`` は、パッケージ自身なので除く。"""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">part</span> <span class="o">!=</span> <span class="s2">"__init__"</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/docstring_coverage.py::_module_name</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_module_name</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``root`` からの相対パスでモジュール名を付ける。``root`` がパッケージなら、その名前から始める。"""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"__init__.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parts</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"__init__"</span><span class="p">:</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="ow">or</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/docstring_coverage.py::scan</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan</span><span class="p">(</span><span class="n">roots</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Report</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``roots`` 配下の公開 API を調べて集計する。</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: 存在しないパスがあるとき、または構文エラーのファイルがあるとき。</span>
+<span class="sd">            存在しないパスを「100%」と報告すると、パスの打ち間違いや移動で、検査が黙って空になる。</span>
+<span class="sd">    """</span>
+    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Item</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">roots</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"パスがありません: </span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">iter_python_files</span><span class="p">([</span><span class="n">root</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">_is_private_module</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># 公開 API の定義は「_ で始まらない名前」。非公開のモジュールは数えない</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">scan_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">_module_name</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">Report</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_is_private_module</span></code>: パスの <strong>どこかの部品</strong> が <code class="docutils literal notranslate"><span class="pre">_</span></code> で始まれば、非公開 (<code class="docutils literal notranslate"><span class="pre">_compat.py</span></code>・<code class="docutils literal notranslate"><span class="pre">_impl/core.py</span></code>)。
+ただし <code class="docutils literal notranslate"><span class="pre">__init__</span></code> は、<strong>パッケージ自身</strong> なので除く。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_module_name</span></code>: <code class="docutils literal notranslate"><span class="pre">root</span></code> が <strong>パッケージ</strong> (<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> を持つ) なら、その名前から始める
+(<code class="docutils literal notranslate"><span class="pre">pkg/sub/leaf.py</span></code> → <code class="docutils literal notranslate"><span class="pre">pkg.sub.leaf</span></code>)。<code class="docutils literal notranslate"><span class="pre">__init__</span></code> は、パッケージ名そのもの。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scan</span></code>: <strong>存在しないパスは <code class="docutils literal notranslate"><span class="pre">ValueError</span></code></strong> (第 3 回の「打ち間違いを成功させない」)。
+ファイルは <code class="docutils literal notranslate"><span class="pre">iter_python_files</span></code> で列挙し (第 1 回)、非公開を飛ばして、<code class="docutils literal notranslate"><span class="pre">scan_file</span></code> の結果を <strong>足し込む</strong> (<code class="docutils literal notranslate"><span class="pre">extend</span></code>)。</p></li>
+</ul>
+</section>
+</section>
+<section id="structure-map-import">
+<h2>4. structure_map を読む: import から依存を取り出す<a class="headerlink" href="#structure-map-import" title="Link to this heading">¶</a></h2>
+<p>目的: モジュールどうしの <strong>依存</strong> (どれが、どれを使っているか) を、<code class="docutils literal notranslate"><span class="pre">import</span></code> 文から読み取る。</p>
+<section id="import">
+<h3>4.1 import 文の木<a class="headerlink" href="#import" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>書き方</p></th>
+<th class="head"><p>木の節</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pkg.mod</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Import</span></code> (<code class="docutils literal notranslate"><span class="pre">names=[alias('pkg.mod')]</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pkg.mod</span></code> を読み込む</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pkg.mod</span> <span class="pre">import</span> <span class="pre">f</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ImportFrom</span></code> (<code class="docutils literal notranslate"><span class="pre">module='pkg.mod'</span></code>, <code class="docutils literal notranslate"><span class="pre">level=0</span></code>)</p></td>
+<td><p>絶対 import</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">mod</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ImportFrom</span></code> (<code class="docutils literal notranslate"><span class="pre">module=None</span></code>, <code class="docutils literal notranslate"><span class="pre">level=1</span></code>)</p></td>
+<td><p><strong>相対 import</strong>。<code class="docutils literal notranslate"><span class="pre">level</span></code> は、<code class="docutils literal notranslate"><span class="pre">.</span></code> の数</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">..x</span> <span class="pre">import</span> <span class="pre">f</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ImportFrom</span></code> (<code class="docutils literal notranslate"><span class="pre">module='x'</span></code>, <code class="docutils literal notranslate"><span class="pre">level=2</span></code>)</p></td>
+<td><p>1 つ上のパッケージの <code class="docutils literal notranslate"><span class="pre">x</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id9">
+<h3>4.2 相対 import を、絶対名に直す<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>相対 import (<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">a</span></code>) が指すモジュールは、<strong>今のモジュールの位置</strong> で決まります。
+<code class="docutils literal notranslate"><span class="pre">level</span></code> が 1 なら「同じパッケージ」、2 なら「その親」。<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> (パッケージ自身) と、
+普通のモジュールでは、<strong>基準が違います</strong>。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/structure_map.py::_resolve_from</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_from</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">ImportFrom</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_package</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``from ... import ...`` が指す、パッケージ内のモジュールを返す。"""</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">level</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+        <span class="c1"># 相対 import の基準は、パッケージ (モジュールなら、それを含むパッケージ)</span>
+        <span class="n">base_parts</span> <span class="o">=</span> <span class="n">parts</span> <span class="k">if</span> <span class="n">is_package</span> <span class="k">else</span> <span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">base_parts</span> <span class="o">=</span> <span class="n">base_parts</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_parts</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_parts</span><span class="p">)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">module</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">module</span> <span class="k">else</span> <span class="n">base</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">module</span> <span class="ow">or</span> <span class="s2">""</span>
+    <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">alias</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">known</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">candidate</span>
+        <span class="k">elif</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">known</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">target</span>
+</pre></div>
+</div>
+<p>計算の核心は、この 3 行です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋: docspipeline/structure_map.py::_resolve_from</span>
+        <span class="n">base_parts</span> <span class="o">=</span> <span class="n">parts</span> <span class="k">if</span> <span class="n">is_package</span> <span class="k">else</span> <span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">base_parts</span> <span class="o">=</span> <span class="n">base_parts</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_parts</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_parts</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parts</span></code> は、今のモジュール名を <code class="docutils literal notranslate"><span class="pre">.</span></code> で分けたもの (<code class="docutils literal notranslate"><span class="pre">[&quot;pkg&quot;,</span> <span class="pre">&quot;sub&quot;,</span> <span class="pre">&quot;x&quot;]</span></code>)。</p></li>
+<li><p><strong>普通のモジュール</strong> (<code class="docutils literal notranslate"><span class="pre">pkg.sub.x</span></code>) の基準は、それを含む <strong>パッケージ</strong> (<code class="docutils literal notranslate"><span class="pre">pkg.sub</span></code>) → 末尾を 1 つ落とす (<code class="docutils literal notranslate"><span class="pre">parts[:-1]</span></code>)。</p></li>
+<li><p><strong>パッケージ自身</strong> (<code class="docutils literal notranslate"><span class="pre">pkg.sub</span></code> の <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>) の基準は、<strong>自分自身</strong> (<code class="docutils literal notranslate"><span class="pre">pkg.sub</span></code>)。</p></li>
+<li><p>さらに <code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">-</span> <span class="pre">1</span></code> 個だけ、上へ登る (<code class="docutils literal notranslate"><span class="pre">level=2</span></code> なら、1 つ上)。</p></li>
+</ul>
+<p>結果の <code class="docutils literal notranslate"><span class="pre">base</span></code> に、<code class="docutils literal notranslate"><span class="pre">node.module</span></code> と、<code class="docutils literal notranslate"><span class="pre">import</span></code> する名前を足して、<strong>内部のモジュールか</strong> を <code class="docutils literal notranslate"><span class="pre">known</span></code> (既知のモジュール名の集合) で確かめます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.structure_map</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_from</span>
+
+<span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"pkg"</span><span class="p">,</span> <span class="s2">"pkg.a"</span><span class="p">,</span> <span class="s2">"pkg.sub"</span><span class="p">,</span> <span class="s2">"pkg.sub.x"</span><span class="p">,</span> <span class="s2">"pkg.sub.y"</span><span class="p">,</span> <span class="s2">"pkg.top"</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">is_package</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">module</span><span class="si">:</span><span class="s2">10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">stmt</span><span class="si">:</span><span class="s2">28</span><span class="si">}</span><span class="s2"> →"</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_resolve_from</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">is_package</span><span class="p">,</span> <span class="n">known</span><span class="p">)))</span>
+
+
+<span class="n">show</span><span class="p">(</span><span class="s2">"from . import a"</span><span class="p">,</span> <span class="s2">"pkg.top"</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="s2">"from .a import f"</span><span class="p">,</span> <span class="s2">"pkg.top"</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="s2">"from . import x"</span><span class="p">,</span> <span class="s2">"pkg.sub.y"</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="s2">"from .. import top"</span><span class="p">,</span> <span class="s2">"pkg.sub.x"</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="s2">"from . import y"</span><span class="p">,</span> <span class="s2">"pkg.sub"</span><span class="p">,</span> <span class="n">is_package</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="s2">"from pkg import top"</span><span class="p">,</span> <span class="s2">"pkg.a"</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="s2">"from os import path"</span><span class="p">,</span> <span class="s2">"pkg.a"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+pkg.top    from . import a              → ['pkg.a']
+pkg.top    from .a import f             → ['pkg.a']
+pkg.sub.y  from . import x              → ['pkg.sub.x']
+pkg.sub.x  from .. import top           → ['pkg.top']
+pkg.sub    from . import y              → ['pkg.sub.y']
+pkg.a      from pkg import top          → ['pkg.top']
+pkg.a      from os import path          → []
+</pre></div>
+</div>
+<p>読み取れましたか。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.a</span> <span class="pre">import</span> <span class="pre">f</span></code> は、<code class="docutils literal notranslate"><span class="pre">f</span></code> が <strong>関数</strong> (モジュールではない) なので、<code class="docutils literal notranslate"><span class="pre">pkg.a</span></code> への依存になる (<code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">in</span> <span class="pre">known</span></code> の分岐)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">x</span></code> は、<code class="docutils literal notranslate"><span class="pre">x</span></code> が <strong>モジュール</strong> (<code class="docutils literal notranslate"><span class="pre">pkg.sub.x</span></code>) なので、そのモジュールへの依存になる (<code class="docutils literal notranslate"><span class="pre">candidate</span> <span class="pre">in</span> <span class="pre">known</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">os</span> <span class="pre">import</span> <span class="pre">path</span></code> は、内部のモジュールではないので、何も返さない (外部ライブラリは、別に記録する)。</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3>4.3 木を歩く: 実行時の依存だけを拾う<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<p>全ての <code class="docutils literal notranslate"><span class="pre">import</span></code> が、<strong>実行時の依存</strong> とは限りません。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>場所</p></th>
+<th class="head"><p>例</p></th>
+<th class="head"><p>実行時の依存か</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>モジュール直下</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">a</span></code></p></td>
+<td><p><strong>はい</strong> (モジュールを読み込んだ時点で実行される)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> の中</p></td>
+<td><p>型検査のためだけの <code class="docutils literal notranslate"><span class="pre">import</span></code></p></td>
+<td><p><strong>いいえ</strong> (実行時は、読まれない)</p></td>
+</tr>
+<tr class="row-even"><td><p>関数の中</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f():</span> <span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">b</span></code></p></td>
+<td><p><strong>遅延</strong> (呼ばれたときに、初めて読み込まれる)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>この区別をするのが、<code class="docutils literal notranslate"><span class="pre">_walk</span></code> です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/structure_map.py::_is_type_checking</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_type_checking</span><span class="p">(</span><span class="n">test</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``if TYPE_CHECKING:`` / ``if typing.TYPE_CHECKING:`` か。"""</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"TYPE_CHECKING"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">attr</span> <span class="o">==</span> <span class="s2">"TYPE_CHECKING"</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/structure_map.py::_walk</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_walk</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">,</span> <span class="n">deferred</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""ノードを順に返す。``deferred`` は、関数の中 (呼ばれたときに実行される) かどうか。</span>
+
+<span class="sd">    ``if TYPE_CHECKING:`` の本体は、実行時には読み込まれないので返さない。</span>
+<span class="sd">    """</span>
+    <span class="k">yield</span> <span class="n">node</span><span class="p">,</span> <span class="n">deferred</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">If</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_is_type_checking</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">orelse</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">iter_child_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+    <span class="n">inside_function</span> <span class="o">=</span> <span class="n">deferred</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span> <span class="o">|</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span> <span class="o">|</span> <span class="n">ast</span><span class="o">.</span><span class="n">Lambda</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+        <span class="k">yield from</span> <span class="n">_walk</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">inside_function</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>ジェネレータ</strong> (<code class="docutils literal notranslate"><span class="pre">yield</span></code>) で、<code class="docutils literal notranslate"><span class="pre">(節,</span> <span class="pre">遅延か)</span></code> の組を、<strong>1 つずつ</strong> 返す。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">from</span> <span class="pre">_walk(child,</span> <span class="pre">...)</span></code>: 子の結果を、そのまま <strong>再帰して</strong> 返す (<code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">from</span></code> は、ジェネレータの入れ子を平らにする)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> なら、<strong><code class="docutils literal notranslate"><span class="pre">orelse</span></code> (else の側) だけ</strong> を降りる。<code class="docutils literal notranslate"><span class="pre">if</span></code> の本体は、降りない。</p></li>
+<li><p>関数 (<code class="docutils literal notranslate"><span class="pre">FunctionDef</span></code>・<code class="docutils literal notranslate"><span class="pre">AsyncFunctionDef</span></code>・<code class="docutils literal notranslate"><span class="pre">Lambda</span></code>) の中に入ると、<code class="docutils literal notranslate"><span class="pre">deferred=True</span></code> を、<strong>子孫へ引き継ぐ</strong>。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.structure_map</span><span class="w"> </span><span class="kn">import</span> <span class="n">_walk</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">import a</span>
+<span class="s2">from typing import TYPE_CHECKING</span>
+<span class="s2">if TYPE_CHECKING:</span>
+<span class="s2">    import b</span>
+<span class="s2">def f():</span>
+<span class="s2">    import c</span>
+<span class="s2">class K:</span>
+<span class="s2">    import d</span>
+<span class="s2">"""</span>
+<span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">deferred</span> <span class="ow">in</span> <span class="n">_walk</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Import</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"→"</span><span class="p">,</span> <span class="s2">"遅延 (関数の中)"</span> <span class="k">if</span> <span class="n">deferred</span> <span class="k">else</span> <span class="s2">"実行時 (直下)"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+a → 実行時 (直下)
+c → 遅延 (関数の中)
+d → 実行時 (直下)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">b</span></code> は、<strong>出てきません</strong> (<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> の中)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">c</span></code> は、遅延。<code class="docutils literal notranslate"><span class="pre">d</span></code> は、<strong>クラスの本体</strong> (クラスの本体は、定義の時点で実行される) なので、実行時。</p></li>
+</ul>
+</section>
+<section id="id11">
+<h3>4.4 1 つのモジュールを分析する<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/structure_map.py::_analyze</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_analyze</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_package</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Module</span><span class="p">:</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">lineno</span><span class="si">}</span><span class="s2">: 構文エラー: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="n">runtime</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">references</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">external</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">deferred</span> <span class="ow">in</span> <span class="n">_walk</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">runtime</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">deferred</span> <span class="k">else</span> <span class="n">lazy</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Import</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="n">top</span> <span class="o">=</span> <span class="n">alias</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">top</span> <span class="o">==</span> <span class="n">root</span><span class="p">:</span>
+                    <span class="n">parts</span> <span class="o">=</span> <span class="n">alias</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+                    <span class="k">while</span> <span class="n">parts</span> <span class="ow">and</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span><span class="p">:</span>
+                        <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">parts</span><span class="p">:</span>
+                        <span class="n">found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">external</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">ImportFrom</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">level</span> <span class="ow">or</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">module</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">root</span><span class="p">:</span>
+                <span class="n">found</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_resolve_from</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">is_package</span><span class="p">,</span> <span class="n">known</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">module</span><span class="p">:</span>
+                <span class="n">external</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">known</span><span class="p">:</span>
+            <span class="n">references</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">runtime</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">lazy</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">references</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Module</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+        <span class="n">is_package</span><span class="o">=</span><span class="n">is_package</span><span class="p">,</span>
+        <span class="n">summary</span><span class="o">=</span><span class="n">_first_line</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">tree</span><span class="p">)),</span>
+        <span class="n">lines</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()),</span>
+        <span class="n">public_api</span><span class="o">=</span><span class="n">_public_api</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span>
+        <span class="n">imports</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">runtime</span><span class="p">),</span>
+        <span class="n">references</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">references</span> <span class="o">-</span> <span class="n">runtime</span><span class="p">),</span>
+        <span class="n">external</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">external</span> <span class="o">-</span> <span class="p">{</span><span class="s2">"__future__"</span><span class="p">}),</span>
+        <span class="n">deferred</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">lazy</span> <span class="o">-</span> <span class="n">runtime</span><span class="p">),</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>読み方 (木を歩き、<strong>種類ごとに</strong> 仕分けています)。</p>
+<ol class="arabic simple">
+<li><p>構文エラーは、場所つきの <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> (3.4 と同じ)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">runtime</span></code> / <code class="docutils literal notranslate"><span class="pre">lazy</span></code> / <code class="docutils literal notranslate"><span class="pre">references</span></code> / <code class="docutils literal notranslate"><span class="pre">external</span></code> の <strong>4 つの集合</strong> を用意する。集合なので、同じ依存は、1 件にまとまる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">node,</span> <span class="pre">deferred</span> <span class="pre">in</span> <span class="pre">_walk(tree)</span></code>: 歩きながら、<code class="docutils literal notranslate"><span class="pre">found</span> <span class="pre">=</span> <span class="pre">runtime</span> <span class="pre">if</span> <span class="pre">not</span> <span class="pre">deferred</span> <span class="pre">else</span> <span class="pre">lazy</span></code> で、<strong>入れる先を切り替える</strong>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Import</span></code> (<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">a.b.c</span></code>):</p>
+<ul class="simple">
+<li><p>先頭が <strong>自分のパッケージ</strong> (<code class="docutils literal notranslate"><span class="pre">root</span></code>) なら、内部。<code class="docutils literal notranslate"><span class="pre">a.b.c</span></code> → <code class="docutils literal notranslate"><span class="pre">a.b</span></code> → <code class="docutils literal notranslate"><span class="pre">a</span></code> と、<strong>末尾を削りながら</strong>、<code class="docutils literal notranslate"><span class="pre">known</span></code> にある最長のものを探す
+(<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pkg.mod.name</span></code> の <code class="docutils literal notranslate"><span class="pre">name</span></code> が関数でも、<code class="docutils literal notranslate"><span class="pre">pkg.mod</span></code> を見つけられる)。</p></li>
+<li><p>そうでなければ、外部ライブラリとして、<strong>先頭の名前</strong> (<code class="docutils literal notranslate"><span class="pre">os.path</span></code> → <code class="docutils literal notranslate"><span class="pre">os</span></code>) を記録する。</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ImportFrom</span></code>: 相対 import (<code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>) か、自分のパッケージの絶対 import なら、<code class="docutils literal notranslate"><span class="pre">_resolve_from</span></code> で解決。外部なら、記録。</p></li>
+<li><p><strong>文字列の定数</strong> (<code class="docutils literal notranslate"><span class="pre">ast.Constant</span></code> で、値が <code class="docutils literal notranslate"><span class="pre">str</span></code>) が、<code class="docutils literal notranslate"><span class="pre">known</span></code> のモジュール名と <strong>完全一致</strong> すれば、<code class="docutils literal notranslate"><span class="pre">references</span></code> に入れる
+(Sphinx の <code class="docutils literal notranslate"><span class="pre">extensions</span> <span class="pre">=</span> <span class="pre">[&quot;docspipeline.guard&quot;]</span></code> のような、名前による読み込みを拾う)。</p></li>
+<li><p>最後に、自分自身への依存を除き、<code class="docutils literal notranslate"><span class="pre">Module</span></code> を作る。<code class="docutils literal notranslate"><span class="pre">references</span> <span class="pre">-</span> <span class="pre">runtime</span></code> は、<strong>import でも読んでいるもの</strong> を、参照から除く。</p></li>
+</ol>
+</section>
+<section id="id12">
+<h3>4.5 モジュール全体: パッケージを走査する<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/structure_map.py::scan_package</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan_package</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Graph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""パッケージのディレクトリを読んで、地図を作る。</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        root: ``__init__.py`` を持つディレクトリ。</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        モジュールの一覧と依存。</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: ``root`` がパッケージ (``__init__.py`` を持つディレクトリ) でないとき、</span>
+<span class="sd">            または構文エラーのファイルがあるとき。</span>
+<span class="sd">    """</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"__init__.py"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"パッケージではありません (__init__.py が無い): </span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">package</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">iter_python_files</span><span class="p">([</span><span class="n">root</span><span class="p">]):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">package</span><span class="p">,</span> <span class="o">*</span><span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span><span class="p">]</span>
+        <span class="n">is_package</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"__init__"</span>
+        <span class="k">if</span> <span class="n">is_package</span><span class="p">:</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">files</span><span class="p">[</span><span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">is_package</span><span class="p">)</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+    <span class="n">modules</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_analyze</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">is_pkg</span><span class="p">,</span> <span class="n">known</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">is_pkg</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">Graph</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">modules</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> が無いディレクトリは、<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> (パッケージではない)。</p></li>
+<li><p>ファイルの一覧から、<strong>ファイル名 → モジュール名</strong> の対応を作る (<code class="docutils literal notranslate"><span class="pre">pkg/sub/x.py</span></code> → <code class="docutils literal notranslate"><span class="pre">pkg.sub.x</span></code>、<code class="docutils literal notranslate"><span class="pre">__init__</span></code> は削る)。</p></li>
+<li><p><strong>先に全ファイルの名前を集めて</strong> (<code class="docutils literal notranslate"><span class="pre">known</span></code>)、それから分析する。内部かどうかの判定に、<strong>全体の名前の一覧</strong> が要るため。</p></li>
+</ul>
+<p>実際に、小さなパッケージを作って、動かします。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.structure_map</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan_package</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"pkg/__init__.py"</span><span class="p">:</span> <span class="s1">'"""パッケージ。"""</span><span class="se">\n</span><span class="s1">__version__ = "1"</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+    <span class="s2">"pkg/core.py"</span><span class="p">:</span> <span class="s1">'"""中核。"""</span><span class="se">\n</span><span class="s1">from . import util</span><span class="se">\n</span><span class="s1">from .util import helper</span><span class="se">\n</span><span class="s1">import json</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+    <span class="s2">"pkg/util.py"</span><span class="p">:</span> <span class="s1">'"""道具。"""</span><span class="se">\n</span><span class="s1">def helper():</span><span class="se">\n</span><span class="s1">    from . import lazy_mod</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+    <span class="s2">"pkg/lazy_mod.py"</span><span class="p">:</span> <span class="s1">'"""遅延で読まれる。"""</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+    <span class="s2">"pkg/cfg.py"</span><span class="p">:</span> <span class="s1">'"""名前で読む。"""</span><span class="se">\n</span><span class="s1">EXTENSIONS = ["pkg.core"]</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">scan_package</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"pkg"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"pkg"</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s2">14</span><span class="si">}</span><span class="s2"> import=</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">imports</span><span class="p">)</span><span class="si">}</span><span class="s2"> 遅延=</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">deferred</span><span class="p">)</span><span class="si">}</span><span class="s2"> 参照=</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">references</span><span class="p">)</span><span class="si">}</span><span class="s2"> 外部=</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">external</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+pkg.cfg        import=[] 遅延=[] 参照=['pkg.core'] 外部=[]
+pkg.core       import=['pkg.util'] 遅延=[] 参照=[] 外部=['json']
+pkg.lazy_mod   import=[] 遅延=[] 参照=[] 外部=[]
+pkg.util       import=[] 遅延=['pkg.lazy_mod'] 参照=[] 外部=[]
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id13">
+<h2>5. 静的解析の限界<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>見つけられないもの</p></th>
+<th class="head"><p>例</p></th>
+<th class="head"><p>対処</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>動的な読み込み</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">importlib.import_module(name)</span></code> (<code class="docutils literal notranslate"><span class="pre">name</span></code> が変数)</p></td>
+<td><p>見つけられない。文書に、限界として書く</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>組み立てた名前</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;pkg.&quot;</span> <span class="pre">+</span> <span class="pre">&quot;mod&quot;</span></code></p></td>
+<td><p>文字列の <strong>完全一致</strong> だけを拾う</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>実行時にしか決まらない値</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">__all__</span> <span class="pre">=</span> <span class="pre">[n</span> <span class="pre">for</span> <span class="pre">n</span> <span class="pre">in</span> <span class="pre">dir()]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> (読めない) として、安全側で扱う</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>別のファイルから足される</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">setattr(module,</span> <span class="pre">&quot;x&quot;,</span> <span class="pre">...)</span></code></p></td>
+<td><p>見つけられない</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>名前の衝突・変数での上書き</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">os</span></code> のあと <code class="docutils literal notranslate"><span class="pre">os</span> <span class="pre">=</span> <span class="pre">3</span></code></p></td>
+<td><p>見分けない (木の形だけを見る)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>「見つけられた = 正しい」ではなく、「見つけたものは、書いてある」</strong> と理解します。
+静的解析の結果は、<strong>下書き</strong> として扱い、人が確かめます (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code> の出力の冒頭の警告が、これです)。</p>
+</section>
+<section id="id14">
+<h2>ハンズオン<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>第 2 節の <code class="docutils literal notranslate"><span class="pre">outline</span></code> を、自分の関数 (<code class="docutils literal notranslate"><span class="pre">docspipeline/files.py</span></code> の中身) に適用して、木を眺める。
+(<code class="docutils literal notranslate"><span class="pre">Path(&quot;docspipeline/files.py&quot;).read_text(encoding=&quot;utf-8&quot;)</span></code> を <code class="docutils literal notranslate"><span class="pre">ast.parse</span></code> に渡す)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span> <span class="pre">docspipeline</span> <span class="pre">--format</span> <span class="pre">mermaid</span></code> を実行し、出力を Mermaid の表示ツールで見る。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">coverage</span> <span class="pre">docspipeline</span></code> の結果が 100% であることを確かめ、わざと docstring を 1 つ消して、変化を見る (戻すこと)。</p></li>
+</ol>
+</section>
+<section id="id15">
+<h2>確認問題<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>静的解析 (<code class="docutils literal notranslate"><span class="pre">ast</span></code>) と、<code class="docutils literal notranslate"><span class="pre">import</span></code> して調べる方法 (<code class="docutils literal notranslate"><span class="pre">inspect</span></code>) の違いを、利点・欠点で説明してください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ast.literal_eval</span></code> と <code class="docutils literal notranslate"><span class="pre">eval</span></code> の、決定的な違いは何ですか。<code class="docutils literal notranslate"><span class="pre">_exported</span></code> が、前者を使う理由は。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__all__</span></code> が、動的に作られていて読めないとき、<code class="docutils literal notranslate"><span class="pre">_exported</span></code> は <code class="docutils literal notranslate"><span class="pre">None</span></code> を返します。この <strong>安全側の理由</strong> は。</p></li>
+<li><p>普通のモジュールとパッケージ (<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>) で、相対 import の「基準」が違うのは、なぜですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> の中の <code class="docutils literal notranslate"><span class="pre">import</span></code> と、関数の中の <code class="docutils literal notranslate"><span class="pre">import</span></code> は、なぜ、「循環の検出」の対象にしないのですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ast.walk</span></code> でなく、<strong>自分で再帰</strong> する理由は何ですか。</p></li>
+<li><p>(書く問題) ソース文字列から、<strong>トップレベルの関数の名前</strong> を、定義の順に返す関数 <code class="docutils literal notranslate"><span class="pre">function_names(source)</span></code> を書いてください
+(クラスの中のメソッドは含めない)。</p></li>
+</ol>
+</section>
+<section id="id16">
+<h2>解答<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>静的解析は、<strong>実行しない</strong> ので安全で、環境 (Houdini・Sphinx) が無くても動く。ただし、実行時にしか決まらないものは見えない。
+<code class="docutils literal notranslate"><span class="pre">inspect</span></code> は、実際の値を見られて正確だが、<strong>コードが実行され</strong> (副作用・遅い)、環境が無いと読み込めない。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">literal_eval</span></code> は、<strong>書いてある値 (リテラル) だけ</strong> を、評価する。関数呼び出しなど、実行が必要なものは <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>。
+<code class="docutils literal notranslate"><span class="pre">eval</span></code> は、<strong>任意のコードを実行する</strong>。他人のソースを読む道具に、<code class="docutils literal notranslate"><span class="pre">eval</span></code> は使えない (安全のため)。</p></li>
+<li><p>読めないのに「何も公開していない」と扱うと、<strong>検査から漏れる</strong> (数え忘れ)。「全部を公開」と扱えば、
+検査が <strong>厳しい側</strong> に倒れる (数え過ぎる)。品質の検査は、見逃すより、<strong>厳しく</strong> あるべき。</p></li>
+<li><p>相対 import の <code class="docutils literal notranslate"><span class="pre">.</span></code> は、「<strong>今のパッケージ</strong>」を指す。普通のモジュール <code class="docutils literal notranslate"><span class="pre">pkg.sub.x</span></code> を含むパッケージは <code class="docutils literal notranslate"><span class="pre">pkg.sub</span></code> だが、
+パッケージ自身 (<code class="docutils literal notranslate"><span class="pre">pkg.sub/__init__.py</span></code>) は、<code class="docutils literal notranslate"><span class="pre">pkg.sub</span></code> <strong>そのもの</strong> が、今のパッケージだから。</p></li>
+<li><p>実行時に <strong>モジュールを読み込む順序</strong> を決める依存ではないから。<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> の中は、実行時には読まれない。
+関数の中は、呼ばれたときに読まれるので、<strong>循環を断つ</strong> 定番の書き方 (循環として報告すると、正しい対処が、誤検出になる)。</p></li>
+<li><p>「関数の中は、別扱い」「<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> の <code class="docutils literal notranslate"><span class="pre">if</span></code> の本体は、降りない」のように、<strong>降りない場所を決める</strong> ため。
+<code class="docutils literal notranslate"><span class="pre">ast.walk</span></code> は、全ての節に降りる。</p></li>
+<li><p>例 (実行して確かめてある):</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">function_names</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">body</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">))]</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">function_names</span><span class="p">(</span><span class="s2">"def a(): pass</span><span class="se">\n</span><span class="s2">class K:</span><span class="se">\n</span><span class="s2">    def method(self): pass</span><span class="se">\n</span><span class="s2">async def b(): pass</span><span class="se">\n</span><span class="s2">def c(): pass</span><span class="se">\n</span><span class="s2">"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+['a', 'b', 'c']
+</pre></div>
+</div>
+</section>
+<section id="id17">
+<h2>まとめ<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>概念</p></th>
+<th class="head"><p>要点</p></th>
+<th class="head"><p>このリポジトリでの例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>静的解析</p></td>
+<td><p>実行せずに読む。安全・環境に依らない。動的なものは見えない</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">docstring_coverage</span></code>・<code class="docutils literal notranslate"><span class="pre">structure_map</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>AST</p></td>
+<td><p>ソースの木。文字列やコメントに惑わされない</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ast.parse</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>自前の再帰</p></td>
+<td><p>降りない場所を決められる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_walk</span></code>・<code class="docutils literal notranslate"><span class="pre">visit_body</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">literal_eval</span></code></p></td>
+<td><p>リテラルだけを、安全に評価する</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_exported</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>相対 import</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">level</span></code> と、「今のパッケージ」で決まる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_resolve_from</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>実行時の依存</p></td>
+<td><p>直下・<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code>・関数の中を、区別する</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_walk</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>限界</p></td>
+<td><p>動的なもの・組み立てた名前は見えない。結果は下書き</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">map</span></code> の警告</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id18">
+<h2>次回<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="05-graph-algorithms.html"><span class="std std-doc">第 5 回 グラフとアルゴリズム</span></a>: 取り出した依存を <strong>グラフ</strong> として扱い、循環を見つけるアルゴリズム (Tarjan) を学びます。</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="05-graph-algorithms.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">第 5 回 グラフとアルゴリズム</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="03-files-and-processes.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第 3 回 ファイルとプロセス</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">第 4 回 構文木 (ast) とソースの静的解析</a><ul>
+<li><a class="reference internal" href="#id1">この回のゴール</a></li>
+<li><a class="reference internal" href="#id2">1. なぜ、コードを「実行せず」に読むのか</a></li>
+<li><a class="reference internal" href="#id3">2. 構文木とは</a><ul>
+<li><a class="reference internal" href="#id4">木を歩く 3 つの方法</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#docstring-coverage">3. docstring_coverage を読む</a><ul>
+<li><a class="reference internal" href="#id5">3.1 データ構造</a></li>
+<li><a class="reference internal" href="#all">3.2 <code class="docutils literal notranslate"><span class="pre">__all__</span></code> を静的に読む</a></li>
+<li><a class="reference internal" href="#id6">3.3 デコレータの名前</a></li>
+<li><a class="reference internal" href="#id7">3.4 1 ファイルを解析する</a></li>
+<li><a class="reference internal" href="#id8">3.5 パッケージ全体</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#structure-map-import">4. structure_map を読む: import から依存を取り出す</a><ul>
+<li><a class="reference internal" href="#import">4.1 import 文の木</a></li>
+<li><a class="reference internal" href="#id9">4.2 相対 import を、絶対名に直す</a></li>
+<li><a class="reference internal" href="#id10">4.3 木を歩く: 実行時の依存だけを拾う</a></li>
+<li><a class="reference internal" href="#id11">4.4 1 つのモジュールを分析する</a></li>
+<li><a class="reference internal" href="#id12">4.5 モジュール全体: パッケージを走査する</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id13">5. 静的解析の限界</a></li>
+<li><a class="reference internal" href="#id14">ハンズオン</a></li>
+<li><a class="reference internal" href="#id15">確認問題</a></li>
+<li><a class="reference internal" href="#id16">解答</a></li>
+<li><a class="reference internal" href="#id17">まとめ</a></li>
+<li><a class="reference internal" href="#id18">次回</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/dp_prompt.js?v=654ff740"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

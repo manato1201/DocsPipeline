@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools" / "diagrams"))
 
 import build_diagrams  # noqa: E402
+import kit  # noqa: E402
 
 NAMES = sorted(build_diagrams.DIAGRAMS)
 
@@ -64,6 +65,13 @@ def test_svg_embeds_the_drawio_source_and_both_are_valid_xml(name):
     xml.dom.minidom.parseString(drawio)
     xml.dom.minidom.parseString(svg)
     assert unescape(svg.split('content="', 1)[1].split('"', 1)[0]) == drawio.strip()
+
+
+def test_text_width_is_rounded_so_the_output_does_not_depend_on_the_python_version():
+    """Python 3.12 から float の sum の誤差の出方が変わった。丸めないと、版によって生成物の末尾の桁が違う。"""
+    for text, size, mono in (("docs/*.md", 11.5, True), ("CONFLUENCE_PUBLISH", 11.5, True), ("構成図 abc", 15, False)):
+        width = kit.text_width(text, size, mono)
+        assert width == round(width, 2), (text, width)
 
 
 def test_numbered_badges_are_unique_and_start_at_one():

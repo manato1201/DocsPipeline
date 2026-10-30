@@ -13,6 +13,8 @@
 
 文書は [`docs/`](docs/) にあり、この道具自身で生成する (`docspipeline build docs`)。
 保守・拡張する人は、[学習資料](docs/learn/index.md) から読む (全体像 → コードの読み方 → ビルドの内側 → 拡張のレシピ → テスト → 演習 → トラブルシュート)。
+基礎 (Python・文字列処理・構文木・グラフ・Sphinx・テスト・図・CI) から学ぶ人は、[講義資料](docs/lecture/index.md) (全 14 回、実行できる例と演習つき) から読む。
+ブラウザだけで読むなら、ビルド済みの HTML 版 [`site/index.html`](site/index.html) を開く (生成物。`python tools/build_site.py` で作り直す)。
 
 ## クイックスタート
 
@@ -30,7 +32,7 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 |---|---|
 | Mermaid の図 | [`mmdc`](https://github.com/mermaid-js/mermaid-cli) (`npm install @mermaid-js/mermaid-cli`)。無ければ図はコードのまま表示される |
 | C++ の文書 | `doxygen` |
-| Confluence への公開 | `docs/` の extras `confluence` と、[環境変数](docs/confluence.rst) |
+| Confluence への公開 | `docs/` の extras `confluence` と、[環境変数](docs/confluence.md) |
 
 ## コマンド
 
@@ -40,6 +42,8 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 | `docspipeline build [DOCS]` | ビルド。既定は `-W` (`--no-strict` で外す)、`-b confluence` で Confluence 形式 |
 | `docspipeline coverage PATH...` | docstring が無い公開 API を一覧 (`--fail-under N`) |
 | `docspipeline check-diagrams [DOCS]` | `.drawio` に書き出した SVG があるか |
+| `docspipeline check-mermaid [PATH...]` | Mermaid のブロックが、標準の `%%{init}%%` の行で始まるか (`--fix` で入れる)。GitHub と HTML で、色とフォントが揃う |
+| `docspipeline mermaid-style` | 標準の `%%{init}%%` の行と、5 色の `classDef` を表示する (貼り付け用) |
 | `docspipeline linkcheck [DOCS]` | 外部リンクの切れ |
 | `docspipeline map PACKAGE` | ソースを構文解析して、モジュールの依存の地図 (Markdown の下書き / Mermaid / JSON) を作る。ローカルで読むだけで、外部へは送信しない。`--fail-on-cycle` |
 | `docspipeline doctor` | 手元で使える機能 (`mmdc`・`doxygen`・設定の有無) を確認。トークンの値は出さない |
@@ -73,7 +77,7 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 | 0 雛形 | 済 | 共通の `conf.py` (`docspipeline.config`)、`init`、ページの雛形 (目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連) |
 | 1 Python (ProfilingTool) | **対象のリポジトリが無いため未着手**。代わりに [`examples/python_sample`](examples/python_sample) と、この文書自身で動作確認 | autodoc・日本語の docstring・Markdown の取り込み・reStructuredText の「概要」「設計」 |
 | 2 横展開 + 図 | 仕組みは済。Hub / AssetDataInsightSuite は未着手 | Mermaid の画像化、diagrams.net の図 1 枚 (`docs/diagrams/`)、`check-diagrams` |
-| 3 C++ (RAGReel) | 仕組みは済。RAGReel 自体は未着手 | Doxygen + Breathe を採用 (理由は [設計](docs/design.rst))。動作確認は [`examples/cpp_sample`](examples/cpp_sample) |
+| 3 C++ (RAGReel) | 仕組みは済。RAGReel 自体は未着手 | Doxygen + Breathe を採用 (理由は [設計](docs/design.md))。動作確認は [`examples/cpp_sample`](examples/cpp_sample) |
 | 4 Confluence | 仕組みは済。**実環境では未検証** | 接続テスト → dryrun → publish。Confluence の環境が手元に無い |
 | 5 CI | 済 (GitHub Actions を書いた。**まだ GitHub 上では走らせていない**) | PR ごとに `-W` ビルド、週 1 回 linkcheck、main で公開 |
 | 6 ホスティング | 決めていない | まずローカルの HTML。公開先は、文書の内容 (個人・企業の情報) を確認してから |
@@ -85,9 +89,9 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 **自前の** `docspipeline map` として実装した (外部ツールは導入せず、コードの情報を外部へ送らない。[学習資料](docs/learn/09-structure-map.md))。
 X3 (graphify)・X7 (better-readme-skill)・Y9 (skills.sh のスキル) は、導入前に SKILL.md と監査結果を読む前提の提案で、取り込んでいない。
 最新の追補の ASCII モチーフ (蚕・繭) は、実装していない。設計書が「出す場所は UI を作る段階で決める」としており、
-DocsPipeline にはまだ UI が無い (理由は [設計](docs/design.rst))。
+DocsPipeline にはまだ UI が無い (理由は [設計](docs/design.md))。
 第 4 弾の追補のうち、Z19「Copy prompt」は **実装した**: 手順に `.. prompt::` で、Claude Code にそのまま渡せるプロンプトを載せ、
-HTML ではコピーボタンが付く ([使い方](docs/usage.rst))。Z31 PDFMathTranslate (AGPL-3.0) は、設計書の方針どおり、
+HTML ではコピーボタンが付く ([使い方](docs/usage.md))。Z31 PDFMathTranslate (AGPL-3.0) は、設計書の方針どおり、
 手元の道具としてのみ使い、組み込まない。
 Graphify の地図との比較も、未実施。
 
@@ -96,13 +100,22 @@ Graphify の地図との比較も、未実施。
 - Confluence の実環境への `dryrun` / `publish`、Mermaid の SVG が Confluence の画面で見えること
 - 標準ライブラリの型の参照 (`pathlib.Path` など) が、intersphinx で解決されること。作業環境から `docs.python.org` に届かず、オフラインのモード (`DOCSPIPELINE_OFFLINE=1`) でしか確かめていない。CI (オンライン) で初めて確認される
 - GitHub Actions の実行
-- Python 3.13 以外 (CI は 3.11 と 3.13)
+- Python 3.12 (3.11 と 3.13 は、手元で `pytest` を全て通した。CI の対象も 3.11 と 3.13。3.12 は、図の生成物の一致だけ確かめた)
 - 実際の ProfilingTool・ToolOrchestrationHub・AssetDataInsightSuite・RAGReel (Qt) のコード
 
 ## 開発
 
 ```bash
 pip install -e ".[docs,cpp,confluence,dev]"
-pytest              # 単体テスト + サンプルと自身の文書の実ビルド + 図の整合 (doxygen が無ければ C++ は飛ばす)
+pytest              # 単体テスト + サンプルと自身の文書の実ビルド + 図・HTML 版・講義の整合 (doxygen が無ければ C++ は飛ばす)
 ruff check . && ruff format --check .
 ```
+
+生成物と、その作り直し。元と生成物がずれると、`pytest` が落ちる。
+
+| 生成物 | 作り直す | 元 |
+|---|---|---|
+| `docs/diagrams/*.drawio(.svg)` | `python tools/diagrams/build_diagrams.py` | `tools/diagrams/build_diagrams.py` |
+| `site/` (HTML 版) | `python tools/build_site.py` (`mmdc` が要る) | `docs/`・`docspipeline/` |
+| 講義の引用・実行結果 | `python tools/quote_code.py docs/lecture --outputs` | `docs/lecture/`・ソース |
+| Mermaid の標準の行 | `docspipeline check-mermaid docs --fix` | `docspipeline/mmdc.py` |

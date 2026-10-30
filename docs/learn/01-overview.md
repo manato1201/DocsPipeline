@@ -25,28 +25,18 @@ DocsPipeline が **何を入力に、何を作り、何で守っているか** �
 
 ### 一つのコマンドが何をするか
 
-```{list-table}
-:header-rows: 1
-:widths: 28 72
-
-* - コマンド
-  - 中で起きること
-* - `docspipeline build docs`
-  - `sphinx -W` を子プロセスで起動 (モードは `local` 固定)。出力はトークンを伏せて表示
-* - `docspipeline publish docs --mode dryrun`
-  - 環境変数の確認 → 接続テスト → 接続してのビルド (ページは変更しない)
-* - `docspipeline coverage PATH`
-  - コードを `import` せず、`ast` で公開 API の docstring を数える
-* - `docspipeline init . --project X --author Y`
-  - 雛形 (`templates/project`) の `@@名前@@` を置き換えて、`docs/` と CI を書き出す
-* - `docspipeline doctor`
-  - `sphinx`・`mmdc`・`doxygen`・環境変数の有無を一覧する
-```
+| コマンド | 中で起きること |
+|---|---|
+| `docspipeline build docs` | `sphinx -W` を子プロセスで起動 (モードは `local` 固定)。出力はトークンを伏せて表示 |
+| `docspipeline publish docs --mode dryrun` | 環境変数の確認 → 接続テスト → 接続してのビルド (ページは変更しない) |
+| `docspipeline coverage PATH` | コードを `import` せず、`ast` で公開 API の docstring を数える |
+| `docspipeline init . --project X --author Y` | 雛形 (`templates/project`) の `@@名前@@` を置き換えて、`docs/` と CI を書き出す |
+| `docspipeline doctor` | `sphinx`・`mmdc`・`doxygen`・環境変数の有無を一覧する |
 
 ## 使うときの注意
 
 * DocsPipeline は **Sphinx の上に載っている**。Sphinx 自体の挙動 (イベント、ディレクティブ、ビルダー) を知らないと、中を読んでも分かりにくい。[ビルドの内側](03-build-internals.md) で補う。
-* 「公開する」機能は、実際の Confluence 環境では検証していない ([Confluence への公開](../confluence.rst) の「検証できていないこと」)。変更するときは、特に慎重に。
+* 「公開する」機能は、実際の Confluence 環境では検証していない ([Confluence への公開](../confluence.md) の「検証できていないこと」)。変更するときは、特に慎重に。
 
 ## よくある誤り
 

@@ -39,6 +39,11 @@ docspipeline = ["templates/**/*", "stubs/*.py", "static/*"]
 line-length = 120
 target-version = "py311"
 
+[tool.ruff.format]
+# Markdown の中のコードブロックは整形しない。講義の例は、読みやすさのために手で揃えてあり、
+# 引用と実行結果は tests/test_lectures.py が検査する (整形すると、書いたとおりの引用と出力の対応が崩れる)
+exclude = ["*.md"]
+
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 ignore = [

@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -20,11 +21,64 @@ from pathlib import Path
 MMDC_ENV = "DOCSPIPELINE_MMDC"
 PUPPETEER_ENV = "DOCSPIPELINE_PUPPETEER_CONFIG"
 
-#: 文字を HTML (foreignObject) ではなく SVG の ``<text>`` で描かせる。
+FONT_FAMILY = "Noto Sans JP, Hiragino Sans, Meiryo, sans-serif"
+
+#: 図の色とフォント。GitHub (Markdown のまま表示) と、Sphinx (``mmdc`` で SVG にした HTML) の
+#: 両方で、同じ見た目にするための値。色はこのリポジトリの構成図 (diagrams.net) と揃えてある。
+THEME_VARIABLES = {
+    "fontFamily": FONT_FAMILY,
+    "primaryColor": "#ffffff",
+    "primaryBorderColor": "#d0d5dd",
+    "primaryTextColor": "#101828",
+    "lineColor": "#667085",
+    "clusterBkg": "#f2f4f7",
+    "clusterBorder": "#d0d5dd",
+    "edgeLabelBackground": "#ffffff",
+}
+
+#: 流れ図の設定。``wrappingWidth`` を大きくしないと、日本語の長い行が、単語の途中で折り返される。
+FLOWCHART_CONFIG = {"wrappingWidth": 480, "nodeSpacing": 40, "rankSpacing": 56, "padding": 14}
+
+#: 順序図の設定。下に同じ参加者を繰り返さず (``mirrorActors``)、横幅を詰めて、文字が小さくならないようにする。
+SEQUENCE_CONFIG = {"mirrorActors": False, "wrap": False, "width": 150, "actorMargin": 30, "messageMargin": 34}
+
+#: 各 Mermaid ブロックの 1 行目に置く、標準の初期化の行 (``%%{init: ...}%%``)。
+#: GitHub は、この行から色とフォントを読む。``docspipeline check-mermaid`` が、全ブロックにあるかを確かめる。
+MERMAID_INIT = (
+    "%%{init: "
+    + json.dumps(
+        {
+            "theme": "base",
+            "fontFamily": FONT_FAMILY,
+            "themeVariables": THEME_VARIABLES,
+            "flowchart": FLOWCHART_CONFIG,
+            "sequence": SEQUENCE_CONFIG,
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    + "}%%"
+)
+
+#: 図の部品に色を付ける ``classDef`` の標準の組。入力 = 青、Sphinx・処理 = 緑、出力・公開 = オレンジ、
+#: 止まる・失敗 = 赤、補助 = 白。ブロックの末尾に貼って使う。
+MERMAID_CLASSDEFS = """\
+    classDef input fill:#dae8fc,stroke:#1a73e8,color:#101828
+    classDef proc fill:#e6f4f1,stroke:#0f9d8a,color:#101828
+    classDef out fill:#fff7ed,stroke:#e8710a,color:#101828
+    classDef stop fill:#fef3f2,stroke:#d92d20,color:#101828
+    classDef plain fill:#ffffff,stroke:#d0d5dd,color:#101828"""
+
+#: ``mmdc`` に渡す設定。文字を HTML (foreignObject) ではなく SVG の ``<text>`` で描かせる。
 #: foreignObject は SVG を画像として取り込む先 (Confluence など) で文字が消えることがある。
+#: 図に ``%%{init}%%`` が無くても、同じ見た目になるよう、色とフォントもここに入れる。
 MERMAID_CONFIG = {
     "htmlLabels": False,
-    "flowchart": {"htmlLabels": False},
+    "theme": "base",
+    "fontFamily": FONT_FAMILY,
+    "themeVariables": THEME_VARIABLES,
+    "flowchart": {**FLOWCHART_CONFIG, "htmlLabels": False},
+    "sequence": SEQUENCE_CONFIG,
 }
 
 
@@ -111,7 +165,7 @@ def render(code: str, out_dir: Path, *, cmd: list[str], fmt: str = "svg", puppet
         conf = tmp_dir / "mermaid.json"
         conf.write_text(json.dumps(MERMAID_CONFIG), encoding="utf-8")
         tmp_out = tmp_dir / f"diagram.{fmt}"
-        args = [*cmd, "-i", str(src), "-o", str(tmp_out), "-c", str(conf), "-b", "transparent", "-q"]
+        args = [*cmd, "-i", str(src), "-o", str(tmp_out), "-c", str(conf), "-b", "white", "-q"]
         if puppeteer_config:
             args += ["-p", puppeteer_config]
         try:
@@ -128,3 +182,69 @@ def render(code: str, out_dir: Path, *, cmd: list[str], fmt: str = "svg", puppet
         shutil.copyfile(tmp_out, part)
         os.replace(part, out)
     return out
+
+
+# ---- Markdown の中の Mermaid ブロックの、書式の統一 ----
+
+_FENCE_OPEN = re.compile(r"^(?P<indent> {0,3})(?P<fence>`{3,}|~{3,})\s*\{?mermaid\}?\s*$")
+
+
+def mermaid_blocks(lines: list[str]) -> list[tuple[int, int]]:
+    """Markdown の行から、Mermaid のコードブロックの位置を探す。
+
+    Args:
+        lines: ファイルの行 (改行なし)。
+
+    Returns:
+        各ブロックの ``(開きの囲みの行, 閉じの囲みの行)`` (0 始まり)。閉じが無ければ、末尾まで。
+    """
+    blocks = []
+    i = 0
+    while i < len(lines):
+        match = _FENCE_OPEN.match(lines[i])
+        if not match:
+            i += 1
+            continue
+        fence = match.group("fence")
+        end = i + 1
+        while end < len(lines) and not (
+            lines[end].strip().startswith(fence[0] * len(fence)) and not lines[end].strip().strip(fence[0])
+        ):
+            end += 1
+        blocks.append((i, end))
+        i = end + 1
+    return blocks
+
+
+def _first_content_line(lines: list[str], start: int, end: int) -> int | None:
+    for index in range(start + 1, min(end, len(lines))):
+        if lines[index].strip():
+            return index
+    return None
+
+
+def check_mermaid_text(text: str) -> list[int]:
+    """標準の ``%%{init}%%`` の行で始まっていない Mermaid ブロックの、開きの行 (1 始まり) を返す。"""
+    lines = text.splitlines()
+    missing = []
+    for start, end in mermaid_blocks(lines):
+        first = _first_content_line(lines, start, end)
+        if first is None or lines[first].strip() != MERMAID_INIT:
+            missing.append(start + 1)
+    return missing
+
+
+def fix_mermaid_text(text: str) -> str:
+    """標準の ``%%{init}%%`` の行を、全ブロックの先頭に入れる。
+
+    別の ``%%{init ...}%%`` で始まるブロックは、標準の行に置き換える。
+    """
+    lines = text.split("\n")
+    for start, end in reversed(mermaid_blocks(lines)):
+        indent = _FENCE_OPEN.match(lines[start]).group("indent")  # type: ignore[union-attr]
+        first = _first_content_line(lines, start, end)
+        if first is not None and lines[first].strip().startswith("%%{init"):
+            lines[first] = indent + MERMAID_INIT
+        elif first is None or lines[first].strip() != MERMAID_INIT:
+            lines.insert(start + 1, indent + MERMAID_INIT)
+    return "\n".join(lines)

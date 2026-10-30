@@ -66,6 +66,9 @@ jobs:
           docspipeline build examples/cpp_sample/docs --require-mermaid
       - name: Check diagram exports
         run: docspipeline check-diagrams docs
+      - name: Check Mermaid style
+        # 全ての Mermaid ブロックが、標準の %%{init}%% の行で始まること (GitHub と HTML で見た目が揃う)
+        run: docspipeline check-mermaid docs README.md
       - name: Docstring coverage
         run: docspipeline coverage docspipeline --fail-under 100
       - name: Link check

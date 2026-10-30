@@ -1,0 +1,1588 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="第 8 回 CLI の設計と、雛形の生成" href="08-cli-and-scaffold.html"><link rel="prev" title="第 6 回 文書生成の基礎: Sphinx の考え方" href="06-sphinx-basics.html">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>第 7 回 Sphinx 拡張を作る - DocsPipeline</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dp_prompt.css?v=c3d6ec34" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">DocsPipeline</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">DocsPipeline</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">利用者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hou.html">Houdini の hou を使うコード</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output-formats.html">出力形式ごとの取り決め</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runbook.html">運用手順</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">保守・拡張する人向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../learn/index.html">学習資料</a><input aria-label="Toggle navigation of 学習資料" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../learn/01-overview.html">全体像</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/02-code-tour.html">コードの読み方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/03-build-internals.html">ビルドの内側</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/04-extend.html">拡張のしかた</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/05-testing.html">テストの書き方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/06-exercises.html">演習</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/07-troubleshooting.html">トラブルシュート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/08-maintenance.html">メンテナンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/09-structure-map.html">機械の地図 (<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../learn/glossary.html">用語集</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">講義資料</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">講義資料: 文書を「コード」として作り、安全に公開する</a><input aria-label="Toggle navigation of 講義資料: 文書を「コード」として作り、安全に公開する" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00-introduction.html">第 0 回 はじめに: 文書を「コード」として扱う</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-python-basics.html">第 1 回 Python の基礎 (この講義で必要な範囲)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-text-processing.html">第 2 回 文字列・正規表現・ハッシュ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-files-and-processes.html">第 3 回 ファイルとプロセス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-ast.html">第 4 回 構文木 (ast) とソースの静的解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-graph-algorithms.html">第 5 回 グラフとアルゴリズム</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06-sphinx-basics.html">第 6 回 文書生成の基礎: Sphinx の考え方</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">第 7 回 Sphinx 拡張を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-cli-and-scaffold.html">第 8 回 CLI の設計と、雛形の生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09-publishing-safety.html">第 9 回 公開と安全設計</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10-testing.html">第 10 回 テスト</a></li>
+<li class="toctree-l2"><a class="reference internal" href="11-diagrams.html">第 11 回 図を作る</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12-ci-and-operations.html">第 12 回 CI と運用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13-capstone.html">第 13 回 総合演習</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API リファレンス</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/lecture/07-sphinx-extensions.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="sphinx">
+<h1>第 7 回 Sphinx 拡張を作る<a class="headerlink" href="#sphinx" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>所要時間の目安: 4 時間 / 前提: 第 1〜3 回・第 6 回</p>
+</div></blockquote>
+<section id="id1">
+<h2>この回のゴール<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Sphinx <strong>拡張</strong> の構造 (<code class="docutils literal notranslate"><span class="pre">setup(app)</span></code>・イベント・ディレクティブ・設定値) を説明できる。</p></li>
+<li><p><strong>自分で拡張を書き</strong>、実際にビルドして、動かせる。</p></li>
+<li><p>DocsPipeline の 4 つの拡張 (<code class="docutils literal notranslate"><span class="pre">guard</span></code>・<code class="docutils literal notranslate"><span class="pre">prompt</span></code>・<code class="docutils literal notranslate"><span class="pre">mermaid</span></code>・<code class="docutils literal notranslate"><span class="pre">doxygen</span></code>) を、設計の理由まで含めて説明できる。</p></li>
+<li><p><strong>並列ビルド</strong> と、拡張が守るべき約束 (原子的な書き込み・共有状態) を説明できる。</p></li>
+<li><p>偽物 (スタブ) を、Python の <strong>メタプログラミング</strong> (<code class="docutils literal notranslate"><span class="pre">__getattr__</span></code>・メタクラス) で作る方法が分かる。</p></li>
+<li><p>拡張を <strong>テストする</strong> 方法 (偽のコマンド・サブプロセスのビルド) が分かる。</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>1. 拡張とは<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p><strong>拡張</strong> は、<code class="docutils literal notranslate"><span class="pre">setup(app)</span></code> 関数を持つ Python のモジュールです。<code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の <code class="docutils literal notranslate"><span class="pre">extensions</span></code> に <strong>名前</strong> を書くと、
+Sphinx が読み込み、<code class="docutils literal notranslate"><span class="pre">setup(app)</span></code> を呼びます。拡張は、<code class="docutils literal notranslate"><span class="pre">app</span></code> を通して、Sphinx に <strong>機能を登録</strong> します。</p>
+<img alt="" src="../_images/mermaid-c5dddd25fd800141.svg" />
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>登録するもの</p></th>
+<th class="head"><p>API</p></th>
+<th class="head"><p>使い道</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ディレクティブ</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">app.add_directive(&quot;名前&quot;,</span> <span class="pre">クラス)</span></code></p></td>
+<td><p>文書の中に、新しい <strong>ブロック</strong> の記法を足す (<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code>・<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">prompt::</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ロール</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">app.add_role(&quot;名前&quot;,</span> <span class="pre">関数)</span></code></p></td>
+<td><p>新しい <strong>行内</strong> の記法を足す</p></td>
+</tr>
+<tr class="row-even"><td><p>設定値</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">app.add_config_value(&quot;名前&quot;,</span> <span class="pre">既定値,</span> <span class="pre">再ビルドの種類)</span></code></p></td>
+<td><p>利用者が <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> で指定できる設定を足す</p></td>
+</tr>
+<tr class="row-odd"><td><p>イベントの受け取り</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">app.connect(&quot;イベント名&quot;,</span> <span class="pre">関数,</span> <span class="pre">priority=)</span></code></p></td>
+<td><p>ビルドの途中に、処理を差し込む</p></td>
+</tr>
+<tr class="row-even"><td><p>静的ファイル</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">app.add_css_file</span></code> / <code class="docutils literal notranslate"><span class="pre">app.add_js_file</span></code></p></td>
+<td><p>HTML に CSS・JavaScript を足す</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>返す辞書:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>キー</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<td><p>拡張のバージョン</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parallel_read_safe</span></code></p></td>
+<td><p><strong>並列で文書を読んでも安全か</strong> (後で詳しく)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parallel_write_safe</span></code></p></td>
+<td><p><strong>並列で書き出しても安全か</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="guard">
+<h2>2. 最小の拡張: guard<a class="headerlink" href="#guard" title="Link to this heading">¶</a></h2>
+<p>DocsPipeline で、いちばん小さい拡張です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/guard.py::_raise_config_error</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_raise_config_error</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_config_error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">docspipeline_config_error</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/guard.py::setup</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Sphinx 拡張の登録。"""</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_config_value</span><span class="p">(</span><span class="s2">"docspipeline_config_error"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"env"</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"config-inited"</span><span class="p">,</span> <span class="n">_raise_config_error</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"version"</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span> <span class="s2">"parallel_read_safe"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"parallel_write_safe"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_raise_config_error(app,</span> <span class="pre">config)</span></code>: <code class="docutils literal notranslate"><span class="pre">config-inited</span></code> イベントのハンドラ。引数は、Sphinx が決めた形 (<code class="docutils literal notranslate"><span class="pre">app</span></code>, <code class="docutils literal notranslate"><span class="pre">config</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config.docspipeline_config_error</span></code> が <strong>空でなければ</strong>、<code class="docutils literal notranslate"><span class="pre">ConfigError</span></code> を投げる。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">setup</span></code>: 設定値 <code class="docutils literal notranslate"><span class="pre">docspipeline_config_error</span></code> を、<strong>既定値 <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></strong> で足す (<code class="docutils literal notranslate"><span class="pre">&quot;env&quot;</span></code>: 変わったら全文書を読み直す)。
+<code class="docutils literal notranslate"><span class="pre">config-inited</span></code> に、ハンドラを <strong><code class="docutils literal notranslate"><span class="pre">priority=100</span></code></strong> で接続する。</p></li>
+</ul>
+<p><strong>なぜ、こう作るのか</strong> (第 6 回の復習): <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の中で例外を投げると、Sphinx は、
+スタックトレースつきの分かりにくいエラーにします。<code class="docutils literal notranslate"><span class="pre">build_config</span></code> は、誤りを <strong>設定値に預け</strong>、
+この拡張が、設定を読み終えた直後に、<strong>整った形で</strong> 失敗させます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.util.docutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">docutils_namespace</span>
+
+<span class="n">ANSI</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\x1b\[[0-9;]*m"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">builder</span><span class="o">=</span><span class="s2">"html"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""ビルドして、(警告, 例外の文) を返す。docutils の登録を、毎回、元に戻す。"""</span>
+    <span class="n">status</span><span class="p">,</span> <span class="n">warning</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="n">docutils_namespace</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Sphinx</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="n">builder</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">),</span>
+                <span class="n">builder</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+                <span class="n">warning</span><span class="o">=</span><span class="n">warning</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="n">ANSI</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">warning</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="s2">"&lt;tmp&gt;"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">error</span>
+
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">conf</span> <span class="o">=</span> <span class="s1">'extensions = ["docspipeline.guard"]</span><span class="se">\n</span><span class="s1">docspipeline_config_error = "公開に必要な環境変数が足りません: CONFLUENCE_API_TOKEN"</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"誤りがあるとき:"</span><span class="p">,</span> <span class="n">run</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s1">'extensions = ["docspipeline.guard"]</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"誤りが無いとき:"</span><span class="p">,</span> <span class="n">run</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+誤りがあるとき: ('', 'ConfigError: 公開に必要な環境変数が足りません: CONFLUENCE_API_TOKEN')
+誤りが無いとき: ('', None)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">run</span></code> は、この回の後の例でも使う、<strong>ビルドの補助関数</strong> です。<code class="docutils literal notranslate"><span class="pre">docutils_namespace()</span></code> は、同じプロセスで、
+Sphinx を <strong>何度も</strong> 作るとき、docutils の登録 (ノード・ディレクティブ) を、毎回、<strong>元に戻します</strong>
+(戻さないと、「すでに登録されている」という警告が出ます)。</p>
+</section>
+<section id="id3">
+<h2>3. 自分の拡張を書く<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>「メモ」の箱を作る、30 行ほどの拡張を作ってみましょう。<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">memo::</span> <span class="pre">題名</span></code> と書くと、題名と本文の箱が出ます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.util.docutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">docutils_namespace</span>
+
+<span class="n">MEMO_EXT</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">from docutils import nodes</span>
+<span class="s2">from docutils.parsers.rst import Directive</span>
+
+<span class="s2">class Memo(Directive):</span>
+<span class="s2">    has_content = True                    # 本文を受け取る</span>
+<span class="s2">    optional_arguments = 1                # 引数 (題名) は、あってもなくてもよい</span>
+<span class="s2">    final_argument_whitespace = True      # 引数に、空白を含めてよい</span>
+
+<span class="s2">    def run(self):</span>
+<span class="s2">        title = self.arguments[0] if self.arguments else "メモ"</span>
+<span class="s2">        body = "</span><span class="se">\\</span><span class="s2">n".join(self.content)</span>
+<span class="s2">        heading = nodes.paragraph("", "", nodes.strong(title, title))</span>
+<span class="s2">        return [nodes.container("", heading, nodes.literal_block(body, body), classes=["memo"])]</span>
+
+<span class="s2">def setup(app):</span>
+<span class="s2">    app.add_directive("memo", Memo)</span>
+<span class="s2">    return {"version": "0.1", "parallel_read_safe": True}</span>
+<span class="s2">"""</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"memo_ext.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">MEMO_EXT</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="s1">'import os, sys</span><span class="se">\n</span><span class="s1">sys.path.insert(0, os.path.dirname(__file__))</span><span class="se">\n</span><span class="s1">extensions = ["memo_ext"]</span><span class="se">\n</span><span class="s1">html_theme = "basic"</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. memo:: 買い物</span><span class="se">\n\n</span><span class="s2">   牛乳</span><span class="se">\n</span><span class="s2">   卵</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">docutils_namespace</span><span class="p">():</span>
+        <span class="n">Sphinx</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">),</span>
+            <span class="s2">"html"</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+            <span class="n">warning</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="s2">"index.html"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'&lt;div class="memo docutils container"&gt;.*?&lt;/pre&gt;&lt;/div&gt;\s*&lt;/div&gt;'</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+&lt;div class="memo docutils container"&gt;
+&lt;p&gt;&lt;strong&gt;買い物&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight-default notranslate"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;牛乳&lt;/span&gt;
+&lt;span class="n"&gt;卵&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre></div>
+</div>
+<p>読み方:</p>
+<ol class="arabic simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">Directive</span></code> のクラス属性</strong> が、「どんな引数・本文を受け取るか」を宣言します。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">has_content</span> <span class="pre">=</span> <span class="pre">True</span></code>: 本文 (<code class="docutils literal notranslate"><span class="pre">self.content</span></code>: 行のリスト) を受け取る。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optional_arguments</span> <span class="pre">=</span> <span class="pre">1</span></code>: 引数 (<code class="docutils literal notranslate"><span class="pre">self.arguments</span></code>) が、0 個か 1 個。<code class="docutils literal notranslate"><span class="pre">required_arguments</span></code> なら、必須。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">final_argument_whitespace</span> <span class="pre">=</span> <span class="pre">True</span></code>: 最後の引数に、<strong>空白を含めてよい</strong> (題名が、複数の語でもよい)。</p></li>
+</ul>
+</li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">run()</span></code></strong> が、ディレクティブの <strong>実体</strong>。<strong>ノードのリスト</strong> を返す。このリストが、文書の木に、<strong>そのまま挿入される</strong>。</p></li>
+<li><p>返すのは、<strong>標準のノード</strong> (<code class="docutils literal notranslate"><span class="pre">container</span></code>・<code class="docutils literal notranslate"><span class="pre">paragraph</span></code>・<code class="docutils literal notranslate"><span class="pre">strong</span></code>・<code class="docutils literal notranslate"><span class="pre">literal_block</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">setup(app)</span></code>: <code class="docutils literal notranslate"><span class="pre">add_directive(&quot;memo&quot;,</span> <span class="pre">Memo)</span></code> で、<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">memo::</span></code> を登録する。メタデータを返す。</p></li>
+</ol>
+<section id="id4">
+<h3>なぜ「標準のノード」だけで組み立てるのか<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>独自のノード (<code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">MemoNode(nodes.General,</span> <span class="pre">nodes.Element)</span></code>) を作ることもできます。しかし、
+<strong>ノードごとに、各ビルダーへ「どう出力するか」を教える必要があります</strong> (<code class="docutils literal notranslate"><span class="pre">app.add_node(MemoNode,</span> <span class="pre">html=(visit,</span> <span class="pre">depart),</span> <span class="pre">...)</span></code>)。
+教えていないビルダー (たとえば Confluence) は、<strong>未知のノードで失敗する</strong> か、黙って捨てます。</p>
+<p>標準のノードだけなら、<strong>全てのビルダーが、すでに知っています</strong>。
+DocsPipeline の <code class="docutils literal notranslate"><span class="pre">prompt</span></code> と <code class="docutils literal notranslate"><span class="pre">mermaid</span></code> は、この方針で作ってあります。</p>
+</section>
+</section>
+<section id="prompt">
+<h2>4. prompt 拡張: コピーできる手順<a class="headerlink" href="#prompt" title="Link to this heading">¶</a></h2>
+<p>手順の説明に、Claude Code へ <strong>そのまま渡せるプロンプト</strong> を載せ、HTML ではコピーボタンを付ける拡張です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/prompt.py::PromptDirective</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PromptDirective</span><span class="p">(</span><span class="n">SphinxDirective</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``.. prompt::`` 指示子。引数は題名 (省略できる)。本文がプロンプト。"""</span>
+
+    <span class="n">has_content</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">required_arguments</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">optional_arguments</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">final_argument_whitespace</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">nodes</span><span class="o">.</span><span class="n">Node</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""題名と本文を、標準のノード (container・paragraph・literal_block) で組み立てる。"""</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">body</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"prompt の本文が空です"</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">)]</span>
+
+        <span class="n">found</span> <span class="o">=</span> <span class="n">find_secret</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"プロンプトに秘密情報らしき値が含まれています (</span><span class="si">%s</span><span class="s2">)。環境変数の名前だけを書いてください"</span><span class="p">,</span>
+                <span class="n">found</span><span class="p">,</span>
+                <span class="n">location</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">docname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span> <span class="k">else</span> <span class="n">DEFAULT_TITLE</span>
+        <span class="n">heading</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">paragraph</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">strong</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">title</span><span class="p">),</span> <span class="n">classes</span><span class="o">=</span><span class="p">[</span><span class="s2">"dp-prompt-title"</span><span class="p">])</span>
+        <span class="n">literal</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">literal_block</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="p">[</span><span class="s2">"dp-prompt-body"</span><span class="p">])</span>
+        <span class="n">literal</span><span class="p">[</span><span class="s2">"language"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"text"</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">container</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">literal</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="p">[</span><span class="s2">"dp-prompt"</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_source_info</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">container</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>読み方:</p>
+<ol class="arabic simple">
+<li><p><strong>本文が空</strong>なら、<code class="docutils literal notranslate"><span class="pre">reporter.warning(...)</span></code> で <strong>警告のノード</strong> を返す (例外にしない。文書の他の部分は、ビルドを続けられる)。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">find_secret(body)</span></code></strong>: 秘密情報らしき記述があれば、<strong>警告</strong> を出す。第 2 回で読んだ正規表現。警告には <strong>値を出さない</strong> (<code class="docutils literal notranslate"><span class="pre">名前=***</span></code>)。</p></li>
+<li><p>題名を決める (引数が無ければ、既定の題名)。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">container</span></code> (classes=<code class="docutils literal notranslate"><span class="pre">dp-prompt</span></code>) の中に、<code class="docutils literal notranslate"><span class="pre">paragraph</span></code> (題名) と <code class="docutils literal notranslate"><span class="pre">literal_block</span></code> (本文)</strong>。標準のノードだけ。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.set_source_info(container)</span></code>: ノードに、<strong>ファイルと行</strong> を覚えさせる (警告に、場所が出るように)。</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/prompt.py::_add_static</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_static</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""コピーボタンの JavaScript と CSS を、HTML の静的ファイルに加える。"""</span>
+    <span class="n">static</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">STATIC_DIR</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">static</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">html_static_path</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">html_static_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">static</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/prompt.py::setup</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Sphinx 拡張の登録。"""</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_directive</span><span class="p">(</span><span class="s2">"prompt"</span><span class="p">,</span> <span class="n">PromptDirective</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"config-inited"</span><span class="p">,</span> <span class="n">_add_static</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_css_file</span><span class="p">(</span><span class="s2">"dp_prompt.css"</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_js_file</span><span class="p">(</span><span class="s2">"dp_prompt.js"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"version"</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span> <span class="s2">"parallel_read_safe"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"parallel_write_safe"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">config-inited</span></code> で、拡張に同梱の <code class="docutils literal notranslate"><span class="pre">static/</span></code> ディレクトリを、<code class="docutils literal notranslate"><span class="pre">html_static_path</span></code> に足す (利用者が、設定しなくてよい)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_css_file</span></code> / <code class="docutils literal notranslate"><span class="pre">add_js_file</span></code>: HTML に、CSS と JavaScript を、読み込ませる。<strong>HTML のビルダーだけ</strong> が使い、Confluence では無視される。</p></li>
+</ul>
+<p>実際に動かします。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.util.docutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">docutils_namespace</span>
+
+<span class="n">ANSI</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\x1b\[[0-9;]*m"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">builder</span><span class="o">=</span><span class="s2">"html"</span><span class="p">):</span>
+    <span class="n">warning</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">docutils_namespace</span><span class="p">():</span>
+        <span class="n">Sphinx</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="n">builder</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">),</span>
+            <span class="n">builder</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+            <span class="n">warning</span><span class="o">=</span><span class="n">warning</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ANSI</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">warning</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="s2">"&lt;tmp&gt;"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s1">'extensions = ["docspipeline.prompt"]</span><span class="se">\n</span><span class="s1">html_theme = "basic"</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. prompt:: 手順</span><span class="se">\n\n</span><span class="s2">   docspipeline build docs を実行する。</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"警告:"</span><span class="p">,</span> <span class="n">run</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"なし"</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="s2">"html"</span> <span class="o">/</span> <span class="s2">"index.html"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'&lt;div class="dp-prompt docutils container"&gt;.*?&lt;/pre&gt;&lt;/div&gt;'</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">"JavaScript を読み込む:"</span><span class="p">,</span>
+        <span class="s2">"dp_prompt.js"</span> <span class="ow">in</span> <span class="n">html</span><span class="p">,</span>
+        <span class="s2">"/ ファイルが出力された:"</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="s2">"html"</span> <span class="o">/</span> <span class="s2">"_static"</span> <span class="o">/</span> <span class="s2">"dp_prompt.js"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. prompt::</span><span class="se">\n\n</span><span class="s2">   export CONFLUENCE_API_TOKEN=abcd1234efgh5678</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"秘密情報らしき値:"</span><span class="p">,</span> <span class="n">run</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+警告: なし
+&lt;div class="dp-prompt docutils container"&gt;
+&lt;p class="dp-prompt-title"&gt;&lt;strong&gt;手順&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="dp-prompt-body highlight-text notranslate"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docspipeline build docs を実行する。
+&lt;/pre&gt;&lt;/div&gt;
+JavaScript を読み込む: True / ファイルが出力された: True
+秘密情報らしき値: &lt;tmp&gt;/index.rst:4: WARNING: プロンプトに秘密情報らしき値が含まれています (TOKEN=***)。環境変数の名前だけを書いてください
+</pre></div>
+</div>
+<section id="javascript-css">
+<h3>ブラウザ側 (JavaScript と CSS)<a class="headerlink" href="#javascript-css" title="Link to this heading">¶</a></h3>
+<p>コピーボタンは、<strong>ブラウザの中で</strong> JavaScript が足します。サーバー側 (Sphinx) は、箱と本文を出すだけです。
+この分担で、<strong>JavaScript が無い環境でも、本文は読めます</strong> (ボタンが無いだけ)。</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// 抜粋ファイル: docspipeline/static/dp_prompt.js</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">copyText</span><span class="p">(</span><span class="nx">text</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">navigator</span><span class="p">.</span><span class="nx">clipboard</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">isSecureContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">navigator</span><span class="p">.</span><span class="nx">clipboard</span><span class="p">.</span><span class="nx">writeText</span><span class="p">(</span><span class="nx">text</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// https でないページ (file:// など) 向けの代替。選択して、コピーの命令を使う。</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">reject</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">var</span><span class="w"> </span><span class="nx">area</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">"textarea"</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">area</span><span class="p">.</span><span class="nx">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">text</span><span class="p">;</span>
+<span class="w">      </span><span class="p">...</span>
+<span class="w">      </span><span class="nx">area</span><span class="p">.</span><span class="nx">select</span><span class="p">();</span>
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nb">document</span><span class="p">.</span><span class="nx">execCommand</span><span class="p">(</span><span class="s2">"copy"</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">resolve</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">reject</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">"copy failed"</span><span class="p">));</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">reject</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">area</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>部分</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">navigator.clipboard.writeText</span></code></p></td>
+<td><p><strong>現代的なコピーの API</strong>。ただし、<strong>安全なコンテキスト</strong> (<code class="docutils literal notranslate"><span class="pre">https</span></code> か <code class="docutils literal notranslate"><span class="pre">localhost</span></code>) でしか使えない</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">window.isSecureContext</span></code></p></td>
+<td><p>今のページが、安全なコンテキストか。<strong>偽なら代替の経路へ</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Promise(function</span> <span class="pre">(resolve,</span> <span class="pre">reject)</span> <span class="pre">...)</span></code></p></td>
+<td><p><strong>非同期の結果</strong> を表す入れ物。成功なら <code class="docutils literal notranslate"><span class="pre">resolve()</span></code>、失敗なら <code class="docutils literal notranslate"><span class="pre">reject()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>一時的な <code class="docutils literal notranslate"><span class="pre">textarea</span></code></p></td>
+<td><p>画面外に作り、<strong>選択して</strong> <code class="docutils literal notranslate"><span class="pre">document.execCommand(&quot;copy&quot;)</span></code> を呼ぶ (古い API だが、広く動く)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">try</span> <span class="pre">...</span> <span class="pre">finally</span></code></p></td>
+<td><p>コピーの成否に関わらず、<strong>一時的な入力欄を必ず消す</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// 抜粋ファイル: docspipeline/static/dp_prompt.js</span>
+<span class="w">    </span><span class="nx">button</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">"click"</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">var</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pre</span><span class="p">.</span><span class="nx">textContent</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\s+$/</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">copyText</span><span class="p">(</span><span class="nx">text</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span>
+<span class="w">        </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">report</span><span class="p">(</span><span class="s2">"コピーしました"</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">report</span><span class="p">(</span><span class="s2">"コピーできませんでした。本文を選択してコピーしてください"</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pre.textContent</span></code>: 本文の <strong>文字だけ</strong> (色付けのための <code class="docutils literal notranslate"><span class="pre">&lt;span&gt;</span></code> は含まれない)。<code class="docutils literal notranslate"><span class="pre">replace(/\s+$/,</span> <span class="pre">&quot;&quot;)</span></code> で、末尾の空白を落とす。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.then(成功,</span> <span class="pre">失敗)</span></code>: 結果に応じて、<strong>利用者に伝える</strong>。失敗しても、「本文を選択してコピーしてください」と、<strong>次の手</strong> を示す。</p></li>
+</ul>
+<div class="highlight-css notranslate"><div class="highlight"><pre><span></span><span class="c">/* 抜粋ファイル: docspipeline/static/dp_prompt.css */</span>
+<span class="p">.</span><span class="nc">dp-prompt</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mf">1.25</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--color-background-border</span><span class="p">,</span><span class="w"> </span><span class="mh">#d0d5dd</span><span class="p">);</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--color-background-secondary</span><span class="p">,</span><span class="w"> </span><span class="mh">#f8f9fb</span><span class="p">);</span>
+<span class="w">  </span><span class="k">overflow</span><span class="p">:</span><span class="w"> </span><span class="kc">hidden</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>CSS は、テーマ (furo) の <strong>色の変数</strong> (<code class="docutils literal notranslate"><span class="pre">var(--color-background-border,</span> <span class="pre">既定値)</span></code>) を使います。
+新しい色を足さないので、<strong>ライトモードとダークモードの両方</strong> に、自然に合います。第 2 引数が、変数が無いときの <strong>既定値</strong> です。</p>
+<p><strong>設計の原則</strong> (この拡張の、判断のまとめ):</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>原則</p></th>
+<th class="head"><p>どう実現したか</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>段階的な劣化</p></td>
+<td><p>JavaScript が無い → ボタンだけが消える。Confluence → 普通のコードブロック</p></td>
+</tr>
+<tr class="row-odd"><td><p>標準のノードだけ</p></td>
+<td><p>どのビルダーでも、未知のノードで失敗しない</p></td>
+</tr>
+<tr class="row-even"><td><p>秘密を、書かせない</p></td>
+<td><p>値らしきものがあれば警告し、<strong>警告にも、値を出さない</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>失敗を、黙らせない</p></td>
+<td><p>コピーに失敗したら、次の手を示す</p></td>
+</tr>
+<tr class="row-even"><td><p>新しい色を足さない</p></td>
+<td><p>テーマの変数を使い、ライト・ダークに合わせる</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="mermaid">
+<h2>5. mermaid 拡張: 外部コマンドを使う拡張<a class="headerlink" href="#mermaid" title="Link to this heading">¶</a></h2>
+<p>Mermaid のコードを、<strong>画像 (SVG)</strong> に変える拡張です。外部コマンド <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> を使います (第 3 回)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/mermaid.py::MermaidDirective.run</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">nodes</span><span class="o">.</span><span class="n">Node</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""本文を画像に変換して返す。変換できないときは ``docspipeline_mermaid_missing`` に従う。"""</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"mermaid の本文が空です"</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">)]</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">policy</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">MISSING_ENV</span><span class="p">)</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_mermaid_missing</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">find_mmdc</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">docspipeline_mermaid_cmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">srcdir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cmd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="s2">"mmdc (mermaid-cli) が見つかりません"</span><span class="p">)</span>
+
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">srcdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"_generated"</span> <span class="o">/</span> <span class="s2">"mermaid"</span>
+    <span class="n">puppeteer</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PUPPETEER_ENV</span><span class="p">)</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_mermaid_puppeteer_config</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span>
+            <span class="n">code</span><span class="p">,</span>
+            <span class="n">out_dir</span><span class="p">,</span>
+            <span class="n">cmd</span><span class="o">=</span><span class="n">cmd</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">docspipeline_mermaid_format</span><span class="p">,</span>
+            <span class="n">puppeteer_config</span><span class="o">=</span><span class="n">puppeteer</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">MermaidRenderError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+
+    <span class="c1"># 先頭の "/" は、ソースのルートからの相対を意味する。</span>
+    <span class="n">uri</span> <span class="o">=</span> <span class="s2">"/"</span> <span class="o">+</span> <span class="n">image</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">srcdir</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">image</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">alt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"alt"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+    <span class="n">img</span><span class="p">[</span><span class="s2">"candidates"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"*"</span><span class="p">:</span> <span class="n">uri</span><span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_source_info</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">caption</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"caption"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">caption</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">img</span><span class="p">]</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="n">figure</span> <span class="o">+=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">caption</span><span class="p">(</span><span class="n">caption</span><span class="p">,</span> <span class="n">caption</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">figure</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/mermaid.py::MermaidDirective._fallback</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">nodes</span><span class="o">.</span><span class="n">Node</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">policy</span> <span class="o">==</span> <span class="s2">"error"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExtensionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">docname</span><span class="si">}</span><span class="s2">: Mermaid を画像にできません。</span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">policy</span> <span class="o">==</span> <span class="s2">"warn"</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Mermaid を画像にできません。</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">docname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Mermaid をコードのまま表示します。</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">literal_block</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+    <span class="n">block</span><span class="p">[</span><span class="s2">"language"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"text"</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_source_info</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">block</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>処理の流れを、図にします。</p>
+<img alt="" src="../_images/mermaid-4e146ea8dab7c06e.svg" />
+<p>設計の判断を読みます。</p>
+<ol class="arabic simple">
+<li><p><strong>方針の決め方</strong>: <code class="docutils literal notranslate"><span class="pre">os.environ.get(MISSING_ENV)</span> <span class="pre">or</span> <span class="pre">config.docspipeline_mermaid_missing</span></code>。環境変数が <strong>優先</strong> (CI が、設定ファイルを触らずに、厳しくできる)。
+(ただし、第 6 回で学んだとおり、環境変数は <strong>キャッシュが知らない</strong> ので、<code class="docutils literal notranslate"><span class="pre">-E</span></code> が要る)</p></li>
+<li><p><strong>探す・変換する・方針に従う</strong> が、<strong>別の関数</strong> に分かれている (<code class="docutils literal notranslate"><span class="pre">find_mmdc</span></code>・<code class="docutils literal notranslate"><span class="pre">render</span></code>・<code class="docutils literal notranslate"><span class="pre">_fallback</span></code>)。
+それぞれ、単体でテストできる。</p></li>
+<li><p><strong>画像の URI</strong>: <code class="docutils literal notranslate"><span class="pre">&quot;/&quot;</span> <span class="pre">+</span> <span class="pre">image.relative_to(self.env.srcdir).as_posix()</span></code>。<strong>先頭の <code class="docutils literal notranslate"><span class="pre">/</span></code></strong> は、「ソースのルートからの相対」を表す。
+文書の場所に依らず、同じ書き方で、画像を指せる。<code class="docutils literal notranslate"><span class="pre">as_posix()</span></code> で、Windows でも <code class="docutils literal notranslate"><span class="pre">/</span></code> 区切り。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">img[&quot;candidates&quot;]</span> <span class="pre">=</span> <span class="pre">{&quot;*&quot;:</span> <span class="pre">uri}</span></code></strong>: Sphinx が画像を <strong>コピーして集める</strong> ための情報。</p></li>
+<li><p><strong>失敗しても、文書は壊さない</strong> (<code class="docutils literal notranslate"><span class="pre">literal</span></code>・<code class="docutils literal notranslate"><span class="pre">warn</span></code> では、コードをそのまま表示する)。<code class="docutils literal notranslate"><span class="pre">error</span></code> のときだけ、止める。</p></li>
+</ol>
+<p>方針ごとの挙動を、実際に確かめます (<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が <strong>無い</strong> 環境にして)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.util.docutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">docutils_namespace</span>
+
+<span class="n">ANSI</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\x1b\[[0-9;]*m"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="n">warning</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="n">docutils_namespace</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Sphinx</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">),</span>
+                <span class="s2">"html"</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+                <span class="n">warning</span><span class="o">=</span><span class="n">warning</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="n">ANSI</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">warning</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="s2">"&lt;tmp&gt;"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">error</span>
+
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"empty"</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"empty"</span><span class="p">)</span>  <span class="c1"># mmdc が、見つからない環境にする</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"DOCSPIPELINE_MMDC"</span><span class="p">,</span> <span class="s2">"DOCSPIPELINE_MERMAID_MISSING"</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. mermaid::</span><span class="se">\n\n</span><span class="s2">   flowchart LR</span><span class="se">\n</span><span class="s2">     A --&gt; B</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"literal"</span><span class="p">,</span> <span class="s2">"warn"</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">):</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'extensions = ["docspipeline.mermaid"]</span><span class="se">\n</span><span class="s1">html_theme = "basic"</span><span class="se">\n</span><span class="s1">docspipeline_mermaid_missing = "</span><span class="si">{</span><span class="n">policy</span><span class="si">}</span><span class="s1">"</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">warning</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">policy</span><span class="si">:</span><span class="s2">8</span><span class="si">}</span><span class="s2"> 警告: </span><span class="si">{</span><span class="n">warning</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'なし'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">''</span><span class="si">:</span><span class="s2">8</span><span class="si">}</span><span class="s2"> 例外: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+literal  警告: なし
+         例外: None
+warn     警告: &lt;tmp&gt;/index.rst:4: WARNING: Mermaid を画像にできません。mmdc (mermaid-cli) が見つかりません
+         例外: None
+error    警告: なし
+         例外: ExtensionError: index: Mermaid を画像にできません。mmdc (mermaid-cli) が見つかりません
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">literal</span></code>: 警告も例外も出ず、<strong>コードのまま</strong> 表示される (手元の確認用)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">warn</span></code>: 場所つきの警告。<code class="docutils literal notranslate"><span class="pre">-W</span></code> なら、ビルドが失敗する。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">error</span></code>: <strong>例外</strong> で、ビルドが止まる (CI・公開用)。</p></li>
+</ul>
+<section id="id5">
+<h3>キャッシュ: 同じ図を、2 度と変換しない<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> は、<strong>偽物</strong> (呼び出しを数えるだけのコマンド) に置き換えて、試せます。<strong>外部コマンドを偽物にする</strong> のは、テストの定石です (第 10 回)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stat</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.util.docutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">docutils_namespace</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"calls.log"</span>
+    <span class="n">fake</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"fake-mmdc"</span>
+    <span class="n">fake</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"#!</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="se">\n</span><span class="s2">import sys</span><span class="se">\n</span><span class="s2">open(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">log</span><span class="p">)</span><span class="si">!r}</span><span class="s2">, 'a').write('呼ばれた</span><span class="se">\\</span><span class="s2">n')</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"out = sys.argv[sys.argv.index('-o') + 1]</span><span class="se">\n</span><span class="s2">open(out, 'w').write('&lt;svg xmlns=</span><span class="se">\"</span><span class="s2">http://www.w3.org/2000/svg</span><span class="se">\"</span><span class="s2">/&gt;')</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="p">)</span>
+    <span class="n">fake</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">fake</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mode</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IEXEC</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"DOCSPIPELINE_MMDC"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fake</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s1">'extensions = ["docspipeline.mermaid"]</span><span class="se">\n</span><span class="s1">html_theme = "basic"</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. mermaid::</span><span class="se">\n\n</span><span class="s2">   flowchart LR</span><span class="se">\n</span><span class="s2">     A --&gt; B</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># 文書は、毎回、全部読み直す</span>
+        <span class="k">with</span> <span class="n">docutils_namespace</span><span class="p">():</span>
+            <span class="n">Sphinx</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">),</span>
+                <span class="s2">"html"</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+                <span class="n">warning</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="n">svgs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"_generated"</span> <span class="o">/</span> <span class="s2">"mermaid"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.svg"</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> 回目: mmdc の呼び出し </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span><span class="si">}</span><span class="s2"> 回 / SVG </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">svgs</span><span class="p">)</span><span class="si">}</span><span class="s2"> 個"</span><span class="p">)</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="s2">"index.html"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"画像として取り込まれた:"</span><span class="p">,</span> <span class="s1">'src="_images/mermaid-'</span> <span class="ow">in</span> <span class="n">html</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+1 回目: mmdc の呼び出し 1 回 / SVG 1 個
+2 回目: mmdc の呼び出し 1 回 / SVG 1 個
+画像として取り込まれた: True
+</pre></div>
+</div>
+<p>文書を <strong>2 回とも全部読み直した</strong> のに、<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の呼び出しは <strong>1 回だけ</strong>。2 回目は、<strong>内容のハッシュ</strong> で名付けた SVG が既にあるので、変換を飛ばしました (第 2 回)。</p>
+</section>
+</section>
+<section id="doxygen">
+<h2>6. doxygen 拡張: 「計算」と「実行」を分ける<a class="headerlink" href="#doxygen" title="Link to this heading">¶</a></h2>
+<p>C++ のコメントから XML を作り、Breathe に渡す拡張です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/doxygen.py::make_doxyfile</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_doxyfile</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">predefined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""XML だけを出す最小の Doxyfile を作る。</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        project: Doxygen の ``PROJECT_NAME``。</span>
+<span class="sd">        inputs: 読み込むソースの場所。</span>
+<span class="sd">        output: 出力先 (この下の ``xml/`` が Breathe の入力になる)。</span>
+<span class="sd">        predefined: ``PREDEFINED`` に渡すマクロ。</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Doxyfile の中身。</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">q</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">'"'</span> <span class="o">+</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="s1">'</span><span class="se">\\</span><span class="s1">"'</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'"'</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"PROJECT_NAME"</span><span class="p">:</span> <span class="n">q</span><span class="p">(</span><span class="n">project</span><span class="p">),</span>
+        <span class="s2">"OUTPUT_DIRECTORY"</span><span class="p">:</span> <span class="n">q</span><span class="p">(</span><span class="n">output</span><span class="p">),</span>
+        <span class="s2">"INPUT"</span><span class="p">:</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">q</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">),</span>
+        <span class="s2">"FILE_PATTERNS"</span><span class="p">:</span> <span class="n">_FILE_PATTERNS</span><span class="p">,</span>
+        <span class="s2">"RECURSIVE"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"GENERATE_XML"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"XML_PROGRAMLISTING"</span><span class="p">:</span> <span class="s2">"NO"</span><span class="p">,</span>
+        <span class="s2">"GENERATE_HTML"</span><span class="p">:</span> <span class="s2">"NO"</span><span class="p">,</span>
+        <span class="s2">"GENERATE_LATEX"</span><span class="p">:</span> <span class="s2">"NO"</span><span class="p">,</span>
+        <span class="s2">"QUIET"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="c1"># コメントの書式の誤りは拾う。コメントが無いこと自体は、docspipeline coverage の役目。</span>
+        <span class="s2">"WARNINGS"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"WARN_IF_DOC_ERROR"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"WARN_IF_UNDOCUMENTED"</span><span class="p">:</span> <span class="s2">"NO"</span><span class="p">,</span>
+        <span class="s2">"JAVADOC_AUTOBRIEF"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"MARKDOWN_SUPPORT"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"ENABLE_PREPROCESSING"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"MACRO_EXPANSION"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"EXPAND_ONLY_PREDEF"</span><span class="p">:</span> <span class="s2">"YES"</span><span class="p">,</span>
+        <span class="s2">"PREDEFINED"</span><span class="p">:</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">predefined</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">lines</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">make_doxyfile</span></code> は <strong>純粋関数</strong> です (文字列を作るだけで、ファイルも、プロセスも触らない)。だから、<strong>そのままテストできます</strong>。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.doxygen</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_doxyfile</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="n">make_doxyfile</span><span class="p">(</span><span class="s2">"My Engine"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"/src/a b"</span><span class="p">,</span> <span class="s2">"/src/c"</span><span class="p">],</span> <span class="s2">"/out"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"Q_OBJECT="</span><span class="p">,</span> <span class="s2">"FOO"</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" = "</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="s2">"PROJECT_NAME"</span><span class="p">,</span>
+        <span class="s2">"INPUT"</span><span class="p">,</span>
+        <span class="s2">"GENERATE_XML"</span><span class="p">,</span>
+        <span class="s2">"GENERATE_HTML"</span><span class="p">,</span>
+        <span class="s2">"WARN_IF_UNDOCUMENTED"</span><span class="p">,</span>
+        <span class="s2">"PREDEFINED"</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+PROJECT_NAME = "My Engine"
+INPUT = "/src/a b" "/src/c"
+GENERATE_XML = YES
+GENERATE_HTML = NO
+WARN_IF_UNDOCUMENTED = NO
+PREDEFINED = Q_OBJECT= FOO
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パスに <strong>空白</strong> があっても、<code class="docutils literal notranslate"><span class="pre">&quot;...&quot;</span></code> で囲んで、正しく渡る (<code class="docutils literal notranslate"><span class="pre">q()</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GENERATE_XML</span> <span class="pre">=</span> <span class="pre">YES</span></code>・<code class="docutils literal notranslate"><span class="pre">GENERATE_HTML</span> <span class="pre">=</span> <span class="pre">NO</span></code>: <strong>XML だけ</strong> を出す (HTML は、Sphinx が作る)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WARN_IF_UNDOCUMENTED</span> <span class="pre">=</span> <span class="pre">NO</span></code>: コメントが <strong>無いこと</strong> は、警告にしない。「書式の誤り」だけを拾う。
+(コメントの網羅は、別の道具の役目 → 役割を分ける)</p></li>
+</ul>
+<p>実行する側です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/doxygen.py::run_doxygen</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_doxygen</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``builder-inited`` で Doxygen を走らせ、警告を Sphinx の警告として転送する。</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        sphinx.errors.ExtensionError: ``doxygen`` が無い、または失敗したとき。</span>
+<span class="sd">    """</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_doxygen_inputs</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inputs</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SKIP_ENV</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">_TRUE</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> が設定されているため Doxygen を飛ばします"</span><span class="p">,</span> <span class="n">SKIP_ENV</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">doxygen</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">docspipeline_doxygen_cmd</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">doxygen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExtensionError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"doxygen が見つかりません。インストールするか、</span><span class="si">{</span><span class="n">SKIP_ENV</span><span class="si">}</span><span class="s2">=1 で C++ の節を飛ばしてください"</span>
+        <span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">docspipeline_doxygen_output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># 古い XML が残って、消したはずの関数が文書に出続けるのを避ける。</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">output</span> <span class="o">/</span> <span class="s2">"xml"</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">doxyfile</span> <span class="o">=</span> <span class="n">output</span> <span class="o">/</span> <span class="s2">"Doxyfile"</span>
+    <span class="n">doxyfile</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="n">make_doxyfile</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_doxygen_project</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">),</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_doxygen_predefined</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Doxygen を実行します: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">doxyfile</span><span class="p">)</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">doxygen</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">doxyfile</span><span class="p">)],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"doxygen: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExtensionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"doxygen が失敗しました (終了コード </span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>行</p></th>
+<th class="head"><p>読み方</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">inputs:</span> <span class="pre">return</span></code></p></td>
+<td><p>C++ の指定が無ければ、<strong>何もしない</strong> (早期の <code class="docutils literal notranslate"><span class="pre">return</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SKIP_ENV</span></code></p></td>
+<td><p>環境変数で、<strong>飛ばせる</strong> (Doxygen が無い環境の手元確認用)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">shutil.which</span></code></p></td>
+<td><p>Doxygen が <strong>無ければ、<code class="docutils literal notranslate"><span class="pre">ExtensionError</span></code></strong> (黙って飛ばさない)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">shutil.rmtree(output</span> <span class="pre">/</span> <span class="pre">&quot;xml&quot;)</span></code></p></td>
+<td><p><strong>古い XML を消す</strong>。消さないと、削除した関数が、文書に出続ける</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">subprocess.run(...</span> <span class="pre">encoding,</span> <span class="pre">errors)</span></code></p></td>
+<td><p>文字コードを明示 (第 3 回)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">line</span> <span class="pre">in</span> <span class="pre">proc.stderr.splitlines():</span> <span class="pre">logger.warning</span></code></p></td>
+<td><p>Doxygen の <strong>警告を、Sphinx の警告に転送</strong>。<code class="docutils literal notranslate"><span class="pre">-W</span></code> で、書式の誤りが、CI を止める</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">proc.returncode</span> <span class="pre">!=</span> <span class="pre">0</span></code></p></td>
+<td><p>失敗したら <code class="docutils literal notranslate"><span class="pre">ExtensionError</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>登録の部分:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋: docspipeline/doxygen.py::setup</span>
+    <span class="c1"># Breathe より先に走らせる (小さい数字ほど先)。</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"builder-inited"</span><span class="p">,</span> <span class="n">run_doxygen</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">priority</span></code></strong> は、同じイベントのハンドラの <strong>実行順序</strong> です (<strong>小さい数ほど先</strong>。既定は 500)。
+Breathe は、Doxygen の XML を <strong>読む側</strong> なので、XML を作る <code class="docutils literal notranslate"><span class="pre">run_doxygen</span></code> が、<strong>先に</strong> 走らなければなりません。</p>
+</section>
+<section id="id6">
+<h2>7. 並列ビルドと、拡張が守る約束<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>Sphinx は、<code class="docutils literal notranslate"><span class="pre">-j</span> <span class="pre">N</span></code> で、文書を <strong>N 個のプロセスで並列に</strong> 読めます。拡張は、それが <strong>安全</strong> か (<code class="docutils literal notranslate"><span class="pre">parallel_read_safe</span></code>) を宣言します。</p>
+<img alt="" src="../_images/mermaid-6ac56add8ac287de.svg" />
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>危険</p></th>
+<th class="head"><p>例</p></th>
+<th class="head"><p>対策</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>共有ファイルへの同時の書き込み</strong></p></td>
+<td><p>2 つのプロセスが、同じ SVG を書く</p></td>
+<td><p><strong>別名に書いて <code class="docutils literal notranslate"><span class="pre">os.replace</span></code></strong> (第 3 回)。<code class="docutils literal notranslate"><span class="pre">mmdc.render</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>共有の変数の書き換え</strong></p></td>
+<td><p>拡張のグローバル変数に、結果を溜める</p></td>
+<td><p>溜めない。溜めるなら、<code class="docutils literal notranslate"><span class="pre">env-merge-info</span></code> などで、<strong>親に集約する</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>プロセスをまたぐ状態への依存</strong></p></td>
+<td><p>「最初に読んだ文書で、設定を決める」</p></td>
+<td><p>設定は、<code class="docutils literal notranslate"><span class="pre">config-inited</span></code> で <strong>1 回だけ</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>拡張</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">parallel_read_safe</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">parallel_write_safe</span></code></p></th>
+<th class="head"><p>理由</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">guard</span></code></p></td>
+<td><p>はい</p></td>
+<td><p>はい</p></td>
+<td><p>状態を持たない</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mermaid</span></code></p></td>
+<td><p>はい</p></td>
+<td><p>はい</p></td>
+<td><p>SVG の書き込みが、原子的</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prompt</span></code></p></td>
+<td><p>はい</p></td>
+<td><p>はい</p></td>
+<td><p>状態を持たない</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">doxygen</span></code></p></td>
+<td><p>はい</p></td>
+<td><p>(宣言なし)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">builder-inited</span></code> で <strong>1 回だけ</strong> 走る。書き出しの段階には関与しない</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id7">
+<h2>8. 設定値の約束<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋: docspipeline/mermaid.py::setup</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_config_value</span><span class="p">(</span><span class="s2">"docspipeline_mermaid_cmd"</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"env"</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_config_value</span><span class="p">(</span><span class="s2">"docspipeline_mermaid_format"</span><span class="p">,</span> <span class="s2">"svg"</span><span class="p">,</span> <span class="s2">"env"</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_config_value</span><span class="p">(</span><span class="s2">"docspipeline_mermaid_missing"</span><span class="p">,</span> <span class="s2">"literal"</span><span class="p">,</span> <span class="s2">"env"</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_config_value</span><span class="p">(</span><span class="s2">"docspipeline_mermaid_puppeteer_config"</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"env"</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>名前の接頭辞</strong> (<code class="docutils literal notranslate"><span class="pre">docspipeline_</span></code>) で、他の拡張と <strong>衝突しない</strong> ようにする。</p></li>
+<li><p><strong>既定値</strong> を必ず持つ (<code class="docutils literal notranslate"><span class="pre">conf.py</span></code> に書かなくても、動く)。</p></li>
+<li><p><strong>検証</strong> は、<code class="docutils literal notranslate"><span class="pre">config-inited</span></code> で行う (<code class="docutils literal notranslate"><span class="pre">_check_policy</span></code>)。<strong>綴りの間違いを、早く、読みやすい形で</strong> 知らせる。</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/mermaid.py::_check_policy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_policy</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Sphinx</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">docspipeline_mermaid_missing</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">MISSING_ENV</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"literal"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_POLICIES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExtensionError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"docspipeline_mermaid_missing は </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISSING_POLICIES</span><span class="p">)</span><span class="si">}</span><span class="s2"> のいずれかにしてください: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">docspipeline_mermaid_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"svg"</span><span class="p">,</span> <span class="s2">"png"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ExtensionError</span><span class="p">(</span><span class="s2">"docspipeline_mermaid_format は svg か png にしてください"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>落とし穴</strong>: Sphinx は、<code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の <strong>知らない名前を、黙って無視</strong> します (<code class="docutils literal notranslate"><span class="pre">docspipeline_mermaid_mising</span> <span class="pre">=</span> <span class="pre">&quot;error&quot;</span></code> と綴りを間違えても、エラーにならない)。
+だから、「名前が登録されているか」を、<strong>テストで確かめる</strong> のが、安全です (Confluence の設定名で、実際にそうしています。第 9 回)。</p>
+</section>
+<section id="hou">
+<h2>9. 偽物を作る: hou のスタブ (メタプログラミング)<a class="headerlink" href="#hou" title="Link to this heading">¶</a></h2>
+<p>Houdini の外では、<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">hou</span></code> ができません。<code class="docutils literal notranslate"><span class="pre">hou</span></code> を使うコードを <strong>autodoc で読む</strong> ために、<strong>何を呼んでも通る偽物</strong> を作りました。
+Python の、<strong>動的な属性アクセス</strong> の仕組みを使います。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/stubs/hou.py::_Meta</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Meta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""クラス属性の参照を、新しいプレースホルダーのクラスで返す。"""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"__"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"__"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_placeholder</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/stubs/hou.py::_Any</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Any</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">_Meta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""何を呼んでも自分自身を返す、何もしないオブジェクト。"""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"__"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"__"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/stubs/hou.py::_placeholder</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_placeholder</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_cache</span><span class="p">:</span>
+        <span class="n">_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_Meta</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="n">_Any</span><span class="p">,),</span> <span class="p">{</span><span class="s2">"__module__"</span><span class="p">:</span> <span class="s2">"hou"</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/stubs/hou.py::__getattr__</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``hou.&lt;名前&gt;`` をすべてプレースホルダーとして返す (モジュールの属性参照)。"""</span>
+    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"__"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"__"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_placeholder</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>仕組み</p></th>
+<th class="head"><p>働き</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>モジュールの <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code></strong> (PEP 562)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hou.Node</span></code> のように、<strong>無い名前を参照</strong> したとき、この関数が呼ばれる。<code class="docutils literal notranslate"><span class="pre">_placeholder(名前)</span></code> を返す</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>メタクラス <code class="docutils literal notranslate"><span class="pre">_Meta</span></code> の <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code></strong></p></td>
+<td><p><strong>クラスの属性</strong> (<code class="docutils literal notranslate"><span class="pre">hou.Node.something</span></code>) の参照を、さらにプレースホルダーのクラスにする</p></td>
+</tr>
+<tr class="row-even"><td><p><strong><code class="docutils literal notranslate"><span class="pre">_Any</span></code> のメソッド</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">__init__</span></code> (何でも受け取る)・<code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> (自分を返す)・<code class="docutils literal notranslate"><span class="pre">__call__</span></code> (呼べる)・<code class="docutils literal notranslate"><span class="pre">__iter__</span></code> (空)・<code class="docutils literal notranslate"><span class="pre">__bool__</span></code> (偽)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong><code class="docutils literal notranslate"><span class="pre">_cache</span></code></strong></p></td>
+<td><p>同じ名前は、<strong>同じクラス</strong> を返す (<code class="docutils literal notranslate"><span class="pre">hou.Node</span> <span class="pre">is</span> <span class="pre">hou.Node</span></code>)。継承や <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> が、安定する</p></td>
+</tr>
+<tr class="row-even"><td><p><strong><code class="docutils literal notranslate"><span class="pre">__xxx__</span></code> を、<code class="docutils literal notranslate"><span class="pre">AttributeError</span></code></strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> や <code class="docutils literal notranslate"><span class="pre">__len__</span></code> などの特殊な名前を、<strong>偽物に答えさせない</strong>。<code class="docutils literal notranslate"><span class="pre">inspect</span></code>・<code class="docutils literal notranslate"><span class="pre">copy</span></code>・<code class="docutils literal notranslate"><span class="pre">pickle</span></code> などの道具が、偽物を本物と誤解して、おかしな動きをするのを避ける</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">STUBS_DIR</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">STUBS_DIR</span><span class="p">))</span>  <span class="c1"># 末尾に足す (本物の hou があれば、そちらが先に見つかる)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hou</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyNode</span><span class="p">(</span><span class="n">hou</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>  <span class="c1"># 偽物のクラスを、継承できる</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">()))</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"クラスとして使える:"</span><span class="p">,</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hou</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="nb">type</span><span class="p">),</span> <span class="s2">"/ 同じ名前は同じもの:"</span><span class="p">,</span> <span class="n">hou</span><span class="o">.</span><span class="n">Node</span> <span class="ow">is</span> <span class="n">hou</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"継承したクラス:"</span><span class="p">,</span> <span class="n">MyNode</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">"/ モジュール名:"</span><span class="p">,</span> <span class="n">hou</span><span class="o">.</span><span class="n">Node</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"子ノードの数:"</span><span class="p">,</span> <span class="n">MyNode</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"何を呼んでも通る:"</span><span class="p">,</span> <span class="n">hou</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="s2">"/obj/geo1"</span><span class="p">)</span><span class="o">.</span><span class="n">children</span><span class="p">()</span><span class="o">.</span><span class="n">anything</span><span class="o">.</span><span class="n">at</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"真偽は偽:"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">hou</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="s2">"/obj"</span><span class="p">)),</span> <span class="s2">"/ 反復は空:"</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">hou</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()))</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">hou</span><span class="o">.</span><span class="n">__wrapped__</span>
+<span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"特殊な名前は AttributeError:"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+クラスとして使える: True / 同じ名前は同じもの: True
+継承したクラス: Node / モジュール名: hou
+子ノードの数: 0
+何を呼んでも通る: True
+真偽は偽: False / 反復は空: []
+特殊な名前は AttributeError: __wrapped__
+</pre></div>
+</div>
+<p><strong>限界を、知っておく</strong>: これは <strong>何も実装していない</strong> 偽物です。値を返す挙動が要るテストは、テスト側で、必要な関数だけを差し替えます。
+偽物を、本物に近づけて <strong>育てない</strong> (保守の負担が、増え続ける)。</p>
+</section>
+<section id="id8">
+<h2>10. 拡張をテストする<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>拡張のテストの定石は、次の 3 つです。</p>
+<ol class="arabic simple">
+<li><p><strong>純粋な部分を、単体でテスト</strong>: <code class="docutils literal notranslate"><span class="pre">make_doxyfile</span></code>・<code class="docutils literal notranslate"><span class="pre">find_secret</span></code>・<code class="docutils literal notranslate"><span class="pre">split_command</span></code> のような、入力 → 出力だけの関数。</p></li>
+<li><p><strong>外部コマンドを、偽物に</strong>: 偽の <code class="docutils literal notranslate"><span class="pre">mmdc</span></code> (呼び出しを数える・失敗させる・存在しない)。環境変数 <code class="docutils literal notranslate"><span class="pre">DOCSPIPELINE_MMDC</span></code> で渡す。</p></li>
+<li><p><strong>本当に Sphinx でビルド</strong>: 一時ディレクトリに小さなプロジェクトを作り、ビルドして、出力 (HTML・警告) を確かめる。</p></li>
+<li><p>は、<strong>別のプロセス</strong> (<code class="docutils literal notranslate"><span class="pre">subprocess</span></code> で <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">sphinx</span></code>) で行うと、テストのプロセスの状態 (<code class="docutils literal notranslate"><span class="pre">sys.path</span></code>・docutils の登録) を、汚しません。
+同じプロセスで行うなら、この回で使った <strong><code class="docutils literal notranslate"><span class="pre">docutils_namespace()</span></code></strong> で、登録を元に戻します。</p></li>
+</ol>
+<p>実際のテストの一部を読みます (<code class="docutils literal notranslate"><span class="pre">tests/test_prompt.py</span></code>)。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 抜粋: tests/test_prompt.py::test_a_secret_like_value_fails_a_strict_build_without_echoing_it</span>
+    <span class="n">leaked</span> <span class="o">=</span> <span class="s2">"CONFLUENCE_API_TOKEN=abcd1234efgh5678"</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="n">_project</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">rst</span><span class="o">=</span><span class="sa">f</span><span class="s2">"手順</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. prompt::</span><span class="se">\n\n</span><span class="s2">   次を実行する: </span><span class="si">{</span><span class="n">leaked</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_build</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="s2">"html"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+    <span class="k">assert</span> <span class="s2">"秘密情報らしき値"</span> <span class="ow">in</span> <span class="n">output</span>
+    <span class="k">assert</span> <span class="s2">"abcd1234efgh5678"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span>  <span class="c1"># 警告にも、値は出さない</span>
+</pre></div>
+</div>
+<p>「警告が出る」だけでなく、最後の行で、「<strong>警告に、値が出ない</strong>」(コメントのとおり) も、確かめています。<strong>安全のための性質も、テストにする</strong> のが、ポイントです。</p>
+</section>
+<section id="id9">
+<h2>ハンズオン<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>第 3 節の <code class="docutils literal notranslate"><span class="pre">memo</span></code> 拡張に、<strong>オプション</strong> <code class="docutils literal notranslate"><span class="pre">:level:</span></code> (<code class="docutils literal notranslate"><span class="pre">info</span></code>・<code class="docutils literal notranslate"><span class="pre">warn</span></code>) を足し、箱の <code class="docutils literal notranslate"><span class="pre">class</span></code> に反映する。(演習の解答に、例があります)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">build</span> <span class="pre">docs</span></code> で、<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が無い状態 (<code class="docutils literal notranslate"><span class="pre">PATH</span></code> から外す) にして、<code class="docutils literal notranslate"><span class="pre">DOCSPIPELINE_MERMAID_MISSING</span></code> を <code class="docutils literal notranslate"><span class="pre">literal</span></code>・<code class="docutils literal notranslate"><span class="pre">warn</span></code>・<code class="docutils literal notranslate"><span class="pre">error</span></code> に変えて、挙動を見る。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docspipeline/static/dp_prompt.js</span></code> を読み、ボタンを押したときの流れを、<strong>紙に書く</strong>。</p></li>
+</ol>
+</section>
+<section id="id10">
+<h2>確認問題<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">setup(app)</span></code> が、返す辞書の <code class="docutils literal notranslate"><span class="pre">parallel_read_safe</span></code> は、何を宣言していますか。</p></li>
+<li><p>独自のノードを作らず、<strong>標準のノードだけ</strong> で組み立てる利点は何ですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">app.connect(&quot;builder-inited&quot;,</span> <span class="pre">run_doxygen,</span> <span class="pre">priority=100)</span></code> の <code class="docutils literal notranslate"><span class="pre">priority=100</span></code> は、何のためですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mermaid</span></code> 拡張で、方針を決めるとき、<strong>環境変数が、設定値より優先</strong> されるのは、なぜですか。それが、増分ビルドで問題になるのは、なぜですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">doxygen</span></code> 拡張が、<code class="docutils literal notranslate"><span class="pre">make_doxyfile</span></code> と <code class="docutils literal notranslate"><span class="pre">run_doxygen</span></code> に、分かれている利点は何ですか。</p></li>
+<li><p>「警告に、秘密情報の値を出さない」を、テストでも確かめているのは、なぜですか。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hou</span></code> のスタブが、<code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> のような名前を <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> にするのは、なぜですか。</p></li>
+<li><p>(書く問題) <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">memo::</span></code> に <code class="docutils literal notranslate"><span class="pre">:level:</span></code> オプションを足し、<code class="docutils literal notranslate"><span class="pre">memo-warn</span></code> のような <code class="docutils literal notranslate"><span class="pre">class</span></code> を付けてください。</p></li>
+</ol>
+</section>
+<section id="id11">
+<h2>解答<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>拡張が、<strong>文書の並列な読み込み</strong> (<code class="docutils literal notranslate"><span class="pre">-j</span> <span class="pre">N</span></code>) の下でも、安全に動く、という宣言。共有のファイル・変数を、競合して壊さないこと。</p></li>
+<li><p>独自のノードは、<strong>ビルダーごとに、出力の方法を教える必要</strong> がある。標準のノードなら、全てのビルダー (HTML・Confluence・テキスト) が、<strong>すでに知っている</strong>。
+未対応のビルダーで、失敗したり、黙って捨てられたりしない。</p></li>
+<li><p>同じイベントのハンドラの <strong>実行順序</strong> を決めるため (小さい数が先)。Breathe が XML を読む前に、Doxygen を走らせたい。</p></li>
+<li><p>CI が、<code class="docutils literal notranslate"><span class="pre">conf.py</span></code> を <strong>変えずに</strong>、環境変数だけで、方針を厳しくできるから。ただし、環境が覚えているのは <strong>設定値</strong> だけで、
+環境変数は覚えていない。<strong>文書が変わっていないと、読み直されず</strong>、拡張が走らないので、方針が働かない (<code class="docutils literal notranslate"><span class="pre">-E</span></code> で、読み直させる)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make_doxyfile</span></code> は <strong>純粋関数</strong> で、ファイルやプロセスに触らないので、単体で、速く、確実にテストできる。
+副作用のある <code class="docutils literal notranslate"><span class="pre">run_doxygen</span></code> は、薄く、小さくなる。</p></li>
+<li><p>安全のための性質 (秘密を出さない) は、<strong>機能が正しく動くこと</strong> と同じくらい大事で、<strong>壊れやすい</strong> (出力を整えるとき、うっかり値を足す)。
+テストにしておけば、将来の変更で、うっかり漏らしたとき、気付ける。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inspect</span></code>・<code class="docutils literal notranslate"><span class="pre">copy</span></code>・<code class="docutils literal notranslate"><span class="pre">pickle</span></code>・テストの道具などが、特殊な名前 (<code class="docutils literal notranslate"><span class="pre">__wrapped__</span></code> など) の有無を <strong>調べて</strong>、挙動を変える。
+偽物が、何にでも「ある」と答えると、これらの道具が、<strong>偽物を本物と誤解して</strong>、無限ループや、おかしな動きをする。</p></li>
+<li><p>例 (実行して確かめてある):</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sphinx.util.docutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">docutils_namespace</span>
+
+<span class="n">MEMO_EXT</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">from docutils import nodes</span>
+<span class="s2">from docutils.parsers.rst import Directive, directives</span>
+
+<span class="s2">class Memo(Directive):</span>
+<span class="s2">    has_content = True</span>
+<span class="s2">    optional_arguments = 1</span>
+<span class="s2">    final_argument_whitespace = True</span>
+<span class="s2">    option_spec = {"level": directives.unchanged}      # :level: を受け取る</span>
+
+<span class="s2">    def run(self):</span>
+<span class="s2">        title = self.arguments[0] if self.arguments else "メモ"</span>
+<span class="s2">        level = self.options.get("level", "info")</span>
+<span class="s2">        body = "</span><span class="se">\\</span><span class="s2">n".join(self.content)</span>
+<span class="s2">        heading = nodes.paragraph("", "", nodes.strong(title, title))</span>
+<span class="s2">        return [nodes.container("", heading, nodes.literal_block(body, body), classes=["memo", f"memo-</span><span class="si">{level}</span><span class="s2">"])]</span>
+
+<span class="s2">def setup(app):</span>
+<span class="s2">    app.add_directive("memo", Memo)</span>
+<span class="s2">    return {"version": "0.1", "parallel_read_safe": True}</span>
+<span class="s2">"""</span>
+
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"memo_ext.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">MEMO_EXT</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"conf.py"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="s1">'import os, sys</span><span class="se">\n</span><span class="s1">sys.path.insert(0, os.path.dirname(__file__))</span><span class="se">\n</span><span class="s1">extensions = ["memo_ext"]</span><span class="se">\n</span><span class="s1">html_theme = "basic"</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"index.rst"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"題名</span><span class="se">\n</span><span class="s2">====</span><span class="se">\n\n</span><span class="s2">.. memo:: 注意</span><span class="se">\n</span><span class="s2">   :level: warn</span><span class="se">\n\n</span><span class="s2">   火を使う</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">docutils_namespace</span><span class="p">():</span>
+        <span class="n">Sphinx</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"doctrees"</span><span class="p">),</span>
+            <span class="s2">"html"</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+            <span class="n">warning</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"out"</span> <span class="o">/</span> <span class="s2">"index.html"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'&lt;div class="[^"]*memo-warn[^"]*"&gt;'</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+&lt;div class="memo memo-warn docutils container"&gt;
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h2>まとめ<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>概念</p></th>
+<th class="head"><p>要点</p></th>
+<th class="head"><p>このリポジトリでの例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>拡張</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">setup(app)</span></code> で、ディレクティブ・設定値・イベントを登録</p></td>
+<td><p>4 つの拡張</p></td>
+</tr>
+<tr class="row-odd"><td><p>ディレクティブ</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run()</span></code> が、ノードのリストを返す</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code>・<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">prompt::</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>標準のノード</p></td>
+<td><p>どのビルダーでも通る</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prompt</span></code>・<code class="docutils literal notranslate"><span class="pre">mermaid</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>優先度</p></td>
+<td><p>小さい数が先。順序の依存を、明示する</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">doxygen</span></code> (<code class="docutils literal notranslate"><span class="pre">priority=100</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>外部コマンド</p></td>
+<td><p>探す・実行・方針に従う、を分ける。失敗しても文書を壊さない</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mermaid</span></code>・<code class="docutils literal notranslate"><span class="pre">mmdc</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>純粋と副作用</p></td>
+<td><p>計算を純粋関数にして、薄い実行層を残す</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">make_doxyfile</span></code> / <code class="docutils literal notranslate"><span class="pre">run_doxygen</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>並列安全</p></td>
+<td><p>共有ファイルは原子的に。宣言する</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">parallel_read_safe</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>段階的な劣化</p></td>
+<td><p>JS なし・Confluence でも、読める</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prompt</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>偽物</p></td>
+<td><p>モジュールの <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code>・メタクラスで、何でも通る偽物</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">stubs/hou.py</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>テスト</p></td>
+<td><p>純粋関数・偽のコマンド・本当のビルド。安全の性質も</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_prompt.py</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id13">
+<h2>次回<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="08-cli-and-scaffold.html"><span class="std std-doc">第 8 回 CLI と雛形</span></a>: コマンドラインの設計 (<code class="docutils literal notranslate"><span class="pre">argparse</span></code>・終了コード) と、テンプレートからの雛形生成を学びます。</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="08-cli-and-scaffold.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">第 8 回 CLI の設計と、雛形の生成</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="06-sphinx-basics.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">第 6 回 文書生成の基礎: Sphinx の考え方</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, manato1201。参照した外部の資料は、構造と考え方だけを取り入れ、コード・画像・文章は写していません。
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">第 7 回 Sphinx 拡張を作る</a><ul>
+<li><a class="reference internal" href="#id1">この回のゴール</a></li>
+<li><a class="reference internal" href="#id2">1. 拡張とは</a></li>
+<li><a class="reference internal" href="#guard">2. 最小の拡張: guard</a></li>
+<li><a class="reference internal" href="#id3">3. 自分の拡張を書く</a><ul>
+<li><a class="reference internal" href="#id4">なぜ「標準のノード」だけで組み立てるのか</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prompt">4. prompt 拡張: コピーできる手順</a><ul>
+<li><a class="reference internal" href="#javascript-css">ブラウザ側 (JavaScript と CSS)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mermaid">5. mermaid 拡張: 外部コマンドを使う拡張</a><ul>
+<li><a class="reference internal" href="#id5">キャッシュ: 同じ図を、2 度と変換しない</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#doxygen">6. doxygen 拡張: 「計算」と「実行」を分ける</a></li>
+<li><a class="reference internal" href="#id6">7. 並列ビルドと、拡張が守る約束</a></li>
+<li><a class="reference internal" href="#id7">8. 設定値の約束</a></li>
+<li><a class="reference internal" href="#hou">9. 偽物を作る: hou のスタブ (メタプログラミング)</a></li>
+<li><a class="reference internal" href="#id8">10. 拡張をテストする</a></li>
+<li><a class="reference internal" href="#id9">ハンズオン</a></li>
+<li><a class="reference internal" href="#id10">確認問題</a></li>
+<li><a class="reference internal" href="#id11">解答</a></li>
+<li><a class="reference internal" href="#id12">まとめ</a></li>
+<li><a class="reference internal" href="#id13">次回</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/dp_prompt.js?v=654ff740"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    </body>
+</html>

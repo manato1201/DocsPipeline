@@ -13,7 +13,8 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from . import confluence, diagrams, docstring_coverage, doctor, scaffold, structure_map
+from . import confluence, diagrams, docstring_coverage, doctor, mmdc, scaffold, structure_map
+from .files import iter_markdown_files
 
 
 def _run(cmd: Sequence[str], env: dict[str, str] | None = None) -> int:
@@ -167,6 +168,43 @@ def cmd_init(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_check_mermaid(args: argparse.Namespace) -> int:
+    """``check-mermaid``: 全ての Mermaid ブロックが、標準の ``%%{init}%%`` の行で始まっているかを確かめる。
+
+    GitHub (Markdown のまま) と Sphinx (``mmdc`` で SVG にした HTML) で、図の色とフォントを揃えるため。
+    ``--fix`` で、足りない行を入れる。
+    """
+    roots = [Path(p) for p in args.paths]
+    missing_paths = [p for p in roots if not p.exists()]
+    if missing_paths:
+        for path in missing_paths:
+            print(f"エラー: パスがありません: {path}", file=sys.stderr)
+        return 2
+    problems = 0
+    for path in iter_markdown_files(roots):
+        text = path.read_text(encoding="utf-8")
+        lines = mmdc.check_mermaid_text(text)
+        if not lines:
+            continue
+        if args.fix:
+            path.write_text(mmdc.fix_mermaid_text(text), encoding="utf-8")
+            print(f"修正: {path} ({len(lines)} か所)")
+        else:
+            problems += len(lines)
+            for line in lines:
+                print(f"{path}:{line}: Mermaid ブロックが、標準の %%{{init}}%% の行で始まっていません")
+    if problems:
+        print("docspipeline check-mermaid --fix で、標準の行を入れられます", file=sys.stderr)
+    return 1 if problems else 0
+
+
+def cmd_mermaid_style(args: argparse.Namespace) -> int:
+    """``mermaid-style``: 標準の ``%%{init}%%`` の行と ``classDef`` の組を表示する (貼り付け用)。"""
+    print(mmdc.MERMAID_INIT)
+    print(mmdc.MERMAID_CLASSDEFS)
+    return 0
+
+
 def cmd_doctor(args: argparse.Namespace) -> int:
     """``doctor``: 使える機能を確認する。"""
     checks = doctor.run_checks()
@@ -260,6 +298,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("-o", "--output", help="書き出すファイル (省略すると標準出力)")
     p.add_argument("--fail-on-cycle", action="store_true", help="import の循環があれば失敗させる")
     p.set_defaults(func=cmd_map)
+
+    p = sub.add_parser("check-mermaid", help="Mermaid ブロックが、標準の %%%%{init}%%%% の行で始まるか確認する")
+    p.add_argument("paths", nargs="*", default=["docs", "README.md"], help="検査する場所 (既定: docs と README.md)")
+    p.add_argument("--fix", action="store_true", help="足りない行を入れる")
+    p.set_defaults(func=cmd_check_mermaid)
+
+    p = sub.add_parser("mermaid-style", help="標準の %%%%{init}%%%% の行と classDef を表示する")
+    p.set_defaults(func=cmd_mermaid_style)
 
     p = sub.add_parser("doctor", help="手元の環境で使える機能を確認する")
     p.set_defaults(func=cmd_doctor)
