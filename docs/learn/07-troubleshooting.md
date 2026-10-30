@@ -12,6 +12,16 @@
 2. `rm -rf docs/_build docs/_generated docs/_doxygen` — キャッシュを消して、もう一度。
 3. `docspipeline build docs --no-strict` — 警告をエラーにせず、**全部の警告を読む**。
 
+```{prompt} ビルドが失敗した原因を切り分ける
+docspipeline build docs が失敗します。原因を切り分けてください。
+
+1. docspipeline doctor を実行し、NG・なし の項目を挙げる。
+2. rm -rf docs/_build docs/_generated docs/_doxygen のあと、docspipeline build docs --no-strict で、全部の警告を出す。
+3. 警告を種類ごとに分け、docs/learn/07-troubleshooting.md の「症状の一覧」と照らして、原因と直し方を提案する。
+4. 提案だけを報告し、私が許可するまで、ファイルは書き換えない。
+5. 出力に API トークンなどの値が混ざっていたら、報告に書き写さず、その旨だけを伝える。
+```
+
 ### 症状の一覧
 
 ```{list-table}
@@ -39,6 +49,12 @@
 * - `エラー: パスがありません: ...` / `ディレクトリがありません: ...` (終了コード 2)
   - `coverage` / `check-diagrams` に渡したパスの打ち間違い・移動。以前は「100%」「問題なし」と黙って成功していた
   - 渡したパスを確かめる。CI の設定 (`docs.yml`) のパスも
+* - `エラー: ソースの場所がありません: ...` (`init`、終了コード 2)
+  - `--package` / `--cpp` に、`docs/` から見て実在しない場所を指定した
+  - `docs/` からの **相対パス** で、実在する場所を指定する。以前は、API ページが空の文書を黙って作っていた
+* - `dryrun` / `publish` が、変更していないページまで読み直して遅い
+  - 意図した動作。公開系のモードは、増分ビルドのキャッシュを使わない (`-E`)。Mermaid の方針が、前のビルドの結果で素通りしないように
+  - 手元で速く確かめたいときは、`publish` の既定の `local` を使う
 * - `エラー: ...py:12: 構文エラー: ...` (終了コード 2)
   - `coverage` / `map` が読んだファイルが、Python として解釈できない
   - メッセージのファイルと行。`--fail-on-cycle` の失敗 (終了コード 1) とは区別できる

@@ -16,11 +16,11 @@ from __future__ import annotations
 
 import ast
 import contextlib
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-_SKIP_DIRS = {"__pycache__", ".git", ".venv", "venv", "node_modules", "_build", "build", "dist", ".tox"}
+from .files import iter_python_files
 
 
 @dataclass(frozen=True)
@@ -51,17 +51,6 @@ class Report:
         if not self.items:
             return 100.0
         return 100.0 * (len(self.items) - len(self.missing)) / len(self.items)
-
-
-def iter_python_files(roots: Iterable[Path]) -> Iterator[Path]:
-    """``roots`` 配下の ``.py`` ファイルを、生成物や仮想環境を除いて列挙する。"""
-    for root in roots:
-        if root.is_file():
-            yield root
-            continue
-        for path in sorted(root.rglob("*.py")):
-            if not _SKIP_DIRS.intersection(path.relative_to(root).parts):
-                yield path
 
 
 def _is_public(name: str) -> bool:
@@ -157,6 +146,14 @@ def scan_file(path: Path, *, module_name: str | None = None) -> list[Item]:
     return items
 
 
+def _is_private_module(path: Path, root: Path) -> bool:
+    """``_`` で始まる名前 (``_compat.py``・``_impl/``) の下にあるか。``__init__`` は、パッケージ自身なので除く。"""
+    if not root.is_dir():
+        return False
+    parts = path.relative_to(root).with_suffix("").parts
+    return any(part.startswith("_") and part != "__init__" for part in parts)
+
+
 def _module_name(path: Path, root: Path) -> str:
     """``root`` からの相対パスでモジュール名を付ける。``root`` がパッケージなら、その名前から始める。"""
     if not root.is_dir():
@@ -181,6 +178,8 @@ def scan(roots: Iterable[Path]) -> Report:
         if not root.exists():
             raise ValueError(f"パスがありません: {root}")
         for path in iter_python_files([root]):
+            if _is_private_module(path, root):
+                continue  # 公開 API の定義は「_ で始まらない名前」。非公開のモジュールは数えない
             items.extend(scan_file(path, module_name=_module_name(path, root)))
     return Report(tuple(items))
 

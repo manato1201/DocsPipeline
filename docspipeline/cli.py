@@ -33,7 +33,9 @@ def _run(cmd: Sequence[str], env: dict[str, str] | None = None) -> int:
         return proc.wait()
 
 
-def _sphinx(builder: str, docs: Path, *, mode: str, strict: bool, extra_env: dict[str, str] | None = None) -> int:
+def _sphinx(
+    builder: str, docs: Path, *, mode: str, strict: bool, extra_env: dict[str, str] | None = None, fresh: bool = False
+) -> int:
     """Sphinx を走らせる。
 
     Confluence のモードは **必ず引数で決める** (環境変数に残っていた値は使わない)。
@@ -44,6 +46,11 @@ def _sphinx(builder: str, docs: Path, *, mode: str, strict: bool, extra_env: dic
     if strict:
         # 警告をエラー扱いにする。--keep-going で、止まらずに全部の警告を出す。
         cmd += ["-W", "--keep-going"]
+    if fresh:
+        # 保存済みの環境 (増分ビルドのキャッシュ) を使わず、全部を読み直す。
+        # 環境変数の方針 (Mermaid が画像にならなければ失敗) は、読み込み時にしか効かない。
+        # 前のビルドが「コードのまま」で済ませたページを、変更なしとして飛ばされると、方針が素通りする。
+        cmd += ["-E"]
     return _run(cmd, {confluence.MODE_ENV: mode, **(extra_env or {})})
 
 
@@ -58,7 +65,14 @@ def _require_confluence_env() -> bool:
 def cmd_build(args: argparse.Namespace) -> int:
     """``build``: Sphinx でビルドする。Confluence 形式でも公開はしない (``local`` 固定)。"""
     extra = {"DOCSPIPELINE_MERMAID_MISSING": "error"} if args.require_mermaid else None
-    return _sphinx(args.builder, Path(args.docs), mode="local", strict=not args.no_strict, extra_env=extra)
+    return _sphinx(
+        args.builder,
+        Path(args.docs),
+        mode="local",
+        strict=not args.no_strict,
+        extra_env=extra,
+        fresh=args.require_mermaid,
+    )
 
 
 def cmd_linkcheck(args: argparse.Namespace) -> int:
@@ -118,7 +132,9 @@ def cmd_publish(args: argparse.Namespace) -> int:
     # 接続する・公開するときは、Mermaid が画像にならなければ失敗させる。
     # 黙ってコードのままにすると、Confluence のページが、図の無いページに置き換わってしまう。
     extra = {"DOCSPIPELINE_MERMAID_MISSING": "error"} if args.mode != "local" else None
-    return _sphinx("confluence", Path(args.docs), mode=args.mode, strict=args.strict, extra_env=extra)
+    return _sphinx(
+        "confluence", Path(args.docs), mode=args.mode, strict=args.strict, extra_env=extra, fresh=args.mode != "local"
+    )
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -132,6 +148,12 @@ def cmd_init(args: argparse.Namespace) -> int:
         hou=args.hou,
         min_coverage=args.min_coverage,
     )
+    missing = scaffold.missing_sources(opts)
+    if missing:
+        for path in missing:
+            print(f"エラー: ソースの場所がありません: {path}", file=sys.stderr)
+        print("--package / --cpp は、docs/ からの相対パスで、実在する場所を指定してください", file=sys.stderr)
+        return 2
     try:
         created = scaffold.write(opts, force=args.force)
     except scaffold.ScaffoldError as exc:

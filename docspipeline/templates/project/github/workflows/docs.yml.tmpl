@@ -31,7 +31,7 @@ jobs:
         run: |
           # 再現性のため、@main は公開後にタグかコミットへ固定すること
           pip install "docspipeline[docs,cpp,confluence] @ git+https://github.com/manato1201/DocsPipeline@main"
-          npm install --no-save @mermaid-js/mermaid-cli
+          npm install --no-save @mermaid-js/mermaid-cli@12.0.0
           echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
           echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
       - name: Build (warnings are errors)
@@ -57,7 +57,6 @@ jobs:
       CONFLUENCE_SPACE_KEY: ${{ vars.CONFLUENCE_SPACE_KEY }}
       CONFLUENCE_PARENT_PAGE: ${{ vars.CONFLUENCE_PARENT_PAGE }}
       CONFLUENCE_SERVER_USER: ${{ vars.CONFLUENCE_SERVER_USER }}
-      CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
       DOCSPIPELINE_PUPPETEER_CONFIG: ${{ github.workspace }}/.puppeteer-ci.json
     steps:
       - uses: actions/checkout@v4
@@ -69,11 +68,15 @@ jobs:
           node-version: "20"
 @@doxygen_step@@
       - name: Install tools
+        # トークンは、ここには渡さない。pip / npm が、依存のインストール scripts を走らせるため。
+        # @main は可変。公開したらタグかコミットに固定すること (固定しないと、main の変更がトークンつきで動く)
         run: |
           pip install "docspipeline[docs,cpp,confluence] @ git+https://github.com/manato1201/DocsPipeline@main"
-          npm install --no-save @mermaid-js/mermaid-cli
+          npm install --no-save @mermaid-js/mermaid-cli@12.0.0
           echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
           echo '{"args":["--no-sandbox"]}' > .puppeteer-ci.json
       - name: Publish to Confluence
-        # 接続テスト → 公開。トークンは出力から伏せられる
+        # 接続テスト → 公開。トークンは、このステップだけに渡す。出力からは伏せられる
+        env:
+          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
         run: docspipeline publish docs --mode publish

@@ -18,6 +18,12 @@
     モジュールの名前と **完全に一致する文字列** による参照
     (Sphinx の ``extensions = ["pkg.ext"]`` のような、名前での読み込み)。
 
+``import`` は、モジュールを読み込んだときに実行されるものだけ。次の 2 つは、実行時の循環にならないので、
+別に扱う (循環の検出の対象にしない)。
+
+* ``if TYPE_CHECKING:`` の中の import (型検査のときだけ)。依存として数えない。
+* 関数の中の import (``deferred``)。呼ばれたときに初めて読み込まれる。循環を断つ定番の書き方。
+
 見つけられないもの: ``importlib.import_module(変数)`` のような動的な読み込み、部分的に組み立てた名前。
 """
 
@@ -29,7 +35,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from .docstring_coverage import iter_python_files
+from .files import iter_python_files
 
 
 @dataclass(frozen=True)
@@ -45,6 +51,7 @@ class Module:
     imports: frozenset[str]
     references: frozenset[str]
     external: frozenset[str]
+    deferred: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -69,13 +76,16 @@ class Graph:
         """依存の組 ``(使う側, 使われる側)`` を返す。
 
         Args:
-            kind: ``import`` または ``reference``。
+            kind: ``import``・``reference``・``deferred`` のいずれか。
+                ``import`` はモジュール直下で実行される import、
+                ``reference`` はモジュール名と一致する文字列、
+                ``deferred`` は関数の中の import で、呼ばれたときに初めて読み込まれる。
             include_root: パッケージ自身 (``__init__``) への依存を含めるか。
                 ``from . import __version__`` のような依存で、図が読みにくくなるので既定では除く。
         """
         result = set()
         for m in self.modules:
-            for dst in m.imports if kind == "import" else m.references:
+            for dst in {"import": m.imports, "reference": m.references, "deferred": m.deferred}[kind]:
                 if include_root or dst != self.package:
                     result.add((m.name, dst))
         return result
@@ -164,17 +174,41 @@ def _resolve_from(node: ast.ImportFrom, module: str, is_package: bool, known: se
             yield target
 
 
+def _is_type_checking(test: ast.expr) -> bool:
+    """``if TYPE_CHECKING:`` / ``if typing.TYPE_CHECKING:`` か。"""
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def _walk(node: ast.AST, deferred: bool = False) -> Iterator[tuple[ast.AST, bool]]:
+    """ノードを順に返す。``deferred`` は、関数の中 (呼ばれたときに実行される) かどうか。
+
+    ``if TYPE_CHECKING:`` の本体は、実行時には読み込まれないので返さない。
+    """
+    yield node, deferred
+    if isinstance(node, ast.If) and _is_type_checking(node.test):
+        children = node.orelse
+    else:
+        children = list(ast.iter_child_nodes(node))
+    inside_function = deferred or isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda)
+    for child in children:
+        yield from _walk(child, inside_function)
+
+
 def _analyze(path: Path, name: str, is_package: bool, known: set[str]) -> Module:
     text = path.read_text(encoding="utf-8")
     try:
         tree = ast.parse(text, filename=str(path))
     except SyntaxError as exc:
         raise ValueError(f"{path}:{exc.lineno}: 構文エラー: {exc.msg}") from exc
-    imports: set[str] = set()
+    runtime: set[str] = set()
+    lazy: set[str] = set()
     references: set[str] = set()
     external: set[str] = set()
     root = name.split(".")[0]
-    for node in ast.walk(tree):
+    for node, deferred in _walk(tree):
+        found = runtime if not deferred else lazy
         if isinstance(node, ast.Import):
             for alias in node.names:
                 top = alias.name.split(".")[0]
@@ -183,17 +217,18 @@ def _analyze(path: Path, name: str, is_package: bool, known: set[str]) -> Module
                     while parts and ".".join(parts) not in known:
                         parts.pop()
                     if parts:
-                        imports.add(".".join(parts))
+                        found.add(".".join(parts))
                 else:
                     external.add(top)
         elif isinstance(node, ast.ImportFrom):
             if node.level or (node.module or "").split(".")[0] == root:
-                imports.update(_resolve_from(node, name, is_package, known))
+                found.update(_resolve_from(node, name, is_package, known))
             elif node.module:
                 external.add(node.module.split(".")[0])
         elif isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value in known:
             references.add(node.value)
-    imports.discard(name)
+    runtime.discard(name)
+    lazy.discard(name)
     references.discard(name)
     return Module(
         name=name,
@@ -202,9 +237,10 @@ def _analyze(path: Path, name: str, is_package: bool, known: set[str]) -> Module
         summary=_first_line(ast.get_docstring(tree)),
         lines=len(text.splitlines()),
         public_api=_public_api(tree),
-        imports=frozenset(imports),
-        references=frozenset(references - imports),
+        imports=frozenset(runtime),
+        references=frozenset(references - runtime),
         external=frozenset(external - {"__future__"}),
+        deferred=frozenset(lazy - runtime),
     )
 
 
@@ -260,6 +296,8 @@ def to_mermaid(graph: Graph) -> str:
         lines.append(f"    {_node_id(src)} --> {_node_id(dst)}")
     for src, dst in sorted(graph.edges("reference")):
         lines.append(f"    {_node_id(src)} -.-> {_node_id(dst)}")
+    for src, dst in sorted(graph.edges("deferred")):
+        lines.append(f"    {_node_id(src)} -. 遅延 .-> {_node_id(dst)}")
     return "\n".join(lines) + "\n"
 
 
@@ -331,6 +369,7 @@ def to_json(graph: Graph) -> str:
                 "public_api": m.public_api,
                 "imports": sorted(m.imports),
                 "references": sorted(m.references),
+                "deferred": sorted(m.deferred),
                 "external": sorted(m.external),
             }
             for m in graph.modules

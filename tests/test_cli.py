@@ -38,6 +38,7 @@ def test_init_title_rule_counts_wide_characters(tmp_path):
 
 
 def test_init_with_cpp_adds_doxygen_everywhere(tmp_path):
+    (tmp_path / "include").mkdir()
     assert run("init", str(tmp_path), "--project", "E", "--author", "me", "--cpp", "../include") == 0
     assert (tmp_path / "docs" / "cpp.rst").exists()
     assert "cpp_sources=['../include']" in (tmp_path / "docs" / "conf.py").read_text(encoding="utf-8")

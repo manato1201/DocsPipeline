@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import os
 import pathlib
+import re
 import shlex
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+
+from .files import iter_python_files
 
 TEMPLATES = Path(__file__).parent / "templates" / "project"
 
@@ -63,7 +66,7 @@ def python_modules(source_root: Path) -> list[str]:
     ``_`` で始まる名前と、``tests`` / ``test`` の下は除く。
     """
     names = []
-    for path in sorted(source_root.rglob("*.py")):
+    for path in iter_python_files([source_root]):  # .venv・node_modules・build などは、共通の規則で除く
         parts = list(path.relative_to(source_root).with_suffix("").parts)
         if any(p.startswith("_") and p != "__init__" for p in parts) or any(p in ("tests", "test") for p in parts):
             continue
@@ -141,11 +144,19 @@ def plan(opts: Options) -> dict[Path, str]:
             continue
         if rel.with_suffix("").name == "api.rst" and not opts.package:
             continue
-        text = src.read_text(encoding="utf-8")
-        for key, value in values.items():
-            text = text.replace(f"@@{key}@@", value)
+        # 1 回の走査で置き換える。値の中に @@名前@@ があっても、さらに置き換わらない
+        text = re.sub(r"@@(\w+)@@", lambda m: values.get(m.group(1), m.group(0)), src.read_text(encoding="utf-8"))
         result[opts.target / _destination(rel)] = text
     return result
+
+
+def missing_sources(opts: Options) -> list[Path]:
+    """``--package`` / ``--cpp`` で指定された、実在しないソースの場所を返す (``docs/`` からの相対で解決)。
+
+    打ち間違いのまま作ると、API ページが空で、CI が何も検査しない文書になる。
+    """
+    docs = opts.target / "docs"
+    return [(docs / p).resolve() for p in (*opts.package, *opts.cpp) if not (docs / p).resolve().is_dir()]
 
 
 def write(opts: Options, *, force: bool = False) -> list[Path]:

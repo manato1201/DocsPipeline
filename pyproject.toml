@@ -33,7 +33,7 @@ version = {attr = "docspipeline.__version__"}
 include = ["docspipeline*"]
 
 [tool.setuptools.package-data]
-docspipeline = ["templates/**/*", "stubs/*.py"]
+docspipeline = ["templates/**/*", "stubs/*.py", "static/*"]
 
 [tool.ruff]
 line-length = 120

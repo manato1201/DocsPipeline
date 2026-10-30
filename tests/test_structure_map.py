@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / "docspipeline"
 
 #: Sphinx / docutils を import してよいモジュール (Sphinx の拡張)。それ以外は、Sphinx が無くても動くこと。
-SPHINX_EXTENSIONS = {"docspipeline.guard", "docspipeline.mermaid", "docspipeline.doxygen"}
+SPHINX_EXTENSIONS = {"docspipeline.guard", "docspipeline.mermaid", "docspipeline.doxygen", "docspipeline.prompt"}
 
 
 def _make_package(tmp_path: Path, files: dict[str, str]) -> Path:
@@ -149,14 +149,20 @@ def test_only_sphinx_extensions_import_sphinx(graph):
 
 
 def test_leaf_modules_import_nothing_internal(graph):
-    leaves = ["confluence", "diagrams", "docstring_coverage", "mmdc", "scaffold"]
+    leaves = ["confluence", "diagrams", "files", "mmdc"]
     for name in leaves:
         assert graph.get(f"docspipeline.{name}").imports == frozenset(), name
 
 
+def test_file_walkers_depend_only_on_the_shared_listing(graph):
+    # ファイルの列挙の規則は files.py の一か所。docstring_coverage・scaffold・structure_map は、それだけを使う
+    for name in ("docstring_coverage", "scaffold", "structure_map"):
+        assert graph.get(f"docspipeline.{name}").imports == {"docspipeline.files"}, name
+
+
 def test_cli_does_not_import_the_sphinx_side(graph):
     # CLI は Sphinx を「子プロセス」として起動する。拡張や config を直接 import しない
-    forbidden = {"docspipeline.config", "docspipeline.guard", "docspipeline.mermaid", "docspipeline.doxygen"}
+    forbidden = {"docspipeline.config", *SPHINX_EXTENSIONS}
     assert not (graph.get("docspipeline.cli").imports & forbidden)
     assert not any(m.imports & {"docspipeline.cli"} for m in graph.modules if m.name != "docspipeline.__main__")
 

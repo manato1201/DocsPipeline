@@ -35,7 +35,8 @@ Markdown の下書きには、依存の図 (Mermaid)、モジュール一覧 (�
 
 | 種類 | 例 | 地図での表現 |
 |---|---|---|
-| `import` | `from . import confluence`、`import pkg.mod` | 実線 |
+| `import` | `from . import confluence`、`import pkg.mod` (モジュールを読み込んだときに実行されるもの) | 実線 |
+| `deferred` | 関数の中の `import` (呼ばれたときに、初めて読み込まれる) | 点線 (「遅延」) |
 | `reference` | `extensions = ["docspipeline.guard"]` のような、**モジュール名と完全に一致する文字列** | 点線 |
 
 ### 実例: この地図で見つかった不備
@@ -84,6 +85,8 @@ Sphinx の拡張で、先頭で `docutils` を import する。結果、**Sphinx
 
 * 地図を **コミットする**。コードから毎回作れるものを置くと、古くなる。残すのは、人が書いた説明と、テスト。
 * 「循環が無い」ことを、図で目視して済ませる。`--fail-on-cycle` かテストに任せる。
+* 関数の中の `import` や、`if TYPE_CHECKING:` の中の `import` を、循環として数える。前者は循環を断つ定番の書き方で、
+  後者は型検査のときだけ。どちらも、実行時の循環ではないので、循環の検出の対象にしない (`TYPE_CHECKING` の中は、依存としても数えない)。
 * `reference` を `import` と同じ強さで扱う。`reference` は名前の一致だけで、**実際に読み込まれるかは分からない**。
 
 ## 演習

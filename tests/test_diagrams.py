@@ -91,7 +91,7 @@ def test_module_map_imports_match_the_real_imports():
     drawn = set(build_diagrams.MODULE_IMPORTS)
     real = _real_edges("import")
     assert drawn - real == set(), f"実際には無い依存を描いている: {sorted(drawn - real)}"
-    missing = real - drawn
+    missing = {e for e in real - drawn if e[1] not in build_diagrams.UTILITY_MODULES}
     assert missing == set(), f"図に無い依存がある (MODULE_IMPORTS に足す): {sorted(missing)}"
 
 

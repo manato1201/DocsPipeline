@@ -112,7 +112,9 @@ def run_doxygen(app: Sphinx) -> None:
         encoding="utf-8",
     )
     logger.info("Doxygen を実行します: %s", doxyfile)
-    proc = subprocess.run([doxygen, str(doxyfile)], capture_output=True, text=True, check=False)
+    proc = subprocess.run(
+        [doxygen, str(doxyfile)], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+    )
     for line in proc.stderr.splitlines():
         if line.strip():
             logger.warning("doxygen: %s", line.strip())

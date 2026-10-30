@@ -35,6 +35,18 @@ docspipeline build docs          # 自分の文書が、警告なしで通る
 4. テストを書く: `tests/test_cli.py` の `test_check_diagrams`。`run("check-diagrams", str(tmp_path))` の終了コードと出力を確かめる。
 5. 文書: `docs/usage.rst` の表に 1 行。CI で使うなら `ci.yml` と `templates/project/github/workflows/docs.yml.tmpl` にも。
 
+```{prompt} レシピ 1 を Claude Code に任せる
+docspipeline に、<コマンド名> コマンドを足してください。<何をするコマンドか、1 行で>
+
+docs/learn/04-extend.md の「レシピ 1」の手順どおりに進めてください。
+1. 先に、失敗するテストを tests/ に書く (終了コードと出力を確かめる)。
+2. 計算の部分を、cli.py ではなく、別の小さなモジュールの関数にする。
+3. cmd_<名前> (docstring つき) と build_parser の登録を足す。
+4. docs/usage.rst の表に 1 行足す。
+5. python -m pytest -q、ruff check .、ruff format --check .、docspipeline build docs がすべて通ることを確かめる。
+入力の打ち間違い (存在しないパスなど) は、黙って成功させず、終了コード 2 のエラーにする。
+```
+
 ```{admonition} 約束
 :class: note
 * 終了コードは、成功 `0`、失敗 `1`、**設定の誤り `2`**。
@@ -98,6 +110,17 @@ def setup(app: Sphinx) -> dict[str, Any]:
 4. SVG を画像にして **目で見る** (下の「確認」)。
 5. 文書から `.. image:: diagrams/<名前>.drawio.svg` (Markdown なら `![説明](../diagrams/<名前>.drawio.svg)`) で参照する。`alt` を必ず書く。
 
+```{prompt} レシピ 4 を Claude Code に任せる
+docs/diagrams/ に、<図の内容> の構成図を足してください。
+
+docs/learn/04-extend.md の「レシピ 4」の手順どおりに進めてください。
+1. tools/diagrams/build_diagrams.py に、Diagram を返す関数を足し、DIAGRAMS に登録する。
+   図の作法 (青 = 主な流れ、灰色の破線 = 補助、オレンジ = 強調、赤 = 止まる条件、番号つきの丸) を守る。
+2. python tools/diagrams/build_diagrams.py で作り直す。
+3. python -m pytest -q tests/test_diagrams.py を通す (カードの重なり・はみ出しを検出する)。
+4. 文書から、alt つきで参照する。
+```
+
 図の作法 (`kit.py` の冒頭にも書いてある):
 
 * 青 = 主な流れ / 灰色の破線 = 起動・登録・参照 / **オレンジ = 強調する経路** / 赤 = 止まる条件。
@@ -145,6 +168,27 @@ diagrams.net で `.drawio` を開いて直しても構わない。ただし **`b
 4. 環境変数を新しく要求するなら、`REQUIRED_ENV` に足す (足りないときに、名前だけを示して止まるようになる)。
 5. 秘密の値が増えるなら、`SECRET_ENV` に足す (出力から伏せ字になる)。
 6. `docs/confluence.rst` の表を更新する。
+
+## レシピ 7: プロンプトのブロックを足す・直す
+
+`docspipeline/prompt.py` (Sphinx 拡張) と、`docspipeline/static/dp_prompt.js`・`dp_prompt.css`。
+
+1. **書く側**: 手順の説明に `{prompt}` を足す。何をしてほしいか → 手順 → **してはいけないこと** の順。秘密情報は書かない (書くと警告が出る)。
+2. **ボタンの動作を変える側**: `dp_prompt.js` を直す。**ブラウザで確かめる** (下の確認)。HTML の見た目は `dp_prompt.css`。
+   色は、テーマの変数 (`--color-*`) を使い、新しい色を足さない。
+3. **出力の形を変える側**: `prompt.py` の `PromptDirective.run`。独自のノードを作らず、標準のノードで組み立てる (作ると、Confluence などのビルダーが、未対応のノードで落ちる)。
+4. テスト: `tests/test_prompt.py` (出力・秘密情報の警告)。
+
+確認 (ボタンの動作は、自動テストの外):
+
+* HTML をブラウザで開き、ボタンを押して、貼り付けた内容が本文だけであることを見る。
+* 確かめる経路: 成功 / 失敗 (コピーが拒否される) / `https` でないページ (代替の経路) / JavaScript が無い。
+* ライトとダークの両方で、見た目を見る。
+
+```{admonition} 約束
+:class: note
+プロンプトの **本文に、環境変数の値を書かない**。手順書は、コピーされ、別の場所に貼られる。
+```
 
 ## 使うときの注意
 

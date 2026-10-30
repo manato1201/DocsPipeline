@@ -1,0 +1,72 @@
+/* `.. prompt::` のブロック。テーマ (furo) の色の変数を使い、ライト / ダークの両方に合わせる。
+ * 新しい色は足さない。動きも付けない (prefers-reduced-motion の配慮が要らない)。 */
+.dp-prompt {
+  margin: 1.25rem 0;
+  border: 1px solid var(--color-background-border, #d0d5dd);
+  border-radius: 0.5rem;
+  background: var(--color-background-secondary, #f8f9fb);
+  overflow: hidden;
+}
+
+.dp-prompt .dp-prompt-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--color-background-border, #d0d5dd);
+  font-size: 0.9rem;
+}
+
+.dp-prompt .dp-prompt-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dp-prompt .dp-prompt-copy {
+  cursor: pointer;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--color-brand-primary, #1a73e8);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--color-brand-primary, #1a73e8);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.dp-prompt .dp-prompt-copy:hover {
+  background: var(--color-brand-primary, #1a73e8);
+  color: var(--color-background-primary, #ffffff);
+}
+
+.dp-prompt .dp-prompt-copy:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #1a73e8);
+  outline-offset: 2px;
+}
+
+.dp-prompt .dp-prompt-status {
+  font-size: 0.8rem;
+  color: var(--color-foreground-secondary, #475467);
+}
+
+.dp-prompt .dp-prompt-status.dp-prompt-failed {
+  color: var(--color-problematic, #b42318);
+}
+
+/* 本文: コードブロックの外枠を、このブロックの枠に溶け込ませる */
+.dp-prompt .highlight,
+.dp-prompt pre {
+  margin: 0;
+  border-radius: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media print {
+  .dp-prompt .dp-prompt-bar {
+    display: none;
+  }
+}

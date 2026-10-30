@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from . import confluence
-from .mmdc import MMDC_ENV, find_mmdc
+from .mmdc import MMDC_ENV, command_exists, find_mmdc
 
 
 @dataclass(frozen=True)
@@ -57,9 +57,13 @@ def run_checks(environ: Mapping[str, str] | None = None) -> list[Check]:
         checks.append(Check(label, version is not None, version or f"pip install '{dist}' (extras を参照)", required))
 
     mmdc = find_mmdc(env.get(MMDC_ENV), os.getcwd())
-    checks.append(
-        Check("mmdc (Mermaid → SVG)", mmdc is not None, " ".join(mmdc) if mmdc else "無い: 図はコードのまま出る")
-    )
+    if mmdc is None:
+        checks.append(Check("mmdc (Mermaid → SVG)", False, "無い: 図はコードのまま出る"))
+    elif not command_exists(mmdc):
+        # DOCSPIPELINE_MMDC に、存在しないコマンドを指定している
+        checks.append(Check("mmdc (Mermaid → SVG)", False, f"指定されたコマンドが見つからない: {' '.join(mmdc)}"))
+    else:
+        checks.append(Check("mmdc (Mermaid → SVG)", True, " ".join(mmdc)))
     doxygen = shutil.which("doxygen")
     checks.append(Check("doxygen (C++)", doxygen is not None, doxygen or "無い: C++ の文書を作るときだけ必要"))
 

@@ -159,17 +159,20 @@ MODULE_IMPORTS: dict[tuple[str, str], tuple[list[tuple[float, float]], str]] = {
     ("cli", "structure_map"): (_bus(710), ""),
     ("cli", "doctor"): (_bus(875), ""),
     ("cli", "confluence"): ([(CLI_X, 190), (CLI_X, BUS), (1170, BUS), (1170, 282)], ""),
-    ("structure_map", "docstring_coverage"): ([(710, 402), (710, 440), (545, 440), (545, 412)], "ファイルの列挙"),
     ("doctor", "confluence"): ([(909, 320), (1136, 320)], "モードと環境変数"),
-    ("doctor", "mmdc"): ([(875, 402), (875, 446), (915, 446), (915, 572)], "mmdc を探す"),
-    ("config", "confluence"): ([(116, 578), (116, 470), (1170, 470), (1170, 412)], "sphinx_settings()"),
-    ("mermaid", "mmdc"): ([(520, 696), (520, 728), (915, 728), (915, 704)], "変換を依頼"),
+    ("doctor", "mmdc"): ([(875, 402), (875, 446), (900, 446), (900, 572)], "mmdc を探す"),
+    ("config", "confluence"): ([(104, 578), (104, 470), (1170, 470), (1170, 412)], "sphinx_settings()"),
+    ("mermaid", "mmdc"): ([(395, 696), (395, 728), (900, 728), (900, 704)], "変換を依頼"),
 }
 #: 名前の文字列による参照 (config が extensions の名前で読み込む)。
+#: 図に矢印を描かない依存の行き先 (共通部品)。使うモジュールが多く、矢印が図を埋めてしまうため。
+#: 使う側は、カードの説明に書き、tests/test_structure_map.py が実際の依存を検査する。
+UTILITY_MODULES = {"files"}
 MODULE_REFERENCES: dict[tuple[str, str], list[tuple[float, float]]] = {
-    ("config", "guard"): [(330, 545), (330, 576)],
-    ("config", "mermaid"): [(520, 545), (520, 576)],
-    ("config", "doxygen"): [(710, 545), (710, 576)],
+    ("config", "guard"): [(255, 545), (255, 576)],
+    ("config", "mermaid"): [(395, 545), (395, 576)],
+    ("config", "doxygen"): [(535, 545), (535, 576)],
+    ("config", "prompt"): [(675, 545), (675, 576)],
 }
 
 
@@ -205,27 +208,29 @@ def module_map() -> Diagram:
         Card(710, 320, "structure_map", "依存の地図 (map)", "branch", GRAY),
         Card(875, 320, "doctor", "環境の確認", "wrench", GRAY),
         Card(1170, 320, "confluence", "モード・トークン伏せ字", "lock", ORANGE),
-        Card(140, 610, "config", "build_config()", "gear", TEAL),
-        Card(330, 610, "guard", "設定エラーの報告", "shield", TEAL),
-        Card(520, 610, "mermaid", "Mermaid の指示子", "diagram", TEAL),
-        Card(710, 610, "doxygen", "Doxygen → XML", "braces", TEAL),
-        Card(915, 610, "mmdc", "mmdc の探索と実行", "plug", GRAY),
-        Card(1095, 610, "stubs.hou", "hou のスタブ", "package", GRAY, sub2="sys.path の末尾に足す"),
+        Card(120, 610, "config", "build_config()", "gear", TEAL),
+        Card(255, 610, "guard", "設定エラーの報告", "shield", TEAL),
+        Card(395, 610, "mermaid", "Mermaid の指示子", "diagram", TEAL),
+        Card(535, 610, "doxygen", "Doxygen → XML", "braces", TEAL),
+        Card(675, 610, "prompt", "コピーできる手順", "doc", TEAL),
+        Card(900, 610, "mmdc", "mmdc の探索と実行", "plug", GRAY),
+        Card(1050, 610, "stubs.hou", "hou のスタブ", "package", GRAY, sub2="sys.path の末尾に足す"),
+        Card(1215, 610, "files", "ファイルの列挙 (共通)", "doc", GRAY, sub2="coverage・map・init が使う"),
     ]
     for (src, dst), (points, label) in MODULE_IMPORTS.items():
         d.edges.append(Edge(points, label, "blue", label_t=0.4 if (src, dst) == ("doctor", "mmdc") else 0.5))
     for points in MODULE_REFERENCES.values():
         d.edges.append(Edge(points, "", "gray", dashed=True))
     d.edges += [
-        Edge([(513, 100), (18, 100), (18, 610), (106, 610)], "sphinx を起動", "gray", dashed=True, label_t=0.25),
-        Edge([(140, 578), (140, 545), (710, 545)], "extensions", "gray", dashed=True, arrow=False, label_t=0.5),
+        Edge([(513, 100), (18, 100), (18, 610), (86, 610)], "sphinx を起動", "gray", dashed=True, label_t=0.25),
+        Edge([(120, 578), (120, 545), (675, 545)], "extensions", "gray", dashed=True, arrow=False, label_t=0.5),
         Edge([(40, 800), (90, 800)], "", "blue"),
         Edge([(330, 800), (380, 800)], "", "gray", dashed=True),
     ]
     d.notes += [
         Note(102, 805, ["import (関数の呼び出し)"], GRAY, 12),
         Note(392, 805, ["起動・名前による参照"], GRAY, 12),
-        Note(1300, 805, ["矢印は実際の依存と一致 (tests/test_diagrams.py)"], MUTED_TEXT, 12, "end"),
+        Note(1300, 805, ["矢印は実際の依存と一致 (共通部品 files への矢印は省略)"], MUTED_TEXT, 12, "end"),
     ]
     return d
 

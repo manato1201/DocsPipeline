@@ -32,6 +32,29 @@ class MermaidRenderError(Exception):
     """``mmdc`` の実行に失敗したときの例外。"""
 
 
+def split_command(text: str, *, windows: bool | None = None) -> list[str]:
+    """コマンドの文字列を、引数の列に分ける。
+
+    POSIX の規則だと、Windows のパスの ``\\`` が消える (``C:\\Users\\me`` → ``C:Usersme``)。
+    Windows では、``\\`` を残し、引用符だけを外す。
+
+    Args:
+        text: ``DOCSPIPELINE_MMDC`` などの値。
+        windows: Windows の規則で分けるか。省略すると、実行中の OS に合わせる。
+    """
+    if windows is None:
+        windows = os.name == "nt"
+    parts = shlex.split(text, posix=not windows)
+    if windows:
+        parts = [p[1:-1] if len(p) >= 2 and p[0] == p[-1] and p[0] in "\"'" else p for p in parts]
+    return parts
+
+
+def command_exists(cmd: list[str]) -> bool:
+    """コマンドの先頭 (実行ファイル) が、実在するか。``PATH`` の検索と、パスの直接指定の両方を見る。"""
+    return bool(cmd) and (shutil.which(cmd[0]) is not None or Path(cmd[0]).exists())
+
+
 def find_mmdc(configured: str | None, confdir: str | Path) -> list[str] | None:
     """``mmdc`` の起動コマンドを探す。
 
@@ -43,7 +66,7 @@ def find_mmdc(configured: str | None, confdir: str | Path) -> list[str] | None:
     """
     explicit = configured or os.environ.get(MMDC_ENV)
     if explicit:
-        return shlex.split(explicit)
+        return split_command(explicit)
     on_path = shutil.which("mmdc")
     if on_path:
         return [on_path]
@@ -92,7 +115,9 @@ def render(code: str, out_dir: Path, *, cmd: list[str], fmt: str = "svg", puppet
         if puppeteer_config:
             args += ["-p", puppeteer_config]
         try:
-            proc = subprocess.run(args, capture_output=True, text=True, timeout=180, check=False)
+            proc = subprocess.run(
+                args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180, check=False
+            )
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise MermaidRenderError(f"mmdc を実行できません: {exc}") from exc
         if proc.returncode != 0 or not tmp_out.exists():

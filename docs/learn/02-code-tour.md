@@ -41,8 +41,11 @@
   - `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`、`structure_map.py`
   - CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている。`structure_map` は、この地図そのものを作る ([機械の地図](09-structure-map.md))
 * - 7'
-  - `docspipeline/mmdc.py`
-  - `mmdc` の探索と実行。**Sphinx に依存しない**。拡張 (`mermaid.py`) と `doctor.py` の両方が使う
+  - `docspipeline/mmdc.py`、`files.py`
+  - `mmdc` の探索と実行、Python ファイルの列挙。どちらも **Sphinx に依存しない葉** で、複数のモジュールが共有する (`files.py` は、`coverage`・`map`・`init` で「探さない場所」の規則を揃える)
+* - 7''
+  - `docspipeline/prompt.py`、`static/`
+  - コピーできるプロンプトの拡張 (`.. prompt::`)。標準のノードだけで組み立て、ボタンは `static/dp_prompt.js` が足す
 * - 8
   - `docspipeline/stubs/hou.py`
   - 属性参照・継承・呼び出しをすべて受け流す偽物。`_Meta` と `_Any` の二段構え

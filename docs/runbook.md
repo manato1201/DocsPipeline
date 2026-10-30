@@ -9,7 +9,9 @@
 2. docstring は Google 形式で、日本語で書く。公開 API (`_` で始まらない名前) には必ず書く。
 3. 図は diagrams.net (`.drawio` と、書き出した `.drawio.svg`) か Mermaid で描く。`.drawio` だけをコミットしない。
    このリポジトリの構成図は `tools/diagrams/build_diagrams.py` から生成する ([拡張のしかた](learn/04-extend.md))。
-4. 新しいページは `docs/page-template.rst.tmpl` を元にして、目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連、の順に書く。
+4. 人が手で行う手順の説明には、Claude Code にそのまま渡せる **プロンプト** (`{prompt}`) を添えてよい。
+   プロンプトには、秘密情報を書かない。「してはいけないこと」(コミットしない、値を書き写さない) を、最後に書く。
+5. 新しいページは `docs/page-template.rst.tmpl` を元にして、目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連、の順に書く。
 
 ```mermaid
 flowchart LR
@@ -22,8 +24,26 @@ flowchart LR
 ## 新しいリポジトリを加える
 
 ```bash
+$ pip install "docspipeline[docs]"
 $ docspipeline init <リポジトリ> --project "<題名>" --author "<名前>" --package ../src
-$ pip install "docspipeline[docs]" && docspipeline build <リポジトリ>/docs
+$ docspipeline build <リポジトリ>/docs
+```
+
+`--package` は、`docs/` から見た Python のソースの場所。**実在しない場所を指定すると、何も書かずに止まる**
+(打ち間違いのまま、API ページが空の文書を作らないため)。
+
+Claude Code に任せるなら、次をそのまま渡す。
+
+```{prompt} 新しいリポジトリに DocsPipeline で docs/ を作る
+このリポジトリに、DocsPipeline で docs/ を作ってください。
+
+1. pip install "docspipeline[docs]" を実行し、docspipeline doctor で環境を確認する。
+2. Python のソースの場所を確かめてから、docspipeline init . --project "<題名>" --author "<名前>" --package <docs/ から見たソースの場所> を実行する。
+   (C++ があれば --cpp、Houdini の hou を使うコードがあれば --hou も付ける)
+3. docspipeline build docs を実行し、警告が出たら原因を直す。警告を消すために nitpick_ignore_regex を足すのは、最後の手段にする。
+4. 変更したファイルの一覧を私に見せ、コミットはしない。
+
+API トークンなどの秘密情報は、ファイルにも出力にも書かない。環境変数の名前だけを使う。
 ```
 
 C++ を含むなら `--cpp ../include`、Houdini の `hou` を使うなら `--hou` を付ける。
@@ -54,6 +74,15 @@ $ grep -rniE "token|secret|password|api[_-]?key|@[a-z0-9.-]+\.[a-z]{2,}" docs --
 ```
 
 ヒットしたものを目で見て、実際の値でないこと (環境変数の名前や、例のアドレス) を確認する。
+
+```{prompt} 公開前に、秘密情報・個人情報が無いか点検する
+docs/ の文書に、秘密情報・個人情報が含まれていないか点検してください。
+
+1. grep で token / secret / password / api key / メールアドレスらしき文字列を探す。
+2. ヒットした箇所を一つずつ読み、実際の値か、環境変数の名前・例の値かを判定して、表にまとめる。
+3. 実際の値らしきものがあれば、その場所だけを私に報告する。値そのものは、出力に書き写さない。
+4. 何も書き換えない。
+```
 
 ## 困ったとき
 
