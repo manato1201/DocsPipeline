@@ -154,6 +154,7 @@ def _bus(cx: float) -> list[tuple[float, float]]:
 
 
 MODULE_IMPORTS: dict[tuple[str, str], tuple[list[tuple[float, float]], str]] = {
+    ("cli", "messages"): (_bus(95), ""),
     ("cli", "scaffold"): (_bus(215), ""),
     ("cli", "diagrams"): (_bus(380), ""),
     ("cli", "docstring_coverage"): (_bus(545), ""),
@@ -204,6 +205,7 @@ def module_map() -> Diagram:
     ]
     d.cards += [
         Card(CLI_X, 100, "cli", "コマンドの入口", "terminal", GRAY),
+        Card(95, 320, "messages", "エラーの 3 行", "doc", GRAY),
         Card(215, 320, "scaffold", "init の雛形", "package", GRAY),
         Card(380, 320, "diagrams", "SVG の有無", "diagram", GRAY),
         Card(545, 320, "docstring_coverage", "ast で検査", "check", GRAY),

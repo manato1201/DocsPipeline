@@ -607,7 +607,7 @@ except ValueError as exc:
 
 ```text
 # 出力
-第 0 層: ['confluence', 'diagrams', 'doxygen', 'files', 'guard', 'mmdc', 'prompt', 'stubs', 'stubs.hou']
+第 0 層: ['confluence', 'diagrams', 'doxygen', 'files', 'guard', 'messages', 'mmdc', 'prompt', 'stubs', 'stubs.hou']
 第 1 層: ['config', 'docstring_coverage', 'doctor', 'mermaid', 'scaffold', 'structure_map']
 第 2 層: ['cli']
 第 3 層: ['__main__']

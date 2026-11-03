@@ -23,7 +23,17 @@ from unittest import mock
 
 import pytest
 
-from docspipeline import confluence, docstring_coverage, doctor, files, mmdc, prompt, scaffold, structure_map
+from docspipeline import (
+    confluence,
+    docstring_coverage,
+    doctor,
+    files,
+    messages,
+    mmdc,
+    prompt,
+    scaffold,
+    structure_map,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTRACTS = ROOT / "docs" / "contracts.md"
@@ -201,6 +211,9 @@ PURE_CALLS = {
     ),
     "doctor.exit_code": lambda: doctor.exit_code([doctor.Check("x", False, "d", required=True)]),
     "prompt.find_secret": lambda: prompt.find_secret("API_TOKEN=abcdef123456"),
+    "messages.format_error": lambda: messages.format_error("何か", "理由", "対処"),
+    "messages.format_elapsed": lambda: messages.format_elapsed(65),
+    "doctor.format_checks": lambda: doctor.format_checks([doctor.Check("x", False, "d", hint="h")]),
 }
 
 
@@ -358,6 +371,17 @@ def test_graph_contract():
         shuffled = structure_map.Graph("p", tuple(rng.sample(graph.modules, len(graph.modules))))
         assert shuffled.cycles() == cycles  # モジュールの並びに依存しない
         assert structure_map.to_mermaid(graph) == structure_map.to_mermaid(graph)  # 決定的
+
+
+def test_format_error_contract():
+    rng = random.Random(2)
+    words = ["パス", "x.py:3", "--force", "docs/", "a b", "→", "'q'"]
+    for _ in range(100):
+        what, why, nxt = (" ".join(rng.choices(words, k=rng.randint(1, 4))) for _ in range(3))
+        label = rng.choice(["エラー", "失敗", "中止"])
+        text = messages.format_error(what, why, nxt, label=label)
+        assert text.split("\n") == [f"{label}: {what}", f"  原因: {why}", f"  次の一手: {nxt}"]  # 常に 3 行
+        assert text == messages.format_error(what, why, nxt, label=label)  # 決定的
 
 
 def test_fix_mermaid_text_does_not_hang_on_an_unclosed_block():

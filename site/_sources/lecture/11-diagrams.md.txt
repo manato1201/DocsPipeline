@@ -524,7 +524,7 @@ print("嘘を足した場合       :", sorted(drawn_with_a_lie - real))
 
 ```text
 # 出力
-図の矢印の数        : 11
+図の矢印の数        : 12
 嘘の矢印            : []
 描き漏れ            : []
 嘘を足した場合       : [('config', 'cli')]

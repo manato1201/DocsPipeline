@@ -12,10 +12,11 @@
    手で書かずに `docspipeline check-mermaid --fix` で入れる。色の約束は [使い方](usage.md)。
 5. 人が手で行う手順の説明には、Claude Code にそのまま渡せる **プロンプト** (`{prompt}`) を添えてよい。
    プロンプトには、秘密情報を書かない。「してはいけないこと」(コミットしない、値を書き写さない) を、最後に書く。
-6. 新しい公開関数は、**層 (純粋 / 読み取り / 書き込み・起動) を決め**、主なものは [契約の表](contracts.md) に事前条件・事後条件・不変条件を書く。
+6. 利用者に見せるエラーは、**何が起きた / なぜ / 次の一手** の 3 行にする (`cli._fail`)。長い処理は、始まり・終わり・Ctrl-C での中断が分かるようにする ([使い方](usage.md))。
+7. 新しい公開関数は、**層 (純粋 / 読み取り / 書き込み・起動) を決め**、主なものは [契約の表](contracts.md) に事前条件・事後条件・不変条件を書く。
    純粋にできるものは純粋にし、外の世界に触れる部分だけを薄い外側に置く。表の関数と層は、`tests/test_contracts.py` が検査する。
-7. 新しいページは `docs/page-template.rst.tmpl` を元にして、目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連、の順に書く。
-8. 文書を変えたら、**HTML 版 (`site/`) を作り直す**: `python tools/build_site.py`。作り直し忘れは、テストが検出する。
+8. 新しいページは `docs/page-template.rst.tmpl` を元にして、目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連、の順に書く。
+9. 文書を変えたら、**HTML 版 (`site/`) を作り直す**: `python tools/build_site.py`。作り直し忘れは、テストが検出する。
 
 ```mermaid
 %%{init: {"theme":"base","fontFamily":"Noto Sans JP, Hiragino Sans, Meiryo, sans-serif","themeVariables":{"fontFamily":"Noto Sans JP, Hiragino Sans, Meiryo, sans-serif","primaryColor":"#ffffff","primaryBorderColor":"#d0d5dd","primaryTextColor":"#101828","lineColor":"#667085","clusterBkg":"#f2f4f7","clusterBorder":"#d0d5dd","edgeLabelBackground":"#ffffff"},"flowchart":{"wrappingWidth":480,"nodeSpacing":40,"rankSpacing":56,"padding":14},"sequence":{"mirrorActors":false,"wrap":false,"width":150,"actorMargin":30,"messageMargin":34}}}%%

@@ -307,7 +307,7 @@ with tempfile.TemporaryDirectory() as tmp:
   files        被依存 4  依存 0
   confluence   被依存 3  依存 0
   mmdc         被依存 3  依存 0
-  cli          被依存 1  依存 8
+  cli          被依存 1  依存 9
 ハブ (被依存 3 以上): ['files', 'confluence', 'mmdc']
 guard の被依存: import だけ = 0 / 名前による参照も数えると = 1
 ```
@@ -365,9 +365,11 @@ def cmd_check_mermaid(args: argparse.Namespace) -> int:
     roots = [Path(p) for p in args.paths]
     missing_paths = [p for p in roots if not p.exists()]
     if missing_paths:
-        for path in missing_paths:
-            print(f"エラー: パスがありません: {path}", file=sys.stderr)
-        return 2
+        return _fail(
+            "パスがありません: " + ", ".join(str(p) for p in missing_paths),
+            "指定した場所が存在しません (既定は docs と README.md)",
+            "パスの打ち間違いを確かめる。リポジトリのルートで実行しているかも確かめる",
+        )
     problems = 0
     for path in iter_markdown_files(roots):
         text = path.read_text(encoding="utf-8")

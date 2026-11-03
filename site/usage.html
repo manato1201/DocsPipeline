@@ -379,7 +379,45 @@ Confluence のページが、図の無いページに置き換わるため。</p
 </section>
 </section>
 <section id="id5">
-<h2>環境変数<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<h2>エラーと進み具合の読み方<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>エラーは、<strong>何が起きた / なぜ / 次にどうする</strong> の 3 行で出る (標準エラー)。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>エラー: パスがありません: docs/nothing
+  原因: 渡した場所が存在しないか、Python として読めないファイルがあります
+  次の一手: メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>1 行目の見出し</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">エラー</span></code></p></td>
+<td><p>入力や設定の誤り (終了コード 2)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">設定エラー</span></code></p></td>
+<td><p>公開の設定が、足りないか安全でない (終了コード 2)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">失敗</span></code></p></td>
+<td><p>実行したが、基準に届かない・ビルドが失敗した (終了コード 1 など)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">中止</span></code></p></td>
+<td><p>前提の確認に失敗したので、先へ進まなかった (公開の接続テストなど)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">中断</span></code></p></td>
+<td><p><strong>Ctrl-C</strong> で止めた (終了コード 130)。子プロセスも止める</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>長い処理は、始まり (<code class="docutils literal notranslate"><span class="pre">==</span> <span class="pre">html</span> <span class="pre">ビルドを始めます</span> <span class="pre">==</span></code>)・終わり (<code class="docutils literal notranslate"><span class="pre">完了:</span> <span class="pre">html</span> <span class="pre">(12.3</span> <span class="pre">秒)</span></code>)・次の一手を出す。
+<code class="docutils literal notranslate"><span class="pre">publish</span></code> は、<code class="docutils literal notranslate"><span class="pre">[1/3]</span> <span class="pre">環境変数の確認</span></code> → <code class="docutils literal notranslate"><span class="pre">[2/3]</span> <span class="pre">接続テスト</span></code> → <code class="docutils literal notranslate"><span class="pre">[3/3]</span> <span class="pre">Confluence</span> <span class="pre">ビルド</span></code> と、進み具合を出す。
+<code class="docutils literal notranslate"><span class="pre">doctor</span></code> は、使えない機能に <strong>次の一手</strong> (入れるコマンドなど) を添える。トークンなどの値は、どこにも出ない (名前だけ)。</p>
+</section>
+<section id="id6">
+<h2>環境変数<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -423,8 +461,8 @@ Confluence のページが、図の無いページに置き換わるため。</p
 <li><p>順序のある流れは <code class="docutils literal notranslate"><span class="pre">sequenceDiagram</span></code> に <code class="docutils literal notranslate"><span class="pre">autonumber</span></code> を付けると、番号つきの丸になる。</p></li>
 </ul>
 </section>
-<section id="id6">
-<h2>プロンプトのコピー<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<section id="id7">
+<h2>プロンプトのコピー<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
 <p>手順の説明に、そのまま Claude Code に渡せるプロンプトを載せられる。HTML では「プロンプトをコピー」ボタンが付く。</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>.. prompt:: 新しいリポジトリに docs/ を作る
 
@@ -445,8 +483,8 @@ Confluence のページが、図の無いページに置き換わるため。</p
 <li><p>書き方の指針: 何をしてほしいか → 手順 → <strong>してはいけないこと</strong> (コミットしない、値を書き写さない、など) の順に書く。</p></li>
 </ul>
 </section>
-<section id="id7">
-<h2>設定の追加<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<section id="id8">
+<h2>設定の追加<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="api.html#docspipeline.config.build_config" title="docspipeline.config.build_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">docspipeline.config.build_config()</span></code></a> が返した値は、<code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の中で上書き・追記できる。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">build_config</span><span class="p">(</span><span class="n">confdir</span><span class="o">=</span><span class="vm">__file__</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s2">"X"</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">"me"</span><span class="p">)</span>
 
@@ -456,8 +494,8 @@ Confluence のページが、図の無いページに置き換わるため。</p
 </pre></div>
 </div>
 </section>
-<section id="id8">
-<h2>使うときの注意<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h2>使うときの注意<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">TypeVar</span></code> を使った型注釈は、nitpicky で未解決の参照になる。上のように外すか、型注釈を単純にする。</p></li>
 <li><p>autodoc はコードを <code class="docutils literal notranslate"><span class="pre">import</span></code> する。副作用のある <code class="docutils literal notranslate"><span class="pre">import</span></code> は、文書のビルドでも実行される。
@@ -527,11 +565,12 @@ Confluence のページが、図の無いページに置き換わるため。</p
 <li><a class="reference internal" href="#id4">各コマンドの詳細</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id5">環境変数</a></li>
+<li><a class="reference internal" href="#id5">エラーと進み具合の読み方</a></li>
+<li><a class="reference internal" href="#id6">環境変数</a></li>
 <li><a class="reference internal" href="#mermaid">Mermaid の図を書く</a></li>
-<li><a class="reference internal" href="#id6">プロンプトのコピー</a></li>
-<li><a class="reference internal" href="#id7">設定の追加</a></li>
-<li><a class="reference internal" href="#id8">使うときの注意</a></li>
+<li><a class="reference internal" href="#id7">プロンプトのコピー</a></li>
+<li><a class="reference internal" href="#id8">設定の追加</a></li>
+<li><a class="reference internal" href="#id9">使うときの注意</a></li>
 </ul>
 </li>
 </ul>

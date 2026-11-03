@@ -244,7 +244,10 @@ stderr: '標準エラー\n'
 ```python
 # 引用: docspipeline/cli.py::_run
 def _run(cmd: Sequence[str], env: dict[str, str] | None = None) -> int:
-    """コマンドを走らせ、出力から API トークンを伏せて表示する。"""
+    """コマンドを走らせ、出力から API トークンを伏せて表示する。
+
+    Ctrl-C では、子プロセスを止めて、終了コード 130 を返す (止めた理由と、次の一手を表示する)。
+    """
     merged = {**os.environ, **(env or {})}
     with subprocess.Popen(
         list(cmd),
@@ -255,9 +258,24 @@ def _run(cmd: Sequence[str], env: dict[str, str] | None = None) -> int:
         errors="replace",  # 読めない文字で、ビルドの途中で落ちない
         env=merged,
     ) as proc:
-        for line in proc.stdout or ():
-            print(confluence.mask_secrets(line, merged), end="", flush=True)
-        return proc.wait()
+        try:
+            for line in proc.stdout or ():
+                print(confluence.mask_secrets(line, merged), end="", flush=True)
+            return proc.wait()
+        except KeyboardInterrupt:
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+            return _fail(
+                "Ctrl-C で中断しました",
+                "実行中のコマンドを止めました。出力は途中までです",
+                "もう一度実行する。途中の結果が気になるときは、docs/_build を消してから実行する",
+                label="中断",
+                code=EXIT_INTERRUPTED,
+            )
 ```
 
 読み方:
@@ -334,7 +352,7 @@ with tempfile.TemporaryDirectory() as tmp:
 ```text
 # 出力
 <tmp>/nothing → 終了コード 2
-    エラー: パスがありません: <tmp>/nothing
+      次の一手: メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す
 <tmp> → 終了コード 0
     docstring のカバレッジ: 100.0% (0/0)
 ```

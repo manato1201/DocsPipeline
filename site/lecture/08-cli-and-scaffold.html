@@ -458,8 +458,20 @@ DocsPipeline の「<strong>2 = 使い方の誤り</strong>」は、<code class="
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">confluence</span><span class="o">.</span><span class="n">ConfluenceSettingsError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"設定エラー: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+            <span class="s2">"公開の設定が、足りないか、安全でない値です (黙って別の動作にはしません)"</span><span class="p">,</span>
+            <span class="s2">"docspipeline doctor で、不足している名前と、モードの値を確かめる"</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">"設定エラー"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+            <span class="s2">"Ctrl-C で中断しました"</span><span class="p">,</span>
+            <span class="s2">"実行を止めました"</span><span class="p">,</span>
+            <span class="s2">"もう一度実行する"</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">"中断"</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">EXIT_INTERRUPTED</span><span class="p">,</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -476,12 +488,20 @@ DocsPipeline の「<strong>2 = 使い方の誤り</strong>」は、<code class="
     <span class="k">try</span><span class="p">:</span>
         <span class="n">report</span> <span class="o">=</span> <span class="n">docstring_coverage</span><span class="o">.</span><span class="n">scan</span><span class="p">([</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">paths</span><span class="p">])</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"エラー: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+            <span class="s2">"渡した場所が存在しないか、Python として読めないファイルがあります"</span><span class="p">,</span>
+            <span class="s2">"メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す"</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">docstring_coverage</span><span class="o">.</span><span class="n">format_report</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()))</span>
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">fail_under</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">report</span><span class="o">.</span><span class="n">percent</span> <span class="o">&lt;</span> <span class="n">args</span><span class="o">.</span><span class="n">fail_under</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"カバレッジが基準 </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">fail_under</span><span class="si">}</span><span class="s2">% を下回っています"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"カバレッジが基準 </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">fail_under</span><span class="si">}</span><span class="s2">% を下回っています (</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">percent</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">,</span>
+            <span class="s2">"docstring が無い公開 API があります (上の一覧)"</span><span class="p">,</span>
+            <span class="s2">"一覧の関数・クラスに docstring を書く。基準を見直すなら --fail-under (init では --min-coverage)"</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">"失敗"</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="mi">0</span>
 </pre></div>
 </div>
@@ -519,9 +539,9 @@ DocsPipeline の「<strong>2 = 使い方の誤り</strong>」は、<code class="
 </pre></div>
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
-存在しないパス : (2, [], 'エラー: パスがありません: &lt;tmp&gt;/none')
+存在しないパス : (2, [], 'エラー: パスがありません: &lt;tmp&gt;/none\n  原因: 渡した場所が存在しないか、Python として読めないファイルがあります\n  次の一手: メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す')
 全部ある       : (0, ['docstring のカバレッジ: 100.0% (2/2)'], '')
-基準を下回る   : (1, ['docstring のカバレッジ: 50.0% (2/4)'], 'カバレッジが基準 100.0% を下回っています')
+基準を下回る   : (1, ['docstring のカバレッジ: 50.0% (2/4)'], '失敗: カバレッジが基準 100.0% を下回っています (50.0%)\n  原因: docstring が無い公開 API があります (上の一覧)\n  次の一手: 一覧の関数・クラスに docstring を書く。基準を見直すなら --fail-under (init では --min-coverage)')
 基準なし       : (0, ['docstring のカバレッジ: 50.0% (2/4)'], '')
 </pre></div>
 </div>
@@ -541,6 +561,7 @@ DocsPipeline の「<strong>2 = 使い方の誤り</strong>」は、<code class="
 <span class="sd">    """</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">docs</span> <span class="o">/</span> <span class="s2">"_build"</span> <span class="o">/</span> <span class="n">builder</span>
     <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"sphinx"</span><span class="p">,</span> <span class="s2">"-b"</span><span class="p">,</span> <span class="n">builder</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">docs</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"== </span><span class="si">{</span><span class="n">builder</span><span class="si">}</span><span class="s2"> ビルドを始めます: </span><span class="si">{</span><span class="n">docs</span><span class="si">}</span><span class="s2"> =="</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
         <span class="c1"># 警告をエラー扱いにする。--keep-going で、止まらずに全部の警告を出す。</span>
         <span class="n">cmd</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"-W"</span><span class="p">,</span> <span class="s2">"--keep-going"</span><span class="p">]</span>
@@ -549,7 +570,25 @@ DocsPipeline の「<strong>2 = 使い方の誤り</strong>」は、<code class="
         <span class="c1"># 環境変数の方針 (Mermaid が画像にならなければ失敗) は、読み込み時にしか効かない。</span>
         <span class="c1"># 前のビルドが「コードのまま」で済ませたページを、変更なしとして飛ばされると、方針が素通りする。</span>
         <span class="n">cmd</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"-E"</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">_run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="p">{</span><span class="n">confluence</span><span class="o">.</span><span class="n">MODE_ENV</span><span class="p">:</span> <span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">extra_env</span> <span class="ow">or</span> <span class="p">{})})</span>
+    <span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+    <span class="n">rc</span> <span class="o">=</span> <span class="n">_run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="p">{</span><span class="n">confluence</span><span class="o">.</span><span class="n">MODE_ENV</span><span class="p">:</span> <span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">extra_env</span> <span class="ow">or</span> <span class="p">{})})</span>
+    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">messages</span><span class="o">.</span><span class="n">format_elapsed</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"完了: </span><span class="si">{</span><span class="n">builder</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">elapsed</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">builder</span> <span class="o">==</span> <span class="s2">"html"</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"次の一手: </span><span class="si">{</span><span class="n">out</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'index.html'</span><span class="si">}</span><span class="s2"> をブラウザで開く"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rc</span> <span class="o">!=</span> <span class="n">EXIT_INTERRUPTED</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">builder</span> <span class="o">==</span> <span class="s2">"linkcheck"</span><span class="p">:</span>
+            <span class="n">why</span> <span class="o">=</span> <span class="s2">"外部リンクが切れているか、外部サイトにつながっていません"</span>
+            <span class="n">next_step</span> <span class="o">=</span> <span class="s2">"上の出力の broken の行を直す。つながらない環境では DOCSPIPELINE_OFFLINE=1"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">why</span> <span class="o">=</span> <span class="s2">"上の出力の WARNING / ERROR が原因です (既定では、警告も失敗にします)"</span>
+            <span class="n">next_step</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">"最初の WARNING / ERROR を直す。まず docspipeline doctor で環境を確かめる。"</span>
+                <span class="s2">"全部の警告は --no-strict で読める"</span>
+            <span class="p">)</span>
+        <span class="n">_fail</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">builder</span><span class="si">}</span><span class="s2"> のビルドに失敗しました (終了コード </span><span class="si">{</span><span class="n">rc</span><span class="si">}</span><span class="s2">、</span><span class="si">{</span><span class="n">elapsed</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">why</span><span class="p">,</span> <span class="n">next_step</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"失敗"</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">rc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rc</span>
 </pre></div>
 </div>
 <div class="table-wrapper colwidths-auto docutils container">
@@ -578,6 +617,94 @@ DocsPipeline の「<strong>2 = 使い方の誤り</strong>」は、<code class="
 <p><strong>Sphinx を、<code class="docutils literal notranslate"><span class="pre">import</span></code> せずに、子プロセスとして起動する</strong> ことが、設計のポイントです。CLI が Sphinx を <code class="docutils literal notranslate"><span class="pre">import</span></code> すると、
 Sphinx が無い環境で、<strong>CLI 全体が起動しません</strong>。子プロセスなら、<code class="docutils literal notranslate"><span class="pre">build</span></code> を使うときだけ、Sphinx が要ります。</p>
 </section>
+<section id="a-3-ctrl-c">
+<h3>3.4a 利用者に見せるメッセージ: エラーの 3 行と、Ctrl-C<a class="headerlink" href="#a-3-ctrl-c" title="Link to this heading">¶</a></h3>
+<p>ローカルの道具の失敗は、原因が <strong>利用者の環境</strong> (入れていない道具・打ち間違い・設定の不足) にあることが多い。
+そこで、エラーは <strong>何が起きた / なぜ / 次にどうする</strong> の 3 行にそろえます。<strong>次の一手</strong> まで書いてあると、迷わずに直せます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/messages.py::format_error</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_error</span><span class="p">(</span><span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">why</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">next_step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"エラー"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""エラーを、何が起きた / なぜ / 次にどうする、の 3 行にして返す。</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        what: 何が起きたか。パスなど、どれのことかを含める。</span>
+<span class="sd">        why: なぜ起きたか (考えられる原因)。</span>
+<span class="sd">        next_step: 利用者が次にすること。コマンドや、確かめる場所を書く。</span>
+<span class="sd">        label: 1 行目の見出し (``エラー`` / ``失敗`` / ``中止`` / ``中断``)。</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        改行を含む文字列 (末尾に改行は付けない)。</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: ``what``・``why``・``next_step`` のいずれかが空のとき。</span>
+<span class="sd">            書き手が、原因と次の一手を考えずに済ませないため。</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"what"</span><span class="p">,</span> <span class="n">what</span><span class="p">),</span> <span class="p">(</span><span class="s2">"why"</span><span class="p">,</span> <span class="n">why</span><span class="p">),</span> <span class="p">(</span><span class="s2">"next_step"</span><span class="p">,</span> <span class="n">next_step</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> は空にできません (何が起きた / なぜ / 次にどうする、の 3 つを書く)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="se">\n</span><span class="s2">  原因: </span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="se">\n</span><span class="s2">  次の一手: </span><span class="si">{</span><span class="n">next_step</span><span class="si">}</span><span class="s2">"</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>3 つのどれかが <strong>空なら例外</strong> にします。書き手が、原因と次の一手を考えずに済ませる、という手抜きを、<strong>書けない</strong> ようにするためです (第 9 回の「早く止まる」を、メッセージにも)。</p></li>
+<li><p>文字列を作るだけの <strong>純粋な関数</strong> です (表示は呼び出し側)。そのため、乱数で作った入力でも検査できます (第 10 回)。</p></li>
+<li><p>CLI は、薄い入口 <code class="docutils literal notranslate"><span class="pre">_fail</span></code> で、これを標準エラーに出して、終了コードを返します。</p></li>
+</ul>
+<p>長い処理 (ビルド・公開) には、さらに 3 つの工夫があります。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>工夫</p></th>
+<th class="head"><p>中身</p></th>
+<th class="head"><p>どこで</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>進み具合</strong></p></td>
+<td><p>公開は <code class="docutils literal notranslate"><span class="pre">[1/3]</span> <span class="pre">環境変数の確認</span></code> → <code class="docutils literal notranslate"><span class="pre">[2/3]</span> <span class="pre">接続テスト</span></code> → <code class="docutils literal notranslate"><span class="pre">[3/3]</span> <span class="pre">Confluence</span> <span class="pre">ビルド</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cmd_publish</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>終わりの知らせ</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">完了:</span> <span class="pre">html</span> <span class="pre">(12.3</span> <span class="pre">秒)</span></code>、成功した HTML のビルドには <code class="docutils literal notranslate"><span class="pre">次の一手:</span> <span class="pre">…/index.html</span> <span class="pre">をブラウザで開く</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_sphinx</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>中断</strong></p></td>
+<td><p>Ctrl-C で、子プロセスを止めて、終了コード <strong>130</strong> (シェルの慣習: 128 + SIGINT)。失敗とは <strong>区別</strong> する</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_run</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli</span><span class="p">,</span> <span class="n">messages</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">messages</span><span class="o">.</span><span class="n">format_error</span><span class="p">(</span><span class="s2">"パスがありません: docs"</span><span class="p">,</span> <span class="s2">"打ち間違いかもしれません"</span><span class="p">,</span> <span class="s2">"パスを確かめる"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">format_error</span><span class="p">(</span><span class="s2">"何か起きた"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"空の部分があると、例外:"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+
+<span class="n">err</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stderr</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">cli</span><span class="o">.</span><span class="n">_fail</span><span class="p">(</span><span class="s2">"接続に失敗"</span><span class="p">,</span> <span class="s2">"認証が通らない"</span><span class="p">,</span> <span class="s2">"トークンを確かめる"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"失敗"</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"終了コード:"</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="s2">"/ 標準エラーの 1 行目:"</span><span class="p">,</span> <span class="n">err</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+エラー: パスがありません: docs
+  原因: 打ち間違いかもしれません
+  次の一手: パスを確かめる
+
+空の部分があると、例外: why は空にできません (何が起きた / なぜ / 次にどうする、の 3 つを書く)
+
+終了コード: 1 / 標準エラーの 1 行目: 失敗: 接続に失敗
+</pre></div>
+</div>
+</section>
 <section id="id5">
 <h3>3.5 各コマンドの本体<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/cli.py::cmd_build</span>
@@ -600,16 +727,30 @@ Sphinx が無い環境で、<strong>CLI 全体が起動しません</strong>。�
 
 <span class="sd">    ``dryrun`` と ``publish`` では、先に接続テストを行い、失敗したらビルドしない。</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"local"</span><span class="p">:</span>
+    <span class="n">connecting</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"local"</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">connecting</span> <span class="k">else</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_connection_test</span> <span class="k">else</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">connecting</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">] 環境変数の確認"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_require_confluence_env</span><span class="p">():</span>
             <span class="k">return</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_connection_test</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">"== 接続テスト =="</span><span class="p">)</span>
-            <span class="n">rc</span> <span class="o">=</span> <span class="n">cmd_confluence_check</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="n">docs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">docs</span><span class="p">))</span>
+            <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">] 接続テスト"</span><span class="p">)</span>
+            <span class="n">rc</span> <span class="o">=</span> <span class="n">_connection_test</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">rc</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">"接続テストに失敗したため、中止します"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">rc</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"== Confluence ビルド (mode=</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">) =="</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="n">EXIT_INTERRUPTED</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">rc</span>
+                <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"接続テストに失敗したため、ビルドを始めずに中止します (終了コード </span><span class="si">{</span><span class="n">rc</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+                    <span class="s2">"公開の前提 (認証・権限・スペース・親ページ) が確認できていません (詳しくは上の出力)"</span><span class="p">,</span>
+                    <span class="s2">"ユーザー・スペースのキー・親ページの名前・トークンを見直してから、もう一度実行する。"</span>
+                    <span class="s2">"手元の確認は --mode dryrun"</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">"中止"</span><span class="p">,</span>
+                    <span class="n">code</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span>
+                <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">step</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">] Confluence ビルド (mode=</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
     <span class="c1"># 接続する・公開するときは、Mermaid が画像にならなければ失敗させる。</span>
     <span class="c1"># 黙ってコードのままにすると、Confluence のページが、図の無いページに置き換わってしまう。</span>
     <span class="n">extra</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"DOCSPIPELINE_MERMAID_MISSING"</span><span class="p">:</span> <span class="s2">"error"</span><span class="p">}</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"local"</span> <span class="k">else</span> <span class="kc">None</span>
@@ -898,17 +1039,21 @@ missing_sources: ['scr']
     <span class="p">)</span>
     <span class="n">missing</span> <span class="o">=</span> <span class="n">scaffold</span><span class="o">.</span><span class="n">missing_sources</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"エラー: ソースの場所がありません: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"--package / --cpp は、docs/ からの相対パスで、実在する場所を指定してください"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+            <span class="s2">"ソースの場所がありません: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">),</span>
+            <span class="s2">"--package / --cpp は docs/ からの相対パスで解決され、その場所に実在しません"</span><span class="p">,</span>
+            <span class="s2">"docs/ から見た相対パスで、実在する場所を指定する (例: --package ../src)。何も書いていません"</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">created</span> <span class="o">=</span> <span class="n">scaffold</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">scaffold</span><span class="o">.</span><span class="n">ScaffoldError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">exc</span><span class="o">.</span><span class="n">existing</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"既にあります: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"上書きするには --force を付けてください"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+            <span class="s2">"既にあります: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">exc</span><span class="o">.</span><span class="n">existing</span><span class="p">),</span>
+            <span class="s2">"既存のファイルを壊さないため、1 つも書かずに止まりました"</span><span class="p">,</span>
+            <span class="s2">"上書きするなら、先にコミットしてから --force を付ける (後で差分を見て戻せる)。"</span>
+            <span class="s2">"残すなら、別の場所を指定する"</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">created</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"作成: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"次の手順: pip install 'docspipeline[docs]' &amp;&amp; docspipeline build </span><span class="si">{</span><span class="n">opts</span><span class="o">.</span><span class="n">target</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'docs'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -929,6 +1074,7 @@ missing_sources: ['scr']
     <span class="n">ok</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">hint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>  <span class="c1"># 失敗したとき、次にすること (成功したときは使わない)</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/doctor.py::format_checks</span>
@@ -938,6 +1084,8 @@ missing_sources: ['scr']
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">checks</span><span class="p">:</span>
         <span class="n">mark</span> <span class="o">=</span> <span class="s2">"OK  "</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">ok</span> <span class="k">else</span> <span class="p">(</span><span class="s2">"NG  "</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">required</span> <span class="k">else</span> <span class="s2">"なし"</span><span class="p">)</span>
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">mark</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">detail</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">ok</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">hint</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"       次の一手: </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1008,8 +1156,8 @@ missing_sources: ['scr']
 </pre></div>
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
-cli が import する (内部): ['confluence', 'diagrams', 'docstring_coverage', 'doctor', 'files', 'mmdc', 'scaffold', 'structure_map']
-cli が import する (外部): ['argparse', 'collections', 'os', 'pathlib', 'subprocess', 'sys']
+cli が import する (内部): ['confluence', 'diagrams', 'docstring_coverage', 'doctor', 'files', 'messages', 'mmdc', 'scaffold', 'structure_map']
+cli が import する (外部): ['argparse', 'collections', 'os', 'pathlib', 'subprocess', 'sys', 'time']
 sphinx / docutils を import するモジュール: ['doxygen', 'guard', 'mermaid', 'prompt']
 </pre></div>
 </div>
@@ -1223,6 +1371,7 @@ CI の担当者が、終了コードだけで、対応の方向を見分けら�
 <li><a class="reference internal" href="#main">3.2 main</a></li>
 <li><a class="reference internal" href="#coverage">3.3 coverage: 入力の検証と、終了コード</a></li>
 <li><a class="reference internal" href="#run-sphinx">3.4 子プロセスを起動する: <code class="docutils literal notranslate"><span class="pre">_run</span></code> と <code class="docutils literal notranslate"><span class="pre">_sphinx</span></code></a></li>
+<li><a class="reference internal" href="#a-3-ctrl-c">3.4a 利用者に見せるメッセージ: エラーの 3 行と、Ctrl-C</a></li>
 <li><a class="reference internal" href="#id5">3.5 各コマンドの本体</a></li>
 <li><a class="reference internal" href="#build-parser">3.6 build_parser</a></li>
 </ul>

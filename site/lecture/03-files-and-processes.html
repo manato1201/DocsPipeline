@@ -529,7 +529,10 @@ stderr: '標準エラー\n'
 出力を <strong>リアルタイムで</strong> 表示したい。このとき、<code class="docutils literal notranslate"><span class="pre">Popen</span></code> で、1 行ずつ読みます。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: docspipeline/cli.py::_run</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_run</span><span class="p">(</span><span class="n">cmd</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""コマンドを走らせ、出力から API トークンを伏せて表示する。"""</span>
+<span class="w">    </span><span class="sd">"""コマンドを走らせ、出力から API トークンを伏せて表示する。</span>
+
+<span class="sd">    Ctrl-C では、子プロセスを止めて、終了コード 130 を返す (止めた理由と、次の一手を表示する)。</span>
+<span class="sd">    """</span>
     <span class="n">merged</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">env</span> <span class="ow">or</span> <span class="p">{})}</span>
     <span class="k">with</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
         <span class="nb">list</span><span class="p">(</span><span class="n">cmd</span><span class="p">),</span>
@@ -540,9 +543,24 @@ stderr: '標準エラー\n'
         <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span>  <span class="c1"># 読めない文字で、ビルドの途中で落ちない</span>
         <span class="n">env</span><span class="o">=</span><span class="n">merged</span><span class="p">,</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">confluence</span><span class="o">.</span><span class="n">mask_secrets</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">merged</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">confluence</span><span class="o">.</span><span class="n">mask_secrets</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">merged</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">_fail</span><span class="p">(</span>
+                <span class="s2">"Ctrl-C で中断しました"</span><span class="p">,</span>
+                <span class="s2">"実行中のコマンドを止めました。出力は途中までです"</span><span class="p">,</span>
+                <span class="s2">"もう一度実行する。途中の結果が気になるときは、docs/_build を消してから実行する"</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">"中断"</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="n">EXIT_INTERRUPTED</span><span class="p">,</span>
+            <span class="p">)</span>
 </pre></div>
 </div>
 <p>読み方:</p>
@@ -631,7 +649,7 @@ stderr: '標準エラー\n'
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
 &lt;tmp&gt;/nothing → 終了コード 2
-    エラー: パスがありません: &lt;tmp&gt;/nothing
+      次の一手: メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す
 &lt;tmp&gt; → 終了コード 0
     docstring のカバレッジ: 100.0% (0/0)
 </pre></div>

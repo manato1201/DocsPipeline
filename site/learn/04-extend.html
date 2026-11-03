@@ -332,9 +332,11 @@ docs/learn/04-extend.md の「レシピ 1」の手順どおりに進めてくだ
 <blockquote>
 <div><p><strong>約束</strong></p>
 <ul class="simple">
-<li><p>終了コードは、成功 <code class="docutils literal notranslate"><span class="pre">0</span></code>、失敗 <code class="docutils literal notranslate"><span class="pre">1</span></code>、<strong>設定の誤り <code class="docutils literal notranslate"><span class="pre">2</span></code></strong>。</p></li>
-<li><p>出力は日本語で、<strong>何を直せばよいか</strong> まで書く (「失敗」だけにしない)。</p></li>
-<li><p>外のプロセスを起動する部分は <code class="docutils literal notranslate"><span class="pre">cli._run</span></code> を通す (トークンの伏せ字処理がかかる)。</p></li>
+<li><p>終了コードは、成功 <code class="docutils literal notranslate"><span class="pre">0</span></code>、失敗 <code class="docutils literal notranslate"><span class="pre">1</span></code>、<strong>設定の誤り <code class="docutils literal notranslate"><span class="pre">2</span></code></strong>、Ctrl-C での中断 <code class="docutils literal notranslate"><span class="pre">130</span></code>。</p></li>
+<li><p>エラーは <strong>何が起きた / なぜ / 次の一手</strong> の 3 行にする。<code class="docutils literal notranslate"><span class="pre">cli._fail(what,</span> <span class="pre">why,</span> <span class="pre">next_step)</span></code> を使えば、そろう
+(<code class="docutils literal notranslate"><span class="pre">messages.format_error</span></code>。3 つのどれかが空だと例外になる)。<code class="docutils literal notranslate"><span class="pre">tests/test_usability.py</span></code> の <code class="docutils literal notranslate"><span class="pre">CASES</span></code> に、失敗する呼び方を 1 つ足す。</p></li>
+<li><p>外のプロセスを起動する部分は <code class="docutils literal notranslate"><span class="pre">cli._run</span></code> を通す (トークンの伏せ字処理と、Ctrl-C での中断がかかる)。</p></li>
+<li><p>数分かかりうる処理は、<code class="docutils literal notranslate"><span class="pre">_sphinx</span></code> のように、始まり・終わり (<code class="docutils literal notranslate"><span class="pre">完了:</span> <span class="pre">…</span> <span class="pre">(12.3</span> <span class="pre">秒)</span></code>)・次の一手を出す。複数の段階があるなら、<code class="docutils literal notranslate"><span class="pre">[1/3]</span></code> のように進み具合を出す。</p></li>
 </ul>
 </div></blockquote>
 </section>

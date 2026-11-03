@@ -480,63 +480,84 @@
 <td><p>必須でない項目の失敗は、終了コードに影響しない</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_doctor.py::test_required_failures_set_the_exit_code</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prompt.find_secret</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">messages.format_error</span></code></p></td>
+<td><p>純粋</p></td>
+<td><p>何が起きた・なぜ・次にどうする、の 3 つが、どれも空でない (空なら <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ラベル:</span> <span class="pre">何が起きた</span></code> / <code class="docutils literal notranslate">&#160; <span class="pre">原因:</span> <span class="pre">…</span></code> / <code class="docutils literal notranslate">&#160; <span class="pre">次の一手:</span> <span class="pre">…</span></code> の 3 行</p></td>
+<td><p>改行を含まない入力なら、<strong>常にちょうど 3 行</strong>。同じ入力なら同じ出力</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_format_error_has_three_lines_what_why_next</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_format_error_refuses_an_empty_part</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_format_error_contract</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">messages.format_elapsed</span></code></p></td>
+<td><p>純粋</p></td>
+<td><p>なし</p></td>
+<td><p>秒数を <code class="docutils literal notranslate"><span class="pre">12.3</span> <span class="pre">秒</span></code> / <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">分</span> <span class="pre">5</span> <span class="pre">秒</span></code> の形にする</p></td>
+<td><p>負の値は 0 として扱う。59.96 秒は <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">分</span> <span class="pre">0</span> <span class="pre">秒</span></code> (<code class="docutils literal notranslate"><span class="pre">60.0</span> <span class="pre">秒</span></code> にしない)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_format_elapsed</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">doctor.format_checks</span></code></p></td>
+<td><p>純粋</p></td>
+<td><p>なし</p></td>
+<td><p>確認の結果を、1 項目 1 行で。失敗した項目にヒントがあれば、「次の一手」の行を足す</p></td>
+<td><p><strong>成功した項目には、次の一手を出さない</strong>。値は出さない (名前だけ)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_doctor_tells_the_next_step_only_for_items_that_are_not_ok</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_doctor_hints_never_contain_secret_values</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prompt.find_secret</span></code></p></td>
 <td><p>純粋</p></td>
 <td><p>なし</p></td>
 <td><p>秘密らしき <code class="docutils literal notranslate"><span class="pre">名前=値</span></code> があれば、<strong>値を伏せた</strong> 形で返す。なければ <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
 <td><p>戻り値に、値が含まれない。プレースホルダー・環境変数の名前は、秘密とみなさない</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_prompt.py::test_secret_like_values_are_found_and_not_echoed</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_prompt.py::test_names_and_placeholders_are_not_secrets</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">structure_map.scan_package</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">structure_map.scan_package</span></code></p></td>
 <td><p>読み取り</p></td>
 <td><p>パッケージの場所に <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> がある (無ければ例外)</p></td>
 <td><p>モジュールごとの依存を持つ地図</p></td>
 <td><p><strong>ソースを読むだけ</strong> (<code class="docutils literal notranslate"><span class="pre">import</span></code> も実行もしない)。何も書かない</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_structure_map.py::test_a_directory_without_init_is_rejected</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_read_only_functions_change_nothing</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">docstring_coverage.scan</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">docstring_coverage.scan</span></code></p></td>
 <td><p>読み取り</p></td>
 <td><p>渡した場所が、実在する (CLI が先に確かめる)</p></td>
 <td><p>公開 API の docstring の有無の集計</p></td>
 <td><p>何も書かない。仮想環境・キャッシュを数えない</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_docstring_coverage.py::test_scan_skips_virtualenv_and_cache_dirs</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_read_only_functions_change_nothing</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scaffold.plan</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scaffold.plan</span></code></p></td>
 <td><p>読み取り</p></td>
 <td><p>なし</p></td>
 <td><p>書き出すファイルと中身の対応</p></td>
 <td><p><strong>ファイルに触れない</strong>。同じ指定なら、同じ結果</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py::test_init_creates_a_python_project_scaffold</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_read_only_functions_change_nothing</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">files.iter_python_files</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">files.iter_python_files</span></code></p></td>
 <td><p>読み取り</p></td>
 <td><p>なし</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">.py</span></code> のファイルを、整列して返す</p></td>
 <td><p>仮想環境・外部のコードを返さない。何も書かない</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_robustness.py::test_api_modules_skip_virtualenvs_and_vendored_code</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_read_only_functions_change_nothing</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scaffold.write</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scaffold.write</span></code></p></td>
 <td><p>書き込み・起動</p></td>
 <td><p>既存のファイルが無い (<code class="docutils literal notranslate"><span class="pre">force</span></code> のときを除く)</p></td>
 <td><p>作ったファイルの一覧</p></td>
 <td><p><strong>既存のファイルがあれば、1 つも書かずに止まる</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py::test_init_refuses_to_overwrite_without_force</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mmdc.render</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mmdc.render</span></code></p></td>
 <td><p>書き込み・起動</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mmdc</span></code> が実行できる</p></td>
 <td><p>Mermaid の画像のファイル</p></td>
 <td><p>同じ図は再変換しない。<strong>半端なファイルを、他が読まない</strong> (原子的な置き換え)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_mermaid.py::test_render_writes_an_svg_and_reuses_it</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_mermaid.py::test_render_failure_reports_the_reason</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cli.main</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cli.main</span></code></p></td>
 <td><p>書き込み・起動</p></td>
 <td><p>なし</p></td>
-<td><p>終了コード (成功 0、失敗 1、使い方の誤り 2)</p></td>
-<td><p><strong>トークンの値を、出力に出さない</strong>。<code class="docutils literal notranslate"><span class="pre">build</span></code> は公開しない</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py::test_build_never_publishes_even_if_the_environment_asks_to</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py::test_run_masks_the_token_in_child_output</span></code></p></td>
+<td><p>終了コード (成功 0、失敗 1、使い方の誤り 2、Ctrl-C で中断 130)</p></td>
+<td><p><strong>トークンの値を、出力に出さない</strong>。<code class="docutils literal notranslate"><span class="pre">build</span></code> は公開しない。<strong>エラーは、何が起きた / なぜ / 次の一手の 3 行</strong>。長い処理は、進み具合と完了を示す</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py::test_build_never_publishes_even_if_the_environment_asks_to</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py::test_run_masks_the_token_in_child_output</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_every_error_says_what_why_and_the_next_step</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_usability.py::test_ctrl_c_stops_the_child_and_says_what_to_do_next</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">doxygen.run_doxygen</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">doxygen.run_doxygen</span></code></p></td>
 <td><p>書き込み・起動</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">doxygen</span></code> が実行できる (無ければ拡張のエラー)</p></td>
 <td><p>Doxygen の XML</p></td>

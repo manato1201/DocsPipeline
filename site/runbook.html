@@ -294,6 +294,7 @@
 手で書かずに <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">check-mermaid</span> <span class="pre">--fix</span></code> で入れる。色の約束は <a class="reference internal" href="usage.html"><span class="std std-doc">使い方</span></a>。</p></li>
 <li><p>人が手で行う手順の説明には、Claude Code にそのまま渡せる <strong>プロンプト</strong> (<code class="docutils literal notranslate"><span class="pre">{prompt}</span></code>) を添えてよい。
 プロンプトには、秘密情報を書かない。「してはいけないこと」(コミットしない、値を書き写さない) を、最後に書く。</p></li>
+<li><p>利用者に見せるエラーは、<strong>何が起きた / なぜ / 次の一手</strong> の 3 行にする (<code class="docutils literal notranslate"><span class="pre">cli._fail</span></code>)。長い処理は、始まり・終わり・Ctrl-C での中断が分かるようにする (<a class="reference internal" href="usage.html"><span class="std std-doc">使い方</span></a>)。</p></li>
 <li><p>新しい公開関数は、<strong>層 (純粋 / 読み取り / 書き込み・起動) を決め</strong>、主なものは <a class="reference internal" href="contracts.html"><span class="std std-doc">契約の表</span></a> に事前条件・事後条件・不変条件を書く。
 純粋にできるものは純粋にし、外の世界に触れる部分だけを薄い外側に置く。表の関数と層は、<code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py</span></code> が検査する。</p></li>
 <li><p>新しいページは <code class="docutils literal notranslate"><span class="pre">docs/page-template.rst.tmpl</span></code> を元にして、目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連、の順に書く。</p></li>

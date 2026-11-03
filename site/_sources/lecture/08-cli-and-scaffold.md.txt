@@ -185,8 +185,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         return args.func(args)
     except confluence.ConfluenceSettingsError as exc:
-        print(f"設定エラー: {exc}", file=sys.stderr)
-        return 2
+        return _fail(
+            str(exc),
+            "公開の設定が、足りないか、安全でない値です (黙って別の動作にはしません)",
+            "docspipeline doctor で、不足している名前と、モードの値を確かめる",
+            label="設定エラー",
+        )
+    except KeyboardInterrupt:
+        return _fail(
+            "Ctrl-C で中断しました",
+            "実行を止めました",
+            "もう一度実行する",
+            label="中断",
+            code=EXIT_INTERRUPTED,
+        )
 ```
 
 - `args.func(args)`: サブコマンドの関数を呼ぶ。
@@ -202,12 +214,20 @@ def cmd_coverage(args: argparse.Namespace) -> int:
     try:
         report = docstring_coverage.scan([Path(p) for p in args.paths])
     except ValueError as exc:
-        print(f"エラー: {exc}", file=sys.stderr)
-        return 2
+        return _fail(
+            str(exc),
+            "渡した場所が存在しないか、Python として読めないファイルがあります",
+            "メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す",
+        )
     print(docstring_coverage.format_report(report, base=Path.cwd()))
     if args.fail_under is not None and report.percent < args.fail_under:
-        print(f"カバレッジが基準 {args.fail_under}% を下回っています", file=sys.stderr)
-        return 1
+        return _fail(
+            f"カバレッジが基準 {args.fail_under}% を下回っています ({report.percent:.1f}%)",
+            "docstring が無い公開 API があります (上の一覧)",
+            "一覧の関数・クラスに docstring を書く。基準を見直すなら --fail-under (init では --min-coverage)",
+            label="失敗",
+            code=1,
+        )
     return 0
 ```
 
@@ -248,9 +268,9 @@ with tempfile.TemporaryDirectory() as tmp:
 
 ```text
 # 出力
-存在しないパス : (2, [], 'エラー: パスがありません: <tmp>/none')
+存在しないパス : (2, [], 'エラー: パスがありません: <tmp>/none\n  原因: 渡した場所が存在しないか、Python として読めないファイルがあります\n  次の一手: メッセージのパス (ファイルと行) を確かめて直す。CI の設定 (docs.yml) のパスも見直す')
 全部ある       : (0, ['docstring のカバレッジ: 100.0% (2/2)'], '')
-基準を下回る   : (1, ['docstring のカバレッジ: 50.0% (2/4)'], 'カバレッジが基準 100.0% を下回っています')
+基準を下回る   : (1, ['docstring のカバレッジ: 50.0% (2/4)'], '失敗: カバレッジが基準 100.0% を下回っています (50.0%)\n  原因: docstring が無い公開 API があります (上の一覧)\n  次の一手: 一覧の関数・クラスに docstring を書く。基準を見直すなら --fail-under (init では --min-coverage)')
 基準なし       : (0, ['docstring のカバレッジ: 50.0% (2/4)'], '')
 ```
 
@@ -272,6 +292,7 @@ def _sphinx(
     """
     out = docs / "_build" / builder
     cmd = [sys.executable, "-m", "sphinx", "-b", builder, str(docs), str(out)]
+    print(f"== {builder} ビルドを始めます: {docs} ==", file=sys.stderr)
     if strict:
         # 警告をエラー扱いにする。--keep-going で、止まらずに全部の警告を出す。
         cmd += ["-W", "--keep-going"]
@@ -280,7 +301,25 @@ def _sphinx(
         # 環境変数の方針 (Mermaid が画像にならなければ失敗) は、読み込み時にしか効かない。
         # 前のビルドが「コードのまま」で済ませたページを、変更なしとして飛ばされると、方針が素通りする。
         cmd += ["-E"]
-    return _run(cmd, {confluence.MODE_ENV: mode, **(extra_env or {})})
+    started = time.monotonic()
+    rc = _run(cmd, {confluence.MODE_ENV: mode, **(extra_env or {})})
+    elapsed = messages.format_elapsed(time.monotonic() - started)
+    if rc == 0:
+        print(f"完了: {builder} ({elapsed})", file=sys.stderr)
+        if builder == "html":
+            print(f"次の一手: {out / 'index.html'} をブラウザで開く", file=sys.stderr)
+    elif rc != EXIT_INTERRUPTED:
+        if builder == "linkcheck":
+            why = "外部リンクが切れているか、外部サイトにつながっていません"
+            next_step = "上の出力の broken の行を直す。つながらない環境では DOCSPIPELINE_OFFLINE=1"
+        else:
+            why = "上の出力の WARNING / ERROR が原因です (既定では、警告も失敗にします)"
+            next_step = (
+                "最初の WARNING / ERROR を直す。まず docspipeline doctor で環境を確かめる。"
+                "全部の警告は --no-strict で読める"
+            )
+        _fail(f"{builder} のビルドに失敗しました (終了コード {rc}、{elapsed})", why, next_step, label="失敗", code=rc)
+    return rc
 ```
 
 | 部分 | 意味 |
@@ -292,6 +331,79 @@ def _sphinx(
 
 **Sphinx を、`import` せずに、子プロセスとして起動する** ことが、設計のポイントです。CLI が Sphinx を `import` すると、
 Sphinx が無い環境で、**CLI 全体が起動しません**。子プロセスなら、`build` を使うときだけ、Sphinx が要ります。
+
+### 3.4a 利用者に見せるメッセージ: エラーの 3 行と、Ctrl-C
+
+ローカルの道具の失敗は、原因が **利用者の環境** (入れていない道具・打ち間違い・設定の不足) にあることが多い。
+そこで、エラーは **何が起きた / なぜ / 次にどうする** の 3 行にそろえます。**次の一手** まで書いてあると、迷わずに直せます。
+
+```python
+# 引用: docspipeline/messages.py::format_error
+def format_error(what: str, why: str, next_step: str, *, label: str = "エラー") -> str:
+    """エラーを、何が起きた / なぜ / 次にどうする、の 3 行にして返す。
+
+    Args:
+        what: 何が起きたか。パスなど、どれのことかを含める。
+        why: なぜ起きたか (考えられる原因)。
+        next_step: 利用者が次にすること。コマンドや、確かめる場所を書く。
+        label: 1 行目の見出し (``エラー`` / ``失敗`` / ``中止`` / ``中断``)。
+
+    Returns:
+        改行を含む文字列 (末尾に改行は付けない)。
+
+    Raises:
+        ValueError: ``what``・``why``・``next_step`` のいずれかが空のとき。
+            書き手が、原因と次の一手を考えずに済ませないため。
+    """
+    for name, value in (("what", what), ("why", why), ("next_step", next_step)):
+        if not value.strip():
+            raise ValueError(f"{name} は空にできません (何が起きた / なぜ / 次にどうする、の 3 つを書く)")
+    return f"{label}: {what}\n  原因: {why}\n  次の一手: {next_step}"
+```
+
+- 3 つのどれかが **空なら例外** にします。書き手が、原因と次の一手を考えずに済ませる、という手抜きを、**書けない** ようにするためです (第 9 回の「早く止まる」を、メッセージにも)。
+- 文字列を作るだけの **純粋な関数** です (表示は呼び出し側)。そのため、乱数で作った入力でも検査できます (第 10 回)。
+- CLI は、薄い入口 `_fail` で、これを標準エラーに出して、終了コードを返します。
+
+長い処理 (ビルド・公開) には、さらに 3 つの工夫があります。
+
+| 工夫 | 中身 | どこで |
+|---|---|---|
+| **進み具合** | 公開は `[1/3] 環境変数の確認` → `[2/3] 接続テスト` → `[3/3] Confluence ビルド` | `cmd_publish` |
+| **終わりの知らせ** | `完了: html (12.3 秒)`、成功した HTML のビルドには `次の一手: …/index.html をブラウザで開く` | `_sphinx` |
+| **中断** | Ctrl-C で、子プロセスを止めて、終了コード **130** (シェルの慣習: 128 + SIGINT)。失敗とは **区別** する | `_run` |
+
+```python
+# 実行できる
+import contextlib
+import io
+
+from docspipeline import cli, messages
+
+print(messages.format_error("パスがありません: docs", "打ち間違いかもしれません", "パスを確かめる"))
+print()
+try:
+    messages.format_error("何か起きた", "", "")
+except ValueError as error:
+    print("空の部分があると、例外:", error)
+print()
+
+err = io.StringIO()
+with contextlib.redirect_stderr(err):
+    code = cli._fail("接続に失敗", "認証が通らない", "トークンを確かめる", label="失敗", code=1)
+print("終了コード:", code, "/ 標準エラーの 1 行目:", err.getvalue().splitlines()[0])
+```
+
+```text
+# 出力
+エラー: パスがありません: docs
+  原因: 打ち間違いかもしれません
+  次の一手: パスを確かめる
+
+空の部分があると、例外: why は空にできません (何が起きた / なぜ / 次にどうする、の 3 つを書く)
+
+終了コード: 1 / 標準エラーの 1 行目: 失敗: 接続に失敗
+```
 
 ### 3.5 各コマンドの本体
 
@@ -317,16 +429,30 @@ def cmd_publish(args: argparse.Namespace) -> int:
 
     ``dryrun`` と ``publish`` では、先に接続テストを行い、失敗したらビルドしない。
     """
-    if args.mode != "local":
+    connecting = args.mode != "local"
+    total = 1 if not connecting else (2 if args.skip_connection_test else 3)
+    step = 0
+    if connecting:
+        step += 1
+        print(f"[{step}/{total}] 環境変数の確認")
         if not _require_confluence_env():
             return 2
         if not args.skip_connection_test:
-            print("== 接続テスト ==")
-            rc = cmd_confluence_check(argparse.Namespace(docs=args.docs))
+            step += 1
+            print(f"[{step}/{total}] 接続テスト")
+            rc = _connection_test(args.docs)
             if rc != 0:
-                print("接続テストに失敗したため、中止します", file=sys.stderr)
-                return rc
-    print(f"== Confluence ビルド (mode={args.mode}) ==")
+                if rc == EXIT_INTERRUPTED:
+                    return rc
+                return _fail(
+                    f"接続テストに失敗したため、ビルドを始めずに中止します (終了コード {rc})",
+                    "公開の前提 (認証・権限・スペース・親ページ) が確認できていません (詳しくは上の出力)",
+                    "ユーザー・スペースのキー・親ページの名前・トークンを見直してから、もう一度実行する。"
+                    "手元の確認は --mode dryrun",
+                    label="中止",
+                    code=rc,
+                )
+    print(f"[{step + 1}/{total}] Confluence ビルド (mode={args.mode})")
     # 接続する・公開するときは、Mermaid が画像にならなければ失敗させる。
     # 黙ってコードのままにすると、Confluence のページが、図の無いページに置き換わってしまう。
     extra = {"DOCSPIPELINE_MERMAID_MISSING": "error"} if args.mode != "local" else None
@@ -636,17 +762,21 @@ def cmd_init(args: argparse.Namespace) -> int:
     )
     missing = scaffold.missing_sources(opts)
     if missing:
-        for path in missing:
-            print(f"エラー: ソースの場所がありません: {path}", file=sys.stderr)
-        print("--package / --cpp は、docs/ からの相対パスで、実在する場所を指定してください", file=sys.stderr)
-        return 2
+        return _fail(
+            "ソースの場所がありません: " + ", ".join(str(p) for p in missing),
+            "--package / --cpp は docs/ からの相対パスで解決され、その場所に実在しません",
+            "docs/ から見た相対パスで、実在する場所を指定する (例: --package ../src)。何も書いていません",
+        )
     try:
         created = scaffold.write(opts, force=args.force)
     except scaffold.ScaffoldError as exc:
-        for path in exc.existing:
-            print(f"既にあります: {path}", file=sys.stderr)
-        print("上書きするには --force を付けてください", file=sys.stderr)
-        return 1
+        return _fail(
+            "既にあります: " + ", ".join(str(p) for p in exc.existing),
+            "既存のファイルを壊さないため、1 つも書かずに止まりました",
+            "上書きするなら、先にコミットしてから --force を付ける (後で差分を見て戻せる)。"
+            "残すなら、別の場所を指定する",
+            code=1,
+        )
     for path in created:
         print(f"作成: {path}")
     print(f"次の手順: pip install 'docspipeline[docs]' && docspipeline build {opts.target / 'docs'}")
@@ -667,6 +797,7 @@ class Check:
     ok: bool
     detail: str
     required: bool = False
+    hint: str = ""  # 失敗したとき、次にすること (成功したときは使わない)
 ```
 
 ```python
@@ -677,6 +808,8 @@ def format_checks(checks: list[Check]) -> str:
     for c in checks:
         mark = "OK  " if c.ok else ("NG  " if c.required else "なし")
         lines.append(f"[{mark}] {c.name}: {c.detail}")
+        if not c.ok and c.hint:
+            lines.append(f"       次の一手: {c.hint}")
     return "\n".join(lines)
 ```
 
@@ -769,8 +902,8 @@ print("sphinx / docutils を import するモジュール:",
 
 ```text
 # 出力
-cli が import する (内部): ['confluence', 'diagrams', 'docstring_coverage', 'doctor', 'files', 'mmdc', 'scaffold', 'structure_map']
-cli が import する (外部): ['argparse', 'collections', 'os', 'pathlib', 'subprocess', 'sys']
+cli が import する (内部): ['confluence', 'diagrams', 'docstring_coverage', 'doctor', 'files', 'messages', 'mmdc', 'scaffold', 'structure_map']
+cli が import する (外部): ['argparse', 'collections', 'os', 'pathlib', 'subprocess', 'sys', 'time']
 sphinx / docutils を import するモジュール: ['doxygen', 'guard', 'mermaid', 'prompt']
 ```
 

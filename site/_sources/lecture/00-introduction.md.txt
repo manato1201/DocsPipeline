@@ -139,6 +139,7 @@ docspipeline/ のモジュール:
   files.py
   guard.py
   mermaid.py
+  messages.py
   mmdc.py
   prompt.py
   scaffold.py

@@ -1416,7 +1416,7 @@ Confluence でも、同じ画像を取り込む。変換には <a class="referen
 どこを見ればよいかを、1 コマンドで示す。API トークンの <strong>値は出さず</strong>、設定の有無だけを示す。</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="docspipeline.doctor.Check">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.doctor.</span></span><span class="sig-name descname"><span class="pre">Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ok</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doctor.Check" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">docspipeline.doctor.</span></span><span class="sig-name descname"><span class="pre">Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ok</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.doctor.Check" title="Link to this definition">¶</a></dt>
 <dd><p>ベースクラス: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>確認の結果 1 件。</p>
 <dl class="field-list simple">
@@ -1426,6 +1426,7 @@ Confluence でも、同じ画像を取り込む。変換には <a class="referen
 <li><p><strong>ok</strong> (<em>bool</em>)</p></li>
 <li><p><strong>detail</strong> (<em>str</em>)</p></li>
 <li><p><strong>required</strong> (<em>bool</em>)</p></li>
+<li><p><strong>hint</strong> (<em>str</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -1479,6 +1480,17 @@ Confluence でも、同じ画像を取り込む。変換には <a class="referen
 <p id="module-docspipeline.cli"><code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> コマンド。</p>
 <p>各コマンドは薄く保つ。雛形づくりは <a class="reference internal" href="#module-docspipeline.scaffold" title="docspipeline.scaffold"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.scaffold</span></code></a>、環境の確認は
 <a class="reference internal" href="#module-docspipeline.doctor" title="docspipeline.doctor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.doctor</span></code></a> にある。</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="docspipeline.cli.EXIT_INTERRUPTED">
+<span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">EXIT_INTERRUPTED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">130</span></span><a class="headerlink" href="#docspipeline.cli.EXIT_INTERRUPTED" title="Link to this definition">¶</a></dt>
+<dd><p>128 + SIGINT)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Ctrl-C で中断したときの終了コード (シェルの慣習</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="docspipeline.cli.cmd_build">
 <span class="sig-prename descclassname"><span class="pre">docspipeline.cli.</span></span><span class="sig-name descname"><span class="pre">cmd_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#docspipeline.cli.cmd_build" title="Link to this definition">¶</a></dt>
@@ -1813,6 +1825,7 @@ Confluence でも、同じ画像を取り込む。変換には <a class="referen
 <li><a class="reference internal" href="#docspipeline.doctor.run_checks"><code class="docutils literal notranslate"><span class="pre">run_checks()</span></code></a></li>
 <li><a class="reference internal" href="#docspipeline.doctor.format_checks"><code class="docutils literal notranslate"><span class="pre">format_checks()</span></code></a></li>
 <li><a class="reference internal" href="#docspipeline.doctor.exit_code"><code class="docutils literal notranslate"><span class="pre">exit_code()</span></code></a></li>
+<li><a class="reference internal" href="#docspipeline.cli.EXIT_INTERRUPTED"><code class="docutils literal notranslate"><span class="pre">EXIT_INTERRUPTED</span></code></a></li>
 <li><a class="reference internal" href="#docspipeline.cli.cmd_build"><code class="docutils literal notranslate"><span class="pre">cmd_build()</span></code></a></li>
 <li><a class="reference internal" href="#docspipeline.cli.cmd_linkcheck"><code class="docutils literal notranslate"><span class="pre">cmd_linkcheck()</span></code></a></li>
 <li><a class="reference internal" href="#docspipeline.cli.cmd_coverage"><code class="docutils literal notranslate"><span class="pre">cmd_coverage()</span></code></a></li>
