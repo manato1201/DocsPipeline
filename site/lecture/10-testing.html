@@ -195,6 +195,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contracts.html">契約と副作用の境界</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
@@ -693,9 +694,120 @@ core (cli)        : (0, '')
 <li><p>拡張 (<code class="docutils literal notranslate"><span class="pre">mermaid</span></code>) は、docutils / Sphinx を import するので、<strong>失敗する</strong> (終了コード 1。最後の行が、その理由)。これは <strong>想定どおり</strong> (拡張は、Sphinx が要る)。</p></li>
 </ul>
 <p><strong>機能のテストでは、見えない約束</strong> (依存の向き・生成物の一致・設定名の実在) を、<strong>テストとして、書き下す</strong>。これが、構造テストです。</p>
-</section>
 <section id="id10">
-<h2>7. 生成物と文書のテスト<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<h3>契約から、テストを作る<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<p>構造テストの考え方は、<strong>関数の契約</strong> (事前条件・事後条件・不変条件) にも使えます。契約を書くと、<strong>そのままテストの種</strong> になります。
+このリポジトリでは、主な関数の契約を <a class="reference internal" href="../contracts.html"><span class="std std-doc">契約の表</span></a> に書き、<code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py</span></code> が確かめます。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>契約の種類</p></th>
+<th class="head"><p>テストの形</p></th>
+<th class="head"><p>例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>事前条件の違反</p></td>
+<td><p><strong>黙って続けず、例外で止まる</strong> ことを確かめる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">current_mode</span></code> に知らないモードを渡すと、<code class="docutils literal notranslate"><span class="pre">local</span></code> に倒さず例外</p></td>
+</tr>
+<tr class="row-odd"><td><p>事後条件</p></td>
+<td><p>結果の <strong>性質</strong> を確かめる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mask_secrets</span></code> の結果に、トークンの値が残らない</p></td>
+</tr>
+<tr class="row-even"><td><p>不変条件</p></td>
+<td><p><strong>いろいろな入力</strong> で成り立つことを確かめる (種を固定した乱数・総当たりとの突き合わせ)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fix_mermaid_text</span></code> は冪等。<code class="docutils literal notranslate"><span class="pre">Graph.cycles</span></code> は、総当たりの結果と一致する</p></td>
+</tr>
+<tr class="row-odd"><td><p>「純粋」という約束</p></td>
+<td><p>I/O を <strong>禁じた状態</strong> で呼ぶ</p></td>
+<td><p>純粋な関数が <code class="docutils literal notranslate"><span class="pre">os.environ</span></code> に触れたら、その場で失敗する</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>最後の行が、構造テストの仲間です。<strong>触れてはいけないものを、触れない状態にして</strong> 呼びます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 引用: tests/test_contracts.py::no_io</span>
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">no_io</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""純粋な関数を呼ぶ間、ファイル・環境変数・子プロセス・ネットワークを禁じる。"""</span>
+    <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">target</span><span class="p">,</span> <span class="n">what</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">builtins</span><span class="p">,</span> <span class="s2">"open"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">io</span><span class="p">,</span> <span class="s2">"open"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">"Popen"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">shutil</span><span class="p">,</span> <span class="s2">"which"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="s2">"socket"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">"listdir"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">"scandir"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="s2">"read_text"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="s2">"write_text"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="s2">"exists"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="s2">"iterdir"</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="s2">"mkdir"</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">what</span><span class="p">,</span> <span class="n">_deny</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="s1">'__name__'</span><span class="p">,</span><span class="w"> </span><span class="n">target</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">"</span><span class="p">)))</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">"environ"</span><span class="p">,</span> <span class="n">_DeniedEnviron</span><span class="p">()))</span>
+        <span class="k">yield</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest</span><span class="w"> </span><span class="kn">import</span> <span class="n">mock</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">docspipeline.mmdc</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_mermaid_text</span><span class="p">,</span> <span class="n">fix_mermaid_text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mode_pure</span><span class="p">(</span><span class="n">environ</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"MODE"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"local"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mode_impure</span><span class="p">(</span><span class="n">environ</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="k">if</span> <span class="n">environ</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">environ</span>        <span class="c1"># 省略すると、環境変数を読む</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"MODE"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"local"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">no_environ</span><span class="p">():</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Denied</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"os.environ.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> に触れた"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s2">"environ"</span><span class="p">,</span> <span class="n">Denied</span><span class="p">()):</span>
+        <span class="k">yield</span>
+
+
+<span class="k">with</span> <span class="n">no_environ</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"純粋な関数 (環境を引数で受ける):"</span><span class="p">,</span> <span class="n">mode_pure</span><span class="p">({</span><span class="s2">"MODE"</span><span class="p">:</span> <span class="s2">"DryRun"</span><span class="p">}))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mode_impure</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"引数を省略した関数          : 失敗した -&gt;"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+<span class="c1"># 不変条件を、いろいろな入力で: 直した結果は、足りない所が無く、もう一度直しても変わらない</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">pieces</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"説明"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"```mermaid"</span><span class="p">,</span> <span class="s2">"flowchart LR"</span><span class="p">,</span> <span class="s2">"    A --&gt; B"</span><span class="p">,</span> <span class="s2">"```"</span><span class="p">,</span> <span class="s2">"```python"</span><span class="p">,</span> <span class="s2">"x = 1"</span><span class="p">]</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">)))</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">300</span><span class="p">)]</span>
+<span class="n">fixed</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mermaid_text</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"直したあと、足りない所が無い:"</span><span class="p">,</span> <span class="nb">all</span><span class="p">(</span><span class="n">check_mermaid_text</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"もう一度直しても同じ (冪等)  :"</span><span class="p">,</span> <span class="nb">all</span><span class="p">(</span><span class="n">fix_mermaid_text</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 出力
+純粋な関数 (環境を引数で受ける): dryrun
+引数を省略した関数          : 失敗した -&gt; os.environ.get に触れた
+直したあと、足りない所が無い: True
+もう一度直しても同じ (冪等)  : True
+</pre></div>
+</div>
+<p>この種のテストは、<strong>実装を変えても残る</strong> のが利点です。「<code class="docutils literal notranslate"><span class="pre">for</span></code> で回して…」ではなく、<strong>結果の性質</strong> を確かめるので、書き換えても、契約が守られている限り通ります。
+(このリポジトリでは、契約のテストを書く過程で、既存の関数の違反は見つかりませんでした。それでも、わざと 3 通りに壊して、テストが落ちることは確かめました。)</p>
+</section>
+</section>
+<section id="id11">
+<h2>7. 生成物と文書のテスト<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
 <p><strong>コードから作るもの</strong> (図・HTML 版・この講義の引用) は、元が変わると、<strong>ずれます</strong>。ずれを、テストで検出します。</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -745,8 +857,8 @@ core (cli)        : (0, '')
 <li><p>実行は、<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-I</span></code> (<strong>隔離モード</strong>: 環境変数・ユーザーの設定に、左右されない) で行う。</p></li>
 </ul>
 <p><strong>文書を、テストできるコード</strong> として扱うと、「<strong>説明が、嘘になる</strong>」ことが、起きなくなります (第 0 回の、docs as code)。</p>
-<section id="id11">
-<h3>決定的であること<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<section id="id12">
+<h3>決定的であること<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <p>実行例の出力を、<strong>毎回、同じ</strong> にしないと、テストが <strong>不安定</strong> (flaky) になります。よくある原因は、<strong>順序</strong> です。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 実行できる</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
@@ -776,8 +888,8 @@ core (cli)        : (0, '')
 </ul>
 </section>
 </section>
-<section id="id12">
-<h2>8. 回帰テスト: 不備を見つけたら<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<section id="id13">
+<h2>8. 回帰テスト: 不備を見つけたら<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
 <p>不備を見つけたとき、<strong>直して終わり</strong> にしません。<strong>同じ不備が、二度と入らない</strong> ようにします。</p>
 <img alt="" src="../_images/mermaid-c819572c04448507.svg" />
 <p><strong>① 再現</strong> が大事です。「たぶん、こうなる」ではなく、<strong>実際に動かして、その症状を見る</strong>。
@@ -818,8 +930,8 @@ core (cli)        : (0, '')
 </div>
 <p><strong>テストの名前は、「何を守るか」を、文で書きます</strong>。落ちたとき、名前を読むだけで、<strong>何が壊れたか</strong> が分かります。</p>
 </section>
-<section id="id13">
-<h2>9. テストを書く作法<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<section id="id14">
+<h2>9. テストを書く作法<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -856,16 +968,16 @@ core (cli)        : (0, '')
 </table>
 </div>
 </section>
-<section id="id14">
-<h2>ハンズオン<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<section id="id15">
+<h2>ハンズオン<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span> <span class="pre">tests/test_confluence.py</span></code> を実行する。次に、<code class="docutils literal notranslate"><span class="pre">docspipeline/confluence.py</span></code> の <code class="docutils literal notranslate"><span class="pre">&quot;confluence_publish&quot;:</span> <span class="pre">False,</span></code> を <code class="docutils literal notranslate"><span class="pre">True</span></code> に <strong>書き換えて</strong>、もう一度実行する。<strong>落ちるテストの名前</strong> を読む (戻すこと)。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span> <span class="pre">-m</span> <span class="pre">&quot;not</span> <span class="pre">slow&quot;</span></code> と <code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-q</span></code> の、<strong>実行時間</strong> を比べる。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests/test_cli.py</span></code> から、好きなテストを 1 つ選び、<strong>何を守っているか</strong> を、一文で書く。</p></li>
 </ol>
 </section>
-<section id="id15">
-<h2>確認問題<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<section id="id16">
+<h2>確認問題<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>「テストが通る」ことと、「テストが役に立つ」ことは、なぜ同じではありませんか。</p></li>
 <li><p>変異テストの手順を、説明してください。</p></li>
@@ -878,8 +990,8 @@ core (cli)        : (0, '')
 <code class="docutils literal notranslate"><span class="pre">total</span></code> の <code class="docutils literal notranslate"><span class="pre">round(...,</span> <span class="pre">2)</span></code> を <code class="docutils literal notranslate"><span class="pre">round(...,</span> <span class="pre">1)</span></code> に変えた <strong>変異</strong> で、そのテストの組が <strong>落ちる</strong> ことを、確かめてください。</p></li>
 </ol>
 </section>
-<section id="id16">
-<h2>解答<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<section id="id17">
+<h2>解答<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>何も確かめていない (<code class="docutils literal notranslate"><span class="pre">assert</span></code> が、常に真) テストも、通る。<strong>境界・失敗の道・安全の性質</strong> を見ていないテストは、
 コードが壊れても、通ってしまう。テストが <strong>その部分を守っているか</strong> は、わざと壊して、確かめる。</p></li>
@@ -937,8 +1049,8 @@ round を 1 桁に: 1 failed, 1 passed
 </div>
 <p>(空の <code class="docutils literal notranslate"><span class="pre">prices</span></code> のテストだけでは、桁数の変異は、捕まえられません。<strong>桁数のテスト</strong> が、それを捕まえます。1 つのテストが、全てを守るわけではない例です。)</p>
 </section>
-<section id="id17">
-<h2>まとめ<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<section id="id18">
+<h2>まとめ<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -984,8 +1096,8 @@ round を 1 桁に: 1 failed, 1 passed
 </table>
 </div>
 </section>
-<section id="id18">
-<h2>次回<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<section id="id19">
+<h2>次回<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="11-diagrams.html"><span class="std std-doc">第 11 回 図を作る</span></a>: SVG・座標・折れ線・drawio・Mermaid で、<strong>読みやすい図</strong> を、コードから作ります。</p>
 </section>
 </section>
@@ -1056,18 +1168,21 @@ round を 1 桁に: 1 failed, 1 passed
 </ul>
 </li>
 <li><a class="reference internal" href="#id8">5. 変異テスト: テストのテスト</a></li>
-<li><a class="reference internal" href="#id9">6. 構造テスト: 設計の約束を、テストにする</a></li>
-<li><a class="reference internal" href="#id10">7. 生成物と文書のテスト</a><ul>
-<li><a class="reference internal" href="#id11">決定的であること</a></li>
+<li><a class="reference internal" href="#id9">6. 構造テスト: 設計の約束を、テストにする</a><ul>
+<li><a class="reference internal" href="#id10">契約から、テストを作る</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id12">8. 回帰テスト: 不備を見つけたら</a></li>
-<li><a class="reference internal" href="#id13">9. テストを書く作法</a></li>
-<li><a class="reference internal" href="#id14">ハンズオン</a></li>
-<li><a class="reference internal" href="#id15">確認問題</a></li>
-<li><a class="reference internal" href="#id16">解答</a></li>
-<li><a class="reference internal" href="#id17">まとめ</a></li>
-<li><a class="reference internal" href="#id18">次回</a></li>
+<li><a class="reference internal" href="#id11">7. 生成物と文書のテスト</a><ul>
+<li><a class="reference internal" href="#id12">決定的であること</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id13">8. 回帰テスト: 不備を見つけたら</a></li>
+<li><a class="reference internal" href="#id14">9. テストを書く作法</a></li>
+<li><a class="reference internal" href="#id15">ハンズオン</a></li>
+<li><a class="reference internal" href="#id16">確認問題</a></li>
+<li><a class="reference internal" href="#id17">解答</a></li>
+<li><a class="reference internal" href="#id18">まとめ</a></li>
+<li><a class="reference internal" href="#id19">次回</a></li>
 </ul>
 </li>
 </ul>

@@ -195,6 +195,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contracts.html">契約と副作用の境界</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
@@ -335,7 +336,11 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">test_site.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">site/</span></code> が元の文書・ソース・図と、ずれていない (ハッシュの印)。生のままの Mermaid や秘密らしき値が入っていない</p></td>
 </tr>
-<tr class="row-odd"><td><p>講義</p></td>
+<tr class="row-odd"><td><p>契約</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_contracts.py</span></code></p></td>
+<td><p><a class="reference internal" href="../contracts.html"><span class="std std-doc">契約の表</span></a> の関数とテストが実在する。<strong>純粋</strong> の層は I/O を禁じて呼んでも動く。<strong>読み取り</strong> の層は何も書かない。不変条件を、いろいろな入力 (種を固定した乱数・総当たりとの突き合わせ) で確かめる</p></td>
+</tr>
+<tr class="row-even"><td><p>講義</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test_lectures.py</span></code></p></td>
 <td><p>講義の引用がソースと一致し、<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">実行できる</span></code> の例が本当に動いて、<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">出力</span></code> と一致する (<a class="reference internal" href="../lecture/10-testing.html"><span class="std std-doc">講義 第 10 回</span></a>)</p></td>
 </tr>

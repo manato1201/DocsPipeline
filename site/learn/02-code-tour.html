@@ -195,6 +195,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contracts.html">契約と副作用の境界</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
@@ -356,29 +357,40 @@
 <thead>
 <tr class="row-odd"><th class="head"><p>層</p></th>
 <th class="head"><p>例</p></th>
-<th class="head"><p>副作用</p></th>
+<th class="head"><p>触れるもの</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>計算だけ</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">confluence.sphinx_settings</span></code>、<code class="docutils literal notranslate"><span class="pre">doxygen.make_doxyfile</span></code>、<code class="docutils literal notranslate"><span class="pre">scaffold.plan</span></code>、<code class="docutils literal notranslate"><span class="pre">docstring_coverage.scan_file</span></code></p></td>
-<td><p>なし (入力 → 出力)</p></td>
+<tr class="row-even"><td><p><strong>純粋</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">confluence.sphinx_settings</span></code>・<code class="docutils literal notranslate"><span class="pre">mask_secrets</span></code>、<code class="docutils literal notranslate"><span class="pre">mmdc.fix_mermaid_text</span></code>、<code class="docutils literal notranslate"><span class="pre">Graph.cycles</span></code>、<code class="docutils literal notranslate"><span class="pre">doxygen.make_doxyfile</span></code></p></td>
+<td><p>なし (入力 → 出力。<code class="docutils literal notranslate"><span class="pre">environ</span></code> は引数で受ける)</p></td>
 </tr>
-<tr class="row-odd"><td><p>薄い実行</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">doxygen.run_doxygen</span></code>、<code class="docutils literal notranslate"><span class="pre">mermaid.render</span></code>、<code class="docutils literal notranslate"><span class="pre">cli._run</span></code></p></td>
-<td><p>プロセスの起動・ファイル書き込み</p></td>
+<tr class="row-odd"><td><p><strong>読み取り</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scaffold.plan</span></code>、<code class="docutils literal notranslate"><span class="pre">docstring_coverage.scan</span></code>、<code class="docutils literal notranslate"><span class="pre">structure_map.scan_package</span></code>、<code class="docutils literal notranslate"><span class="pre">files.iter_python_files</span></code></p></td>
+<td><p>ファイルを読むだけ</p></td>
 </tr>
-<tr class="row-even"><td><p>入口</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">cli.main</span></code>、各 <code class="docutils literal notranslate"><span class="pre">setup(app)</span></code></p></td>
-<td><p>引数・Sphinx との接続</p></td>
+<tr class="row-even"><td><p><strong>書き込み・起動</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scaffold.write</span></code>、<code class="docutils literal notranslate"><span class="pre">mmdc.render</span></code>、<code class="docutils literal notranslate"><span class="pre">doxygen.run_doxygen</span></code>、<code class="docutils literal notranslate"><span class="pre">cli._run</span></code>・<code class="docutils literal notranslate"><span class="pre">cli.main</span></code></p></td>
+<td><p>ファイルの書き込み・プロセスの起動</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>新しい機能も、<strong>「計算」を先に関数にして単体でテストし、実行は薄く</strong> 書く。</p>
+<p>新しい機能も、<strong>「計算」を先に関数にして単体でテストし、実行は薄く</strong> 書く。
+関数ごとの契約 (事前条件・事後条件・不変条件) と層は <a class="reference internal" href="../contracts.html"><span class="std std-doc">契約の表</span></a> にあり、<code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py</span></code> が、
+<strong>純粋な層が本当に何にも触れないこと</strong> を、I/O を禁じた状態で確かめる。</p>
 </section>
 <section id="id6">
-<h3>設定が流れる道<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<h3>読む範囲の決め方<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>全部を同じ深さで読む必要はない。</p>
+<ul class="simple">
+<li><p><strong>純粋な関数</strong>: <a class="reference internal" href="../contracts.html"><span class="std std-doc">契約の表</span></a> (仕様) を読めば足りる。実装の細部は、テストが通っていれば追わなくてよい。</p></li>
+<li><p><strong>読み取り</strong>: 何を読むか (どこを除外するか) だけを確かめる。読み違えると、検査が空になる。</p></li>
+<li><p><strong>書き込み・起動</strong>と、<strong>秘密を扱う部分</strong> (<code class="docutils literal notranslate"><span class="pre">mask_secrets</span></code>・トークン): 実装を深く読む。上書き・削除・外部への送信が起きる場所。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3>設定が流れる道<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>利用者の <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> → <a class="reference internal" href="../api.html#docspipeline.config.build_config" title="docspipeline.config.build_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">docspipeline.config.build_config()</span></code></a> → 辞書 → <code class="docutils literal notranslate"><span class="pre">globals().update</span></code></p></li>
 <li><p>辞書の中の <code class="docutils literal notranslate"><span class="pre">docspipeline_*</span></code> は、各拡張の <code class="docutils literal notranslate"><span class="pre">setup()</span></code> が <code class="docutils literal notranslate"><span class="pre">add_config_value</span></code> で登録した名前</p></li>
@@ -386,23 +398,23 @@
 </ol>
 </section>
 </section>
-<section id="id7">
-<h2>使うときの注意<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<section id="id8">
+<h2>使うときの注意<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">docspipeline.config</span></code> は import しただけでは何もしない。副作用は <code class="docutils literal notranslate"><span class="pre">build_config()</span></code> を <strong>呼んだとき</strong> に起きる (<code class="docutils literal notranslate"><span class="pre">sys.path</span></code> の変更、<code class="docutils literal notranslate"><span class="pre">_generated/confluence_footer.xhtml</span></code> の書き込み)。</p></li>
 <li><p>拡張 (<code class="docutils literal notranslate"><span class="pre">mermaid</span></code>・<code class="docutils literal notranslate"><span class="pre">doxygen</span></code>・<code class="docutils literal notranslate"><span class="pre">guard</span></code>) は <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">docspipeline</span></code> の時点では読み込まれない。Sphinx が <code class="docutils literal notranslate"><span class="pre">extensions</span></code> の名前から読み込む。</p></li>
 </ul>
 </section>
-<section id="id8">
-<h2>よくある誤り<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h2>よくある誤り<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">cli.py</span></code> に計算を書き足す</strong>。コマンドが長くなったら、部品を別のモジュールへ出す (<code class="docutils literal notranslate"><span class="pre">scaffold.py</span></code> は、そうして <code class="docutils literal notranslate"><span class="pre">cli.py</span></code> から出した)。</p></li>
 <li><p><strong>core のモジュールから、拡張 (Sphinx を import するもの) を import する</strong>。Sphinx が無い環境で、CLI 全体が起動しなくなる (実際に起きた)。両方が使う部品は <code class="docutils literal notranslate"><span class="pre">mmdc.py</span></code> のように、Sphinx に依存しない別のモジュールへ (<a class="reference internal" href="09-structure-map.html"><span class="std std-doc">機械の地図</span></a>)。</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">os.environ</span></code> を関数の奥で直接読む</strong>。環境変数は引数 (<code class="docutils literal notranslate"><span class="pre">environ:</span> <span class="pre">Mapping[str,</span> <span class="pre">str]</span> <span class="pre">|</span> <span class="pre">None</span></code>) として受け取り、テストで差し替えられるようにする。<code class="docutils literal notranslate"><span class="pre">confluence.py</span></code> が手本。</p></li>
 </ul>
 </section>
-<section id="id9">
-<h2>関連<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<section id="id10">
+<h2>関連<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>地図を機械で作るには <a class="reference internal" href="09-structure-map.html"><span class="std std-doc">機械の地図</span></a></p></li>
 <li><p>次は <a class="reference internal" href="03-build-internals.html"><span class="std std-doc">ビルドの内側</span></a></p></li>
@@ -471,12 +483,13 @@
 <li><a class="reference internal" href="#id3">見るポイント</a><ul>
 <li><a class="reference internal" href="#id4">読む順番</a></li>
 <li><a class="reference internal" href="#id5">副作用の置き場所</a></li>
-<li><a class="reference internal" href="#id6">設定が流れる道</a></li>
+<li><a class="reference internal" href="#id6">読む範囲の決め方</a></li>
+<li><a class="reference internal" href="#id7">設定が流れる道</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id7">使うときの注意</a></li>
-<li><a class="reference internal" href="#id8">よくある誤り</a></li>
-<li><a class="reference internal" href="#id9">関連</a></li>
+<li><a class="reference internal" href="#id8">使うときの注意</a></li>
+<li><a class="reference internal" href="#id9">よくある誤り</a></li>
+<li><a class="reference internal" href="#id10">関連</a></li>
 </ul>
 </li>
 </ul>

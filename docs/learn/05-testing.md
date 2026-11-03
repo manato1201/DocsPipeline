@@ -32,6 +32,7 @@ flowchart LR
 | 構造 | `test_structure_map.py` | 依存の向きのルール (循環なし・Sphinx に依存してよいのは拡張だけ・葉のモジュール)。Sphinx を隠して core を import する実行テスト |
 | 書式 | `test_mermaid_style.py` | Mermaid の標準の `%%{init}%%` の行。`check-mermaid` と `--fix` (冪等・インデント・閉じていないブロック) |
 | HTML 版 | `test_site.py` | `site/` が元の文書・ソース・図と、ずれていない (ハッシュの印)。生のままの Mermaid や秘密らしき値が入っていない |
+| 契約 | `test_contracts.py` | [契約の表](../contracts.md) の関数とテストが実在する。**純粋** の層は I/O を禁じて呼んでも動く。**読み取り** の層は何も書かない。不変条件を、いろいろな入力 (種を固定した乱数・総当たりとの突き合わせ) で確かめる |
 | 講義 | `test_lectures.py` | 講義の引用がソースと一致し、`# 実行できる` の例が本当に動いて、`# 出力` と一致する ([講義 第 10 回](../lecture/10-testing.md)) |
 
 ### 外部のものを偽物にする型

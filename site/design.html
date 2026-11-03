@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="索引" href="genindex.html"><link rel="search" title="検索" href="search.html"><link rel="next" title="使い方" href="usage.html"><link rel="prev" title="概要" href="overview.html">
+<link rel="index" title="索引" href="genindex.html"><link rel="search" title="検索" href="search.html"><link rel="next" title="契約と副作用の境界" href="contracts.html"><link rel="prev" title="概要" href="overview.html">
 
     <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
         <title>設計 - DocsPipeline</title>
@@ -195,6 +195,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">概要</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contracts.html">契約と副作用の境界</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="confluence.html">Confluence への公開</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
@@ -412,9 +413,93 @@ DocsPipeline には組み込まない。</p>
 <li><p>動作・翻訳の質・入力した PDF の扱い (外部へ送られるか) は、確かめていない。使うなら、導入前に確認する。</p></li>
 </ul>
 </section>
+<section id="z39">
+<h3>契約と副作用の境界 (Z39) の取り込み方<a class="headerlink" href="#z39" title="Link to this heading">¶</a></h3>
+<p>設計書の第 5 弾の追補 (Z39) の考え方を、このリポジトリの <strong>設計の約束</strong> として取り入れた。外部のコードは使っていない。</p>
+<ul class="simple">
+<li><p><strong>契約の欄</strong>: 主な関数に、事前条件・事後条件・不変条件を書く (<a class="reference internal" href="contracts.html"><span class="std std-doc">契約の表</span></a>)。
+docstring の <code class="docutils literal notranslate"><span class="pre">Args</span></code> / <code class="docutils literal notranslate"><span class="pre">Raises</span></code> が事前条件、<code class="docutils literal notranslate"><span class="pre">Returns</span></code> が事後条件に当たる。契約は、AI に実装や変更を頼むときの指示文になる。</p></li>
+<li><p><strong>契約からテストを作る</strong>: 表の各行に、検証するテストを対応づけた。不変条件は、1 つの例ではなく <strong>いろいろな入力</strong> (乱数の種を固定した
+生成・総当たりとの突き合わせを含む) で確かめる (<code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py</span></code>)。表の関数とテストが実在することも、同じテストが確かめる。</p></li>
+<li><p><strong>副作用の境界</strong>: 関数を、純粋 / 読み取り / 書き込み・起動の 3 層に分けた。外側の層が内側を呼ぶ。
+<strong>純粋</strong> の層は、<code class="docutils literal notranslate"><span class="pre">open</span></code>・<code class="docutils literal notranslate"><span class="pre">os.environ</span></code>・子プロセス・ネットワークを禁じた状態で呼んでも動き、同じ入力なら同じ出力になる
+(違反すると、テストが失敗する)。<strong>読み取り</strong> の層は、前後でディレクトリの中身が変わらない。</p></li>
+<li><p><strong>読む範囲の決め方</strong>: 純粋な層は仕様を読めば足りる。書き込み・起動の層と、秘密を扱う部分 (<code class="docutils literal notranslate"><span class="pre">mask_secrets</span></code> など) は、深く読む。
+レビューの負担を、この線引きで減らす。</p></li>
+</ul>
+<p>純粋な関数が、<code class="docutils literal notranslate"><span class="pre">environ=None</span></code> (省略すると <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>) を許している点には、注意がいる。省略したときは純粋でなくなるので、
+テストは、必ず <code class="docutils literal notranslate"><span class="pre">environ</span></code> を渡して確かめる。<strong>この追補を取り入れる過程で、既存の関数に契約違反は見つからなかった</strong> (3 通りの変異で、テストが失敗することは確かめた)。</p>
+</section>
 </section>
 <section id="id7">
-<h2>よくある誤り<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<h2>設計書の追補と、この実装での扱い<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p>設計書の追補は、日付順に積まれている。<strong>同じ話題が複数の追補にあるときは、新しい日付を優先する</strong>。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>#</p></th>
+<th class="head"><p>追補</p></th>
+<th class="head"><p>日付</p></th>
+<th class="head"><p>設計書の状態</p></th>
+<th class="head"><p>この実装での扱い</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>実務で運用するための拡張</p></td>
+<td><p>2026-10-11</p></td>
+<td><p>—</p></td>
+<td><p>Phase 5 (CI)・7 (更新の自動化)・<code class="docutils literal notranslate"><span class="pre">hou</span></code> のスタブは実装。Phase 6 は、ローカルの HTML と <code class="docutils literal notranslate"><span class="pre">site/</span></code> まで。Confluence の実環境は <strong>未検証</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>TakayuStudio 系 (T2・T11・T12)</p></td>
+<td><p>2026-10-15</p></td>
+<td><p>提案</p></td>
+<td><p>実装済み: 定型項目の雛形・<a class="reference internal" href="output-formats.html"><span class="std std-doc">出力形式の表</span></a>・ページ末尾の出典の注記</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>外部リソース (X3・X7・X16・Y9)</p></td>
+<td><p>2026-10-22</p></td>
+<td><p>提案</p></td>
+<td><p>X16 (番号つきの図) は実装。X3 は、自前の <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code> で代える。X7・Y9 は、導入前に SKILL.md を読む前提で、取り込んでいない</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>外部リソース 第 2 弾 (Y9)</p></td>
+<td><p>2026-10-23</p></td>
+<td><p>提案</p></td>
+<td><p>取り込んでいない (同上)</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>外部リソース 第 3 弾の続き (Z16)</p></td>
+<td><p>2026-10-27</p></td>
+<td><p>提案</p></td>
+<td><p>自前の <code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code> として実装 (上の「外部資料 (Z16: oh-my-mermaid) の取り込み方」)</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>ASCII モチーフ</p></td>
+<td><p>2026-10-27</p></td>
+<td><p>提案・未実装</p></td>
+<td><p>実装していない (出す場所が決まっていない)</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>第 4 弾 (Z19・Z31)</p></td>
+<td><p>2026-10-30</p></td>
+<td><p>提案・未実装</p></td>
+<td><p>Z19 は実装 (<code class="docutils literal notranslate"><span class="pre">prompt</span></code> 拡張)。Z31 は、ライセンス (AGPL-3.0) のため取り込まない</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>第 5 弾 (Z39・副作用の境界・読む範囲)</p></td>
+<td><p>2026-11-02</p></td>
+<td><p>提案・未実装</p></td>
+<td><p>実装 (上の節と <a class="reference internal" href="contracts.html"><span class="std std-doc">契約の表</span></a>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>設計書の「追補の索引」が、状態の語彙の元。進み具合は、設計書の側の <code class="docutils literal notranslate"><span class="pre">IMPLEMENTATION_PROGRESS</span></code> を参照 (このリポジトリには、含まれない)。</p>
+</section>
+<section id="id8">
+<h2>よくある誤り<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> で例外を投げる実装にすると、Sphinx がスタックトレースつきの内部エラーとして出す。
 設定の誤りは <code class="docutils literal notranslate"><span class="pre">docspipeline_config_error</span></code> に入れて、<a class="reference internal" href="api.html#module-docspipeline.guard" title="docspipeline.guard"><code class="xref py py-mod docutils literal notranslate"><span class="pre">docspipeline.guard</span></code></a> が報告する。</p></li>
@@ -426,10 +511,11 @@ Sphinx が入っていない環境でも動く (<code class="docutils literal no
 <a class="reference internal" href="api.html#docspipeline.confluence.sphinx_settings" title="docspipeline.confluence.sphinx_settings"><code class="xref py py-func docutils literal notranslate"><span class="pre">docspipeline.confluence.sphinx_settings()</span></code></a> がすべて明示している。</p></li>
 </ul>
 </section>
-<section id="id8">
-<h2>関連<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h2>関連<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="confluence.html"><span class="std std-doc">Confluence への公開</span></a></p></li>
+<li><p><a class="reference internal" href="contracts.html"><span class="std std-doc">契約と副作用の境界</span></a></p></li>
 <li><p><a class="reference internal" href="runbook.html"><span class="std std-doc">運用手順</span></a></p></li>
 </ul>
 </section>
@@ -440,12 +526,12 @@ Sphinx が入っていない環境でも動く (<code class="docutils literal no
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="usage.html">
+          <a class="next-page" href="contracts.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">使い方</div>
+                <div class="title">契約と副作用の境界</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -502,10 +588,12 @@ Sphinx が入っていない環境でも動く (<code class="docutils literal no
 <li><a class="reference internal" href="#ascii">ASCII モチーフ (提案) の扱い</a></li>
 <li><a class="reference internal" href="#copy-prompt-z19">「Copy prompt」(Z19) の取り込み方</a></li>
 <li><a class="reference internal" href="#pdfmathtranslate-z31">PDFMathTranslate (Z31) は取り込まない</a></li>
+<li><a class="reference internal" href="#z39">契約と副作用の境界 (Z39) の取り込み方</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id7">よくある誤り</a></li>
-<li><a class="reference internal" href="#id8">関連</a></li>
+<li><a class="reference internal" href="#id7">設計書の追補と、この実装での扱い</a></li>
+<li><a class="reference internal" href="#id8">よくある誤り</a></li>
+<li><a class="reference internal" href="#id9">関連</a></li>
 </ul>
 </li>
 </ul>

@@ -365,6 +365,101 @@ core (cli)        : (0, '')
 
 **機能のテストでは、見えない約束** (依存の向き・生成物の一致・設定名の実在) を、**テストとして、書き下す**。これが、構造テストです。
 
+### 契約から、テストを作る
+
+構造テストの考え方は、**関数の契約** (事前条件・事後条件・不変条件) にも使えます。契約を書くと、**そのままテストの種** になります。
+このリポジトリでは、主な関数の契約を [契約の表](../contracts.md) に書き、`tests/test_contracts.py` が確かめます。
+
+| 契約の種類 | テストの形 | 例 |
+|---|---|---|
+| 事前条件の違反 | **黙って続けず、例外で止まる** ことを確かめる | `current_mode` に知らないモードを渡すと、`local` に倒さず例外 |
+| 事後条件 | 結果の **性質** を確かめる | `mask_secrets` の結果に、トークンの値が残らない |
+| 不変条件 | **いろいろな入力** で成り立つことを確かめる (種を固定した乱数・総当たりとの突き合わせ) | `fix_mermaid_text` は冪等。`Graph.cycles` は、総当たりの結果と一致する |
+| 「純粋」という約束 | I/O を **禁じた状態** で呼ぶ | 純粋な関数が `os.environ` に触れたら、その場で失敗する |
+
+最後の行が、構造テストの仲間です。**触れてはいけないものを、触れない状態にして** 呼びます。
+
+```python
+# 引用: tests/test_contracts.py::no_io
+@contextlib.contextmanager
+def no_io():
+    """純粋な関数を呼ぶ間、ファイル・環境変数・子プロセス・ネットワークを禁じる。"""
+    with contextlib.ExitStack() as stack:
+        for target, what in (
+            (builtins, "open"),
+            (io, "open"),
+            (subprocess, "Popen"),
+            (subprocess, "run"),
+            (shutil, "which"),
+            (socket, "socket"),
+            (os, "listdir"),
+            (os, "scandir"),
+            (Path, "read_text"),
+            (Path, "write_text"),
+            (Path, "exists"),
+            (Path, "iterdir"),
+            (Path, "mkdir"),
+        ):
+            stack.enter_context(mock.patch.object(target, what, _deny(f"{getattr(target, '__name__', target)}.{what}")))
+        stack.enter_context(mock.patch.object(os, "environ", _DeniedEnviron()))
+        yield
+```
+
+```python
+# 実行できる
+import contextlib
+import os
+import random
+from unittest import mock
+
+from docspipeline.mmdc import check_mermaid_text, fix_mermaid_text
+
+
+def mode_pure(environ):
+    return (environ.get("MODE") or "local").lower()
+
+
+def mode_impure(environ=None):
+    env = os.environ if environ is None else environ        # 省略すると、環境変数を読む
+    return (env.get("MODE") or "local").lower()
+
+
+@contextlib.contextmanager
+def no_environ():
+    class Denied:
+        def __getattr__(self, name):
+            raise AssertionError(f"os.environ.{name} に触れた")
+    with mock.patch.object(os, "environ", Denied()):
+        yield
+
+
+with no_environ():
+    print("純粋な関数 (環境を引数で受ける):", mode_pure({"MODE": "DryRun"}))
+    try:
+        mode_impure()
+    except AssertionError as error:
+        print("引数を省略した関数          : 失敗した ->", error)
+
+# 不変条件を、いろいろな入力で: 直した結果は、足りない所が無く、もう一度直しても変わらない
+rng = random.Random(5)
+pieces = ["説明", "", "```mermaid", "flowchart LR", "    A --> B", "```", "```python", "x = 1"]
+docs = ["\n".join(rng.choice(pieces) for _ in range(rng.randint(0, 12))) + "\n" for _ in range(300)]
+fixed = [fix_mermaid_text(doc) for doc in docs]
+print("直したあと、足りない所が無い:", all(check_mermaid_text(f) == [] for f in fixed))
+print("もう一度直しても同じ (冪等)  :", all(fix_mermaid_text(f) == f for f in fixed))
+```
+
+```text
+# 出力
+純粋な関数 (環境を引数で受ける): dryrun
+引数を省略した関数          : 失敗した -> os.environ.get に触れた
+直したあと、足りない所が無い: True
+もう一度直しても同じ (冪等)  : True
+```
+
+この種のテストは、**実装を変えても残る** のが利点です。「`for` で回して…」ではなく、**結果の性質** を確かめるので、書き換えても、契約が守られている限り通ります。
+(このリポジトリでは、契約のテストを書く過程で、既存の関数の違反は見つかりませんでした。それでも、わざと 3 通りに壊して、テストが落ちることは確かめました。)
+
 ## 7. 生成物と文書のテスト
 
 **コードから作るもの** (図・HTML 版・この講義の引用) は、元が変わると、**ずれます**。ずれを、テストで検出します。

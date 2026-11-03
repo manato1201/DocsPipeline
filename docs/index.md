@@ -35,6 +35,7 @@ flowchart TD
 
 overview
 design
+contracts
 usage
 confluence
 cpp

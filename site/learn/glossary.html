@@ -195,6 +195,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">概要</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../design.html">設計</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contracts.html">契約と副作用の境界</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">使い方</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../confluence.html">Confluence への公開</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cpp.html">C++ の文書 (Doxygen + Breathe)</a></li>
@@ -391,6 +392,15 @@
 </tr>
 <tr class="row-odd"><td><p>講義資料</p></td>
 <td><p>基礎から保守・拡張までを、講義の形で学ぶ資料 (<code class="docutils literal notranslate"><span class="pre">docs/lecture/</span></code>)。引用と実行結果は、テストで元と一致を確かめる</p></td>
+</tr>
+<tr class="row-even"><td><p>契約</p></td>
+<td><p>関数が守る約束。事前条件 (呼ぶ側が守る)・事後条件 (関数が約束する結果)・不変条件 (常に成り立つこと)。<a class="reference internal" href="../contracts.html"><span class="std std-doc">契約の表</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>純粋 (な関数)</p></td>
+<td><p>引数だけで結果が決まり、ファイル・環境変数・子プロセス・ネットワークに触れない関数。同じ入力なら同じ出力</p></td>
+</tr>
+<tr class="row-even"><td><p>副作用の境界</p></td>
+<td><p>純粋 / 読み取り / 書き込み・起動の 3 層の境目。外側が内側を呼び、内側は外側を知らない</p></td>
 </tr>
 </tbody>
 </table>

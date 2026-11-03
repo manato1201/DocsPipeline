@@ -30,13 +30,23 @@
 
 読みやすさ・テストしやすさのために、**副作用 (ファイル・プロセス・ネットワーク) は端に寄せている**。
 
-| 層 | 例 | 副作用 |
+| 層 | 例 | 触れるもの |
 |---|---|---|
-| 計算だけ | `confluence.sphinx_settings`、`doxygen.make_doxyfile`、`scaffold.plan`、`docstring_coverage.scan_file` | なし (入力 → 出力) |
-| 薄い実行 | `doxygen.run_doxygen`、`mermaid.render`、`cli._run` | プロセスの起動・ファイル書き込み |
-| 入口 | `cli.main`、各 `setup(app)` | 引数・Sphinx との接続 |
+| **純粋** | `confluence.sphinx_settings`・`mask_secrets`、`mmdc.fix_mermaid_text`、`Graph.cycles`、`doxygen.make_doxyfile` | なし (入力 → 出力。`environ` は引数で受ける) |
+| **読み取り** | `scaffold.plan`、`docstring_coverage.scan`、`structure_map.scan_package`、`files.iter_python_files` | ファイルを読むだけ |
+| **書き込み・起動** | `scaffold.write`、`mmdc.render`、`doxygen.run_doxygen`、`cli._run`・`cli.main` | ファイルの書き込み・プロセスの起動 |
 
 新しい機能も、**「計算」を先に関数にして単体でテストし、実行は薄く** 書く。
+関数ごとの契約 (事前条件・事後条件・不変条件) と層は [契約の表](../contracts.md) にあり、`tests/test_contracts.py` が、
+**純粋な層が本当に何にも触れないこと** を、I/O を禁じた状態で確かめる。
+
+### 読む範囲の決め方
+
+全部を同じ深さで読む必要はない。
+
+* **純粋な関数**: [契約の表](../contracts.md) (仕様) を読めば足りる。実装の細部は、テストが通っていれば追わなくてよい。
+* **読み取り**: 何を読むか (どこを除外するか) だけを確かめる。読み違えると、検査が空になる。
+* **書き込み・起動**と、**秘密を扱う部分** (`mask_secrets`・トークン): 実装を深く読む。上書き・削除・外部への送信が起きる場所。
 
 ### 設定が流れる道
 
