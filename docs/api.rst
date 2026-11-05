@@ -10,13 +10,21 @@ docstring から自動生成する。直接編集せず、コードの docstring
 
 .. automodule:: docspipeline.confluence
 
+.. automodule:: docspipeline.mmdc
+
 .. automodule:: docspipeline.mermaid
 
 .. automodule:: docspipeline.doxygen
 
+.. automodule:: docspipeline.prompt
+
 .. automodule:: docspipeline.guard
 
+.. automodule:: docspipeline.files
+
 .. automodule:: docspipeline.docstring_coverage
+
+.. automodule:: docspipeline.structure_map
 
 .. automodule:: docspipeline.scaffold
 

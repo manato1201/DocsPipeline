@@ -12,53 +12,41 @@
 
 ### 読む順番
 
-```{list-table}
-:header-rows: 1
-:widths: 6 24 70
-
-* - 順
-  - ファイル
-  - 見るもの
-* - 1
-  - `docspipeline/confluence.py`
-  - **一番短く、一番大事**。モード (`current_mode`)、必須の環境変数 (`REQUIRED_ENV`)、Sphinx に渡す設定 (`sphinx_settings`)、伏せ字 (`mask_secrets`)。外部に触れない純粋な関数だけで、テストしやすい作りの手本
-* - 2
-  - `docspipeline/config.py`
-  - `build_config()`。引数が増えるたびにここを通る。上から順に「パスの登録 → 拡張の一覧 → nitpicky → 辞書の組み立て → Confluence 設定」
-* - 3
-  - `docspipeline/guard.py`
-  - **一番小さな Sphinx 拡張** (30 行弱)。`setup()` と、イベントへの接続の最小の形
-* - 4
-  - `docspipeline/mermaid.py`
-  - 外部コマンド (`mmdc`) を呼ぶ拡張。`find_mmdc` → `render` (ハッシュでキャッシュ) → `MermaidDirective.run` → `_fallback` (三つの方針)
-* - 5
-  - `docspipeline/doxygen.py`
-  - もう一つの外部コマンドの例。`make_doxyfile` (文字列を作るだけ) と `run_doxygen` (実行) が分かれている
-* - 6
-  - `docspipeline/cli.py`
-  - コマンドの入口。一つのコマンドは、一つの `cmd_*` 関数 + `build_parser` の一行
-* - 7
-  - `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`
-  - CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている
-* - 8
-  - `docspipeline/stubs/hou.py`
-  - 属性参照・継承・呼び出しをすべて受け流す偽物。`_Meta` と `_Any` の二段構え
-* - 9
-  - `tools/diagrams/kit.py`、`build_diagrams.py`
-  - 図の定義 (パネル・カード・矢印) から、`.drawio` と SVG を作る
-```
+| 順 | ファイル | 見るもの |
+|---|---|---|
+| 1 | `docspipeline/confluence.py` | **一番短く、一番大事**。モード (`current_mode`)、必須の環境変数 (`REQUIRED_ENV`)、Sphinx に渡す設定 (`sphinx_settings`)、伏せ字 (`mask_secrets`)。外部に触れない純粋な関数だけで、テストしやすい作りの手本 |
+| 2 | `docspipeline/config.py` | `build_config()`。引数が増えるたびにここを通る。上から順に「パスの登録 → 拡張の一覧 → nitpicky → 辞書の組み立て → Confluence 設定」 |
+| 3 | `docspipeline/guard.py` | **一番小さな Sphinx 拡張** (30 行弱)。`setup()` と、イベントへの接続の最小の形 |
+| 4 | `docspipeline/mermaid.py` | 外部コマンド (`mmdc`) を呼ぶ拡張。`find_mmdc` → `render` (ハッシュでキャッシュ) → `MermaidDirective.run` → `_fallback` (三つの方針) |
+| 5 | `docspipeline/doxygen.py` | もう一つの外部コマンドの例。`make_doxyfile` (文字列を作るだけ) と `run_doxygen` (実行) が分かれている |
+| 6 | `docspipeline/cli.py` | コマンドの入口。一つのコマンドは、一つの `cmd_*` 関数 + `build_parser` の一行 |
+| 7 | `docspipeline/scaffold.py`、`diagrams.py`、`doctor.py`、`docstring_coverage.py`、`structure_map.py` | CLI から呼ばれる部品。どれも「計算」と「表示」が分かれている。`structure_map` は、この地図そのものを作る ([機械の地図](09-structure-map.md)) |
+| 7' | `docspipeline/mmdc.py`、`files.py` | `mmdc` の探索と実行、Python ファイルの列挙。どちらも **Sphinx に依存しない葉** で、複数のモジュールが共有する (`files.py` は、`coverage`・`map`・`init` で「探さない場所」の規則を揃える) |
+| 7'' | `docspipeline/prompt.py`、`static/` | コピーできるプロンプトの拡張 (`.. prompt::`)。標準のノードだけで組み立て、ボタンは `static/dp_prompt.js` が足す |
+| 8 | `docspipeline/stubs/hou.py` | 属性参照・継承・呼び出しをすべて受け流す偽物。`_Meta` と `_Any` の二段構え |
+| 9 | `tools/diagrams/kit.py`、`build_diagrams.py` | 図の定義 (パネル・カード・矢印) から、`.drawio` と SVG を作る |
 
 ### 副作用の置き場所
 
 読みやすさ・テストしやすさのために、**副作用 (ファイル・プロセス・ネットワーク) は端に寄せている**。
 
-| 層 | 例 | 副作用 |
+| 層 | 例 | 触れるもの |
 |---|---|---|
-| 計算だけ | `confluence.sphinx_settings`、`doxygen.make_doxyfile`、`scaffold.plan`、`docstring_coverage.scan_file` | なし (入力 → 出力) |
-| 薄い実行 | `doxygen.run_doxygen`、`mermaid.render`、`cli._run` | プロセスの起動・ファイル書き込み |
-| 入口 | `cli.main`、各 `setup(app)` | 引数・Sphinx との接続 |
+| **純粋** | `confluence.sphinx_settings`・`mask_secrets`、`mmdc.fix_mermaid_text`、`Graph.cycles`、`doxygen.make_doxyfile` | なし (入力 → 出力。`environ` は引数で受ける) |
+| **読み取り** | `scaffold.plan`、`docstring_coverage.scan`、`structure_map.scan_package`、`files.iter_python_files` | ファイルを読むだけ |
+| **書き込み・起動** | `scaffold.write`、`mmdc.render`、`doxygen.run_doxygen`、`cli._run`・`cli.main` | ファイルの書き込み・プロセスの起動 |
 
 新しい機能も、**「計算」を先に関数にして単体でテストし、実行は薄く** 書く。
+関数ごとの契約 (事前条件・事後条件・不変条件) と層は [契約の表](../contracts.md) にあり、`tests/test_contracts.py` が、
+**純粋な層が本当に何にも触れないこと** を、I/O を禁じた状態で確かめる。
+
+### 読む範囲の決め方
+
+全部を同じ深さで読む必要はない。
+
+* **純粋な関数**: [契約の表](../contracts.md) (仕様) を読めば足りる。実装の細部は、テストが通っていれば追わなくてよい。
+* **読み取り**: 何を読むか (どこを除外するか) だけを確かめる。読み違えると、検査が空になる。
+* **書き込み・起動**と、**秘密を扱う部分** (`mask_secrets`・トークン): 実装を深く読む。上書き・削除・外部への送信が起きる場所。
 
 ### 設定が流れる道
 
@@ -74,9 +62,11 @@
 ## よくある誤り
 
 * **`cli.py` に計算を書き足す**。コマンドが長くなったら、部品を別のモジュールへ出す (`scaffold.py` は、そうして `cli.py` から出した)。
+* **core のモジュールから、拡張 (Sphinx を import するもの) を import する**。Sphinx が無い環境で、CLI 全体が起動しなくなる (実際に起きた)。両方が使う部品は `mmdc.py` のように、Sphinx に依存しない別のモジュールへ ([機械の地図](09-structure-map.md))。
 * **`os.environ` を関数の奥で直接読む**。環境変数は引数 (`environ: Mapping[str, str] | None`) として受け取り、テストで差し替えられるようにする。`confluence.py` が手本。
 
 ## 関連
 
+* 地図を機械で作るには [機械の地図](09-structure-map.md)
 * 次は [ビルドの内側](03-build-internals.md)
 * 責務の一覧は [API リファレンス](../api.rst)

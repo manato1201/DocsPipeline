@@ -26,7 +26,7 @@
 ### 演習 2 (易): Mermaid の指示子に `:width:` を足す
 
 * ヒント: `MermaidDirective.option_spec` に `"width"` を足す。`docutils.parsers.rst.directives.length_or_percentage_or_unitless` が使える。画像のノードの `width` に入れる。
-* 先に読む: [出力形式ごとの取り決め](../output-formats.rst) — Confluence の出力には、幅が **反映されない**。それでも HTML では効く。
+* 先に読む: [出力形式ごとの取り決め](../output-formats.md) — Confluence の出力には、幅が **反映されない**。それでも HTML では効く。
 * 確認: HTML の出力に `width` が出るテスト (`test_build.py` の `fake mmdc` の型を使う)。
 
 ### 演習 3 (中): `doctor --json`
@@ -52,7 +52,7 @@
 
 ### 演習 6 (難): PDF を出力形式に足す
 
-* 先にやること: [出力形式ごとの取り決め](../output-formats.rst) の表の「PDF」の行を読み、**何が未対応か** を確かめる。
+* 先にやること: [出力形式ごとの取り決め](../output-formats.md) の表の「PDF」の行を読み、**何が未対応か** を確かめる。
 * 設計に含めるもの: ビルダー (`latex` / `latexpdf`) の選択、日本語フォント、図 (SVG) の扱い、CI に何が要るか、**表の行をどう更新するか**。
 * 注意: 実装の前に、設計を 1 ページ (`docs/` の新しいページ) に書き、読む人に見せる。
 

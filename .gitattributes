@@ -1,0 +1,4 @@
+# 生成物。差分と言語の統計から外し、手で直さない (作り直し方は README の「開発」)
+site/** linguist-generated=true
+docs/diagrams/*.drawio linguist-generated=true
+docs/diagrams/*.drawio.svg linguist-generated=true
