@@ -466,6 +466,20 @@
 <td><p>同じ地図なら、同じ文字列 (決定的)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tests/test_structure_map.py::test_renderers</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_graph_contract</span></code></p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">structure_map.Graph.labeled_edges</span></code></p></td>
+<td><p>純粋</p></td>
+<td><p>なし</p></td>
+<td><p>全ての依存を <code class="docutils literal notranslate"><span class="pre">(使う側,</span> <span class="pre">使われる側,</span> <span class="pre">種類,</span> <span class="pre">札)</span></code> で、整列して返す。札は <code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> (読んだ) か <code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> (推測)</p></td>
+<td><p><strong><code class="docutils literal notranslate"><span class="pre">import</span></code>・<code class="docutils literal notranslate"><span class="pre">deferred</span></code> は必ず <code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code>、<code class="docutils literal notranslate"><span class="pre">reference</span></code> は必ず <code class="docutils literal notranslate"><span class="pre">INFERRED</span></code></strong>。推測を、読んだことにしない。同じ地図なら同じ結果で、モジュールの並びに依存しない</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_structure_map.py::test_edge_labels_follow_the_kind_of_dependency</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_labeled_edges_contract</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">structure_map.to_markdown</span></code></p></td>
+<td><p>純粋</p></td>
+<td><p>なし</p></td>
+<td><p>アーキテクチャ文書の下書きを、Markdown で返す</p></td>
+<td><p>全ての依存が札つきの表に <strong>ちょうど 1 回</strong> 出る。<strong>推測の依存は、モジュール一覧でも <code class="docutils literal notranslate"><span class="pre">(推測)</span></code> と分かる</strong>。冒頭の警告と札の見方が、必ず入る</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tests/test_structure_map.py::test_markdown_shows_which_facts_were_read_and_which_were_guessed</span></code><br/><code class="docutils literal notranslate"><span class="pre">tests/test_contracts.py::test_to_markdown_contract</span></code></p></td>
+</tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">docstring_coverage.format_report</span></code></p></td>
 <td><p>純粋</p></td>
 <td><p>なし</p></td>

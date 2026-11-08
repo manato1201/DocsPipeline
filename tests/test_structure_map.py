@@ -100,13 +100,65 @@ def test_renderers(tmp_path):
     )
     g = structure_map.scan_package(root)
     mermaid = structure_map.to_mermaid(g)
-    assert mermaid.startswith("flowchart LR") and "pkg_a --> pkg_b" in mermaid and "pkg_a -.-> pkg_c" in mermaid
+    assert mermaid.startswith("flowchart LR") and "pkg_a --> pkg_b" in mermaid and "pkg_a -. 推測 .-> pkg_c" in mermaid
     md = structure_map.to_markdown(g)
     assert "自動生成の下書き" in md and "そのまま公開しないでください" in md and "外部へは何も送信していません" in md
     assert "```mermaid" in md and "説明 \\| 縦線。" in md
     data = json.loads(structure_map.to_json(g))
     assert data["package"] == "pkg" and data["cycles"] == []
     assert next(m for m in data["modules"] if m["name"] == "pkg.a")["imports"] == ["pkg.b"]
+
+
+# ---- 出どころの札 (読んだ / 推測した) ----
+
+LABELLED = {
+    "a.py": "from . import b\nX = 'pkg.c'\n\n\ndef f():\n    from . import d\n",
+    "b.py": "",
+    "c.py": "",
+    "d.py": "",
+}
+
+
+def test_edge_labels_follow_the_kind_of_dependency(tmp_path):
+    g = structure_map.scan_package(_make_package(tmp_path, LABELLED))
+    assert g.labeled_edges() == [
+        ("pkg.a", "pkg.b", "import", "EXTRACTED"),  # import 文は、原文に明示されている
+        ("pkg.a", "pkg.c", "reference", "INFERRED"),  # 文字列の一致は、推し量っただけ
+        ("pkg.a", "pkg.d", "deferred", "EXTRACTED"),  # 関数の中の import も、文として書かれている
+    ]
+    assert structure_map.EDGE_LABELS == {"import": "EXTRACTED", "deferred": "EXTRACTED", "reference": "INFERRED"}
+
+
+def test_markdown_shows_which_facts_were_read_and_which_were_guessed(tmp_path):
+    md = structure_map.to_markdown(structure_map.scan_package(_make_package(tmp_path, LABELLED)))
+    assert "## 札の見方" in md and "`EXTRACTED` (読んだ)" in md and "`INFERRED` (推測)" in md
+    assert "| `a` | `c` | `reference` | `INFERRED` (推測) |" in md
+    assert "| `a` | `b` | `import` | `EXTRACTED` (読んだ) |" in md
+    assert "読んだ辺: 2 本 / 推測した辺: 1 本。" in md
+    # モジュール一覧でも、推測した依存だけが「(推測)」と分かる
+    row = next(line for line in md.splitlines() if line.startswith("| `a` | "))
+    assert "`b`," in row and "`c` (推測)" in row and "`b` (推測)" not in row
+    # 「使われていない」は、無いことからの推測。読んだことのように書かない
+    assert "入口の候補、推測" in md
+
+
+def test_json_carries_the_labels_per_edge(tmp_path):
+    data = json.loads(structure_map.to_json(structure_map.scan_package(_make_package(tmp_path, LABELLED))))
+    assert data["labels"] == {"EXTRACTED": "読んだ", "INFERRED": "推測"}
+    assert {(e["from"], e["to"]): (e["kind"], e["label"]) for e in data["edges"]} == {
+        ("pkg.a", "pkg.b"): ("import", "EXTRACTED"),
+        ("pkg.a", "pkg.c"): ("reference", "INFERRED"),
+        ("pkg.a", "pkg.d"): ("deferred", "EXTRACTED"),
+    }
+    assert {"package", "modules", "cycles", "entry_points"} <= set(data)  # 既存のキーは、そのまま
+
+
+def test_a_cycle_is_decided_by_read_edges_only(tmp_path):
+    # 文字列の参照が輪になっていても、import の循環とは数えない (推測で、循環と断定しない)
+    root = _make_package(tmp_path, {"a.py": "X = 'pkg.b'\n", "b.py": "X = 'pkg.a'\n"})
+    g = structure_map.scan_package(root)
+    assert g.cycles() == []
+    assert "循環: なし (読んだ辺だけで判定)" in structure_map.to_markdown(g)
 
 
 # ---- CLI ----

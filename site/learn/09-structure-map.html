@@ -326,8 +326,8 @@ docspipeline<span class="w"> </span>map<span class="w"> </span>docspipeline<span
 docspipeline<span class="w"> </span>map<span class="w"> </span>docspipeline<span class="w"> </span>--fail-on-cycle<span class="w">       </span><span class="c1"># import の循環があれば、終了コード 1</span>
 </pre></div>
 </div>
-<p>Markdown の下書きには、依存の図 (Mermaid)、モジュール一覧 (要約・行数・公開 API の数・使う/使われる)、
-循環と「どこからも使われていない」モジュール、<strong>読み取れないこと</strong> が入る。冒頭に「自動生成の下書き。
+<p>Markdown の下書きには、<strong>札の見方</strong>、依存の図 (Mermaid)、モジュール一覧 (要約・行数・公開 API の数・使う/使われる)、
+<strong>札つきの依存の一覧</strong>、循環と「どこからも使われていない」モジュール、<strong>読み取れないこと</strong> が入る。冒頭に「自動生成の下書き。
 人が確認してから使い、そのまま公開しない」という警告が付く。</p>
 </section>
 <section id="id5">
@@ -338,27 +338,63 @@ docspipeline<span class="w"> </span>map<span class="w"> </span>docspipeline<span
 <tr class="row-odd"><th class="head"><p>種類</p></th>
 <th class="head"><p>例</p></th>
 <th class="head"><p>地図での表現</p></th>
+<th class="head"><p>札</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">import</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">.</span> <span class="pre">import</span> <span class="pre">confluence</span></code>、<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pkg.mod</span></code> (モジュールを読み込んだときに実行されるもの)</p></td>
 <td><p>実線</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> (読んだ)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">deferred</span></code></p></td>
 <td><p>関数の中の <code class="docutils literal notranslate"><span class="pre">import</span></code> (呼ばれたときに、初めて読み込まれる)</p></td>
 <td><p>点線 (「遅延」)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> (読んだ)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">extensions</span> <span class="pre">=</span> <span class="pre">[&quot;docspipeline.guard&quot;]</span></code> のような、<strong>モジュール名と完全に一致する文字列</strong></p></td>
-<td><p>点線</p></td>
+<td><p>点線 (「推測」)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> (推測)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
 <section id="id6">
-<h3>実例: この地図で見つかった不備<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<h3>「読んだ」と「推測した」を区別する<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>自動で作った図は、読む人が <strong>どこまで信じてよいか</strong> を、辺ごとに見分けられるようにする。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>札</p></th>
+<th class="head"><p>意味</p></th>
+<th class="head"><p>この地図での例</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> (読んだ)</p></td>
+<td><p>原文に <strong>明示されている</strong> ことを、そのまま読み取った</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">import</span></code> 文による依存、要約 (docstring の 1 行目)、行数、公開 API の数、循環の判定</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> (推測)</p></td>
+<td><p>書き方から <strong>推し量った</strong>。外れることがある</p></td>
+<td><p>文字列の一致による参照、「どこからも使われていない」の判定</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul class="simple">
+<li><p>図では、推測の辺に「推測」と書く。モジュール一覧では、推測だけで結ばれた依存に <code class="docutils literal notranslate"><span class="pre">(推測)</span></code> を付ける。</p></li>
+<li><p><strong>循環は、読んだ辺だけで判定する</strong>。文字列の参照が輪になっていても、循環とは断定しない。</p></li>
+<li><p>「どこからも使われていない」は、<strong>使い道が見つからなかった</strong> というだけ。関数の中の <code class="docutils literal notranslate"><span class="pre">import</span></code> や動的な読み込みで使われているかもしれない。</p></li>
+<li><p>機械で読む用の JSON は、辺ごとに <code class="docutils literal notranslate"><span class="pre">kind</span></code> と <code class="docutils literal notranslate"><span class="pre">label</span></code> を持つ (<code class="docutils literal notranslate"><span class="pre">edges</span></code>)。</p></li>
+<li><p>札は、種類から決まる (<code class="docutils literal notranslate"><span class="pre">structure_map.EDGE_LABELS</span></code>)。新しい種類の依存を足すときは、<strong>読んだか推測かを先に決める</strong>。
+決め方に迷うなら、推測にする (読んだことにして外れるより、安全)。</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3>実例: この地図で見つかった不備<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">doctor</span></code> コマンドを足したとき、<code class="docutils literal notranslate"><span class="pre">mmdc</span></code> の探索関数を <code class="docutils literal notranslate"><span class="pre">mermaid.py</span></code> から import した。ところが <code class="docutils literal notranslate"><span class="pre">mermaid.py</span></code> は
 Sphinx の拡張で、先頭で <code class="docutils literal notranslate"><span class="pre">docutils</span></code> を import する。結果、<strong>Sphinx が入っていない環境で、<code class="docutils literal notranslate"><span class="pre">docspipeline</span></code> の
 どのコマンドも起動時にクラッシュ</strong> した (<code class="docutils literal notranslate"><span class="pre">cli</span> <span class="pre">→</span> <span class="pre">doctor</span> <span class="pre">→</span> <span class="pre">mermaid</span> <span class="pre">→</span> <span class="pre">docutils</span></code>)。</p>
@@ -398,8 +434,8 @@ Sphinx の拡張で、先頭で <code class="docutils literal notranslate"><span
 </table>
 </div>
 </section>
-<section id="id7">
-<h3>手書きの図との突き合わせ<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<section id="id8">
+<h3>手書きの図との突き合わせ<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <p><a class="reference download internal" download="" href="../_downloads/88262962fc5cc51e2128cdc5f3186d54/module-map.drawio.svg"><span class="xref download myst">module-map</span></a> の矢印は、<code class="docutils literal notranslate"><span class="pre">tools/diagrams/build_diagrams.py</span></code> の
 <code class="docutils literal notranslate"><span class="pre">MODULE_IMPORTS</span></code> / <code class="docutils literal notranslate"><span class="pre">MODULE_REFERENCES</span></code> から作る。<code class="docutils literal notranslate"><span class="pre">tests/test_diagrams.py</span></code> が、<strong>同じ読み取り</strong> で作った実際の依存と
 突き合わせ、次を検出する。</p>
@@ -411,8 +447,8 @@ Sphinx の拡張で、先頭で <code class="docutils literal notranslate"><span
 (<a class="reference internal" href="04-extend.html"><span class="std std-doc">拡張のしかた</span></a> のレシピ 4)。</p>
 </section>
 </section>
-<section id="id8">
-<h2>使うときの注意<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h2>使うときの注意<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>下書きは、そのまま公開しない</strong>。「なぜ」は載っていない。人が確認し、理由を書き足してから使う。</p></li>
 <li><p>見つけられないもの: <code class="docutils literal notranslate"><span class="pre">importlib.import_module(変数)</span></code> のような動的な読み込み、組み立てた名前。<strong>文字列の参照は、完全一致だけ</strong>。</p></li>
@@ -420,30 +456,32 @@ Sphinx の拡張で、先頭で <code class="docutils literal notranslate"><span
 <li><p>Graphify との比較は、未実施 (導入していない)。比べるなら、<strong>導入前に SKILL.md と監査結果を読む</strong>。</p></li>
 </ul>
 </section>
-<section id="id9">
-<h2>よくある誤り<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<section id="id10">
+<h2>よくある誤り<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>地図を <strong>コミットする</strong>。コードから毎回作れるものを置くと、古くなる。残すのは、人が書いた説明と、テスト。</p></li>
 <li><p>「循環が無い」ことを、図で目視して済ませる。<code class="docutils literal notranslate"><span class="pre">--fail-on-cycle</span></code> かテストに任せる。</p></li>
 <li><p>関数の中の <code class="docutils literal notranslate"><span class="pre">import</span></code> や、<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> の中の <code class="docutils literal notranslate"><span class="pre">import</span></code> を、循環として数える。前者は循環を断つ定番の書き方で、
 後者は型検査のときだけ。どちらも、実行時の循環ではないので、循環の検出の対象にしない (<code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> の中は、依存としても数えない)。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reference</span></code> を <code class="docutils literal notranslate"><span class="pre">import</span></code> と同じ強さで扱う。<code class="docutils literal notranslate"><span class="pre">reference</span></code> は名前の一致だけで、<strong>実際に読み込まれるかは分からない</strong>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reference</span></code> を <code class="docutils literal notranslate"><span class="pre">import</span></code> と同じ強さで扱う。<code class="docutils literal notranslate"><span class="pre">reference</span></code> は名前の一致だけで、<strong>実際に読み込まれるかは分からない</strong>(札は <code class="docutils literal notranslate"><span class="pre">INFERRED</span></code>)。</p></li>
+<li><p>札を見ずに、図の全ての辺を事実として引用する。<strong>推測の辺は、人が確かめてから</strong> 文書に書く。</p></li>
 </ul>
 </section>
-<section id="id10">
-<h2>演習<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<section id="id11">
+<h2>演習<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code> の出力に、<strong>外部ライブラリ</strong> (<code class="docutils literal notranslate"><span class="pre">module.external</span></code>) の一覧の列を足す。Sphinx を使うモジュールが、一目で分かるようになる。</p></li>
 <li><p>「<code class="docutils literal notranslate"><span class="pre">cli</span></code> は <code class="docutils literal notranslate"><span class="pre">config</span></code> を import しない」のような <strong>禁止の依存</strong> を、テストの中のリストではなく、設定ファイル (TOML) で宣言できるようにする。</p></li>
 <li><p>C++ の <code class="docutils literal notranslate"><span class="pre">#include</span></code> の地図を作る (<a class="reference internal" href="../cpp.html"><span class="std std-doc">C++ の文書</span></a>)。何を「モジュール」とし、どこまでを内部とするか、先に設計を書く。</p></li>
 </ol>
 </section>
-<section id="id11">
-<h2>関連<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<section id="id12">
+<h2>関連<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="02-code-tour.html"><span class="std std-doc">コードの読み方</span></a> — 地図の「理由」の層</p></li>
 <li><p><a class="reference internal" href="05-testing.html"><span class="std std-doc">テストの書き方</span></a></p></li>
-<li><p><a class="reference internal" href="../design.html"><span class="std std-doc">設計</span></a> — Z16 の取り込み方</p></li>
+<li><p><a class="reference internal" href="../design.html"><span class="std std-doc">設計</span></a> — Z16 (地図)・Z47 (札) の取り込み方</p></li>
+<li><p><a class="reference internal" href="../contracts.html"><span class="std std-doc">契約と副作用の境界</span></a> — <code class="docutils literal notranslate"><span class="pre">labeled_edges</span></code>・<code class="docutils literal notranslate"><span class="pre">to_markdown</span></code> の契約</p></li>
 </ul>
 </section>
 </section>
@@ -509,15 +547,16 @@ Sphinx の拡張で、先頭で <code class="docutils literal notranslate"><span
 <li><a class="reference internal" href="#id3">二層で持つ</a></li>
 <li><a class="reference internal" href="#id4">使い方</a></li>
 <li><a class="reference internal" href="#id5">見つける依存の種類</a></li>
-<li><a class="reference internal" href="#id6">実例: この地図で見つかった不備</a></li>
+<li><a class="reference internal" href="#id6">「読んだ」と「推測した」を区別する</a></li>
+<li><a class="reference internal" href="#id7">実例: この地図で見つかった不備</a></li>
 <li><a class="reference internal" href="#tests-test-structure-map-py">ルール (<code class="docutils literal notranslate"><span class="pre">tests/test_structure_map.py</span></code>)</a></li>
-<li><a class="reference internal" href="#id7">手書きの図との突き合わせ</a></li>
+<li><a class="reference internal" href="#id8">手書きの図との突き合わせ</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id8">使うときの注意</a></li>
-<li><a class="reference internal" href="#id9">よくある誤り</a></li>
-<li><a class="reference internal" href="#id10">演習</a></li>
-<li><a class="reference internal" href="#id11">関連</a></li>
+<li><a class="reference internal" href="#id9">使うときの注意</a></li>
+<li><a class="reference internal" href="#id10">よくある誤り</a></li>
+<li><a class="reference internal" href="#id11">演習</a></li>
+<li><a class="reference internal" href="#id12">関連</a></li>
 </ul>
 </li>
 </ul>

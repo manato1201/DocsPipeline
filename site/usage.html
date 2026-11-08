@@ -369,6 +369,8 @@
 <ul class="simple">
 <li><p>ローカルで読むだけで、外部へは送信しない。<code class="docutils literal notranslate"><span class="pre">--fail-on-cycle</span></code> で、循環があれば失敗させる。
 使い方は <a class="reference internal" href="learn/09-structure-map.html"><span class="std std-doc">機械の地図</span></a>。</p></li>
+<li><p>依存の辺には <strong>出どころの札</strong> が付く。<code class="docutils literal notranslate"><span class="pre">import</span></code> 文による依存は <code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> (読んだ)、モジュール名と一致する文字列による参照は
+<code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> (推測)。Mermaid の図では、推測の辺に「推測」と書く。<code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">json</span></code> は、辺ごとに <code class="docutils literal notranslate"><span class="pre">kind</span></code> と <code class="docutils literal notranslate"><span class="pre">label</span></code> を持つ。</p></li>
 </ul>
 <p><strong><code class="docutils literal notranslate"><span class="pre">publish</span></code></strong></p>
 <ul class="simple">
@@ -484,7 +486,38 @@ Confluence のページが、図の無いページに置き換わるため。</p
 </ul>
 </section>
 <section id="id8">
-<h2>設定の追加<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<h2>設計書のひな形 (スキル)<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>設計書を書くときの、契約の欄つきのひな形を、リポジトリの <code class="docutils literal notranslate"><span class="pre">skills/design-doc/</span></code> に置いている。形式は、Claude のスキルと同じ
+(<code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> + スクリプト + 資料のフォルダ)。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ファイル</p></th>
+<th class="head"><p>内容</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code></p></td>
+<td><p>いつ使うか・手順・「読んだ / 推測した」の札の付け方</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">template.md</span></code></p></td>
+<td><p>ひな形。目的 / 構成 / 契約と副作用の境界 / 判断の記録 / 未確認のこと (+ 権利と出典)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scripts/check_design_doc.py</span></code></p></td>
+<td><p>設計書の検査。必須の見出し・契約の表・層の名前・書き換え忘れ (<code class="docutils literal notranslate"><span class="pre">〈…〉</span></code>) を確かめる</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>skills/design-doc/template.md<span class="w"> </span>docs/my-feature-design.md<span class="w">   </span><span class="c1"># 写して、〈…〉を書き換える</span>
+python<span class="w"> </span>skills/design-doc/scripts/check_design_doc.py<span class="w"> </span>docs/my-feature-design.md
+</pre></div>
+</div>
+<p>スキルとして使うときは、<code class="docutils literal notranslate"><span class="pre">skills/design-doc/</span></code> を、使う側の <code class="docutils literal notranslate"><span class="pre">.claude/skills/design-doc/</span></code> に写す。検査は、<strong>書き忘れ</strong> を見つけるだけで、
+内容が正しいかは確かめない。</p>
+</section>
+<section id="id9">
+<h2>設定の追加<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="api.html#docspipeline.config.build_config" title="docspipeline.config.build_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">docspipeline.config.build_config()</span></code></a> が返した値は、<code class="docutils literal notranslate"><span class="pre">conf.py</span></code> の中で上書き・追記できる。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">build_config</span><span class="p">(</span><span class="n">confdir</span><span class="o">=</span><span class="vm">__file__</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s2">"X"</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">"me"</span><span class="p">)</span>
 
@@ -494,8 +527,8 @@ Confluence のページが、図の無いページに置き換わるため。</p
 </pre></div>
 </div>
 </section>
-<section id="id9">
-<h2>使うときの注意<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<section id="id10">
+<h2>使うときの注意<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">TypeVar</span></code> を使った型注釈は、nitpicky で未解決の参照になる。上のように外すか、型注釈を単純にする。</p></li>
 <li><p>autodoc はコードを <code class="docutils literal notranslate"><span class="pre">import</span></code> する。副作用のある <code class="docutils literal notranslate"><span class="pre">import</span></code> は、文書のビルドでも実行される。
@@ -569,8 +602,9 @@ Confluence のページが、図の無いページに置き換わるため。</p
 <li><a class="reference internal" href="#id6">環境変数</a></li>
 <li><a class="reference internal" href="#mermaid">Mermaid の図を書く</a></li>
 <li><a class="reference internal" href="#id7">プロンプトのコピー</a></li>
-<li><a class="reference internal" href="#id8">設定の追加</a></li>
-<li><a class="reference internal" href="#id9">使うときの注意</a></li>
+<li><a class="reference internal" href="#id8">設計書のひな形 (スキル)</a></li>
+<li><a class="reference internal" href="#id9">設定の追加</a></li>
+<li><a class="reference internal" href="#id10">使うときの注意</a></li>
 </ul>
 </li>
 </ul>

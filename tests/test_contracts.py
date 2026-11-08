@@ -206,6 +206,8 @@ PURE_CALLS = {
     "mmdc.fix_mermaid_text": lambda: mmdc.fix_mermaid_text("```mermaid\nflowchart LR\n```\n"),
     "structure_map.Graph.cycles": lambda: _graph().cycles(),
     "structure_map.to_mermaid": lambda: structure_map.to_mermaid(_graph()),
+    "structure_map.Graph.labeled_edges": lambda: _graph().labeled_edges(),
+    "structure_map.to_markdown": lambda: structure_map.to_markdown(_graph()),
     "docstring_coverage.format_report": lambda: docstring_coverage.format_report(
         docstring_coverage.Report((docstring_coverage.Item(Path("a.py"), "f", "function", 3, False),))
     ),
@@ -371,6 +373,71 @@ def test_graph_contract():
         shuffled = structure_map.Graph("p", tuple(rng.sample(graph.modules, len(graph.modules))))
         assert shuffled.cycles() == cycles  # モジュールの並びに依存しない
         assert structure_map.to_mermaid(graph) == structure_map.to_mermaid(graph)  # 決定的
+
+
+def _random_graph(rng: random.Random) -> structure_map.Graph:
+    """import・遅延 import・文字列の参照を、ばらばらに持つ地図 (パッケージ自身への依存も混ぜる)。"""
+    names = [f"p.m{i}" for i in range(rng.randint(2, 6))]
+    modules = [structure_map.Module("p", Path("p/__init__.py"), True, "", 1, 0, frozenset(), frozenset(), frozenset())]
+
+    def pick(owner: str) -> frozenset[str]:
+        return frozenset(d for d in [*names, "p"] if d != owner and rng.random() < 0.25)
+
+    for name in names:
+        runtime, lazy, refs = pick(name), pick(name), pick(name)
+        modules.append(
+            structure_map.Module(
+                name=name,
+                path=Path(name.replace(".", "/") + ".py"),
+                is_package=False,
+                summary=rng.choice(["", "説明", "a | b"]),
+                lines=rng.randint(1, 50),
+                public_api=rng.randint(0, 4),
+                imports=runtime,
+                references=refs - runtime,  # scan_package と同じ: 実行時の import がある組は、参照に数えない
+                external=frozenset(),
+                deferred=lazy - runtime,
+            )
+        )
+    return structure_map.Graph("p", tuple(modules))
+
+
+def test_labeled_edges_contract():
+    rng = random.Random(11)
+    expected = {"import": "EXTRACTED", "deferred": "EXTRACTED", "reference": "INFERRED"}
+    for _ in range(80):
+        graph = _random_graph(rng)
+        rows = graph.labeled_edges()
+        assert rows == sorted(rows)  # 整列済み
+        assert len(rows) == len(set(rows))  # 重複なし
+        for _src, _dst, kind, label in rows:
+            assert label == expected[kind]  # 種類から札が決まる。推測を、読んだことにしない
+        for kind, label in expected.items():
+            assert {(s, d) for s, d, k, _ in rows if k == kind} == graph.edges(kind)  # 欠けも余りも無い
+            assert all(row[3] == label for row in rows if row[2] == kind)
+        shuffled = structure_map.Graph("p", tuple(rng.sample(graph.modules, len(graph.modules))))
+        assert shuffled.labeled_edges() == rows  # モジュールの並びに依存しない
+
+
+def test_to_markdown_contract():
+    rng = random.Random(5)
+    for _ in range(60):
+        graph = _random_graph(rng)
+        text = structure_map.to_markdown(graph)
+        assert text == structure_map.to_markdown(graph)  # 決定的
+        assert "```{warning}" in text and "## 札の見方" in text  # 冒頭の警告と札の見方は、必ず入る
+        table = text.split("## 依存の一覧 (札つき)")[1].split("\n\n")[1].splitlines()[2:]  # 見出し行と区切りを除く
+        short = lambda n: n[len("p.") :] if n != "p" else n  # noqa: E731
+        shown = [tuple(c.strip().split(" (")[0].strip("`") for c in row.strip("|").split("|")) for row in table]
+        assert sorted(shown) == sorted((short(s), short(d), k, lab) for s, d, k, lab in graph.labeled_edges())
+        # 推測だけで結ばれた依存は、モジュール一覧でも「(推測)」と分かる。読んだ依存には付かない
+        guessed = graph.edges("reference") - graph.edges()
+        for module in graph.modules:
+            row = next(line for line in text.splitlines() if line.startswith(f"| `{short(module.name)}` | "))
+            _, uses, _used_by = row.rstrip(" |").rsplit(" | ", 2)  # 「使う」の列だけを見る
+            for src, dst in graph.edges() | graph.edges("reference"):
+                if src == module.name:
+                    assert (f"`{short(dst)}` (推測)" in uses) == ((src, dst) in guessed), (row, src, dst)
 
 
 def test_format_error_contract():

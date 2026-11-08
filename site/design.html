@@ -430,6 +430,63 @@ docstring の <code class="docutils literal notranslate"><span class="pre">Args<
 <p>純粋な関数が、<code class="docutils literal notranslate"><span class="pre">environ=None</span></code> (省略すると <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>) を許している点には、注意がいる。省略したときは純粋でなくなるので、
 テストは、必ず <code class="docutils literal notranslate"><span class="pre">environ</span></code> を渡して確かめる。<strong>この追補を取り入れる過程で、既存の関数に契約違反は見つからなかった</strong> (3 通りの変異で、テストが失敗することは確かめた)。</p>
 </section>
+<section id="z50z47z66-k">
+<h3>第 6 弾の外部資料 (Z50・Z47・Z66 k) の取り込み方<a class="headerlink" href="#z50z47z66-k" title="Link to this heading">¶</a></h3>
+<p>設計書の第 6 弾の追補 (2026-11-08) は、3 つの考え方を挙げている。元の資料は、README と公開ページを <strong>読んだだけ</strong> で、何も導入・実行していない
+(数値は発信者の主張で未測定)。この実装も、<strong>形式と考え方だけ</strong> を取り入れ、外部のコード・文章は使っていない。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>項目</p></th>
+<th class="head"><p>取り込み</p></th>
+<th class="head"><p>中身</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Z50</strong> 設計書のひな形をスキルにする</p></td>
+<td><p>実装</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">skills/design-doc/</span></code>: <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> + <code class="docutils literal notranslate"><span class="pre">template.md</span></code> + <code class="docutils literal notranslate"><span class="pre">scripts/check_design_doc.py</span></code>。契約の欄 (Z39) つき</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Z47</strong> 「読んだ / 推測した」の札</p></td>
+<td><p>実装</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">map</span></code> が、依存の辺に <code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> / <code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> を付ける</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Z66 k</strong> 権利を層で書く</p></td>
+<td><p>一部</p></td>
+<td><p>README に層ごとの表を足した。<strong>ライセンスそのものは未決定</strong>で、<code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> は作っていない</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Z50: 設計書のひな形をスキルにする</strong></p>
+<ul class="simple">
+<li><p>スキル = <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> (front matter は <code class="docutils literal notranslate"><span class="pre">name</span></code> と <code class="docutils literal notranslate"><span class="pre">description</span></code> だけ) + スクリプト + 資料、のフォルダ。形式は設計書の記述に基づく。
+資料の側の仕様 (<code class="docutils literal notranslate"><span class="pre">spec/</span></code>) と、各スキルのライセンスは、<strong>確かめていない</strong>。外部のスキルは、写していない。</p></li>
+<li><p>ひな形の見出しは、<code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">init</span></code> が作る設計ページ (<code class="docutils literal notranslate"><span class="pre">design.rst.tmpl</span></code>) と揃え、テストが食い違いを検出する。
+契約の表の列は、<a class="reference internal" href="contracts.html"><span class="std std-doc">契約の表</span></a> と同じ。検査 (<code class="docutils literal notranslate"><span class="pre">check_design_doc.py</span></code>) は、<strong>このリポジトリ自身の契約の表を通す</strong> ことで、規則が実態から離れないようにした。</p></li>
+<li><p>検査は <strong>書き忘れ</strong> (見出し・空の欄・層の名前・<code class="docutils literal notranslate"><span class="pre">〈…〉</span></code> の残り) を見つけるだけで、契約の中身が正しいかは確かめない。</p></li>
+<li><p>Claude Code が、<code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code> に置いたこのスキルを実際に読み込んで使うことは、<strong>確かめていない</strong> (形式の検査とスクリプトのテストまで)。</p></li>
+<li><p>導入先の <code class="docutils literal notranslate"><span class="pre">init</span></code> が、このスキルも書き出すようにする案は、採っていない (利用者が、使う側の <code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code> に写せば足りる)。</p></li>
+</ul>
+<p><strong>Z47: 「読んだ / 推測した」の札</strong></p>
+<ul class="simple">
+<li><p>設計書の追補は、Graphify の <code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> (原文に明示) / <code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> (推測) の札の発想を、自動生成した図に使う、としている (P9)。
+Graphify は導入していない。<strong>札の付け方は自前</strong>: 依存の種類から決まる (<code class="docutils literal notranslate"><span class="pre">structure_map.EDGE_LABELS</span></code>)。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">import</span></code> 文 (関数の中のものを含む) は <code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code>。モジュール名と一致する文字列による参照は、その文字列が実際にモジュールを指すかを
+読んだだけでは確かめられないので <code class="docutils literal notranslate"><span class="pre">INFERRED</span></code>。<strong>循環は読んだ辺だけで判定</strong>し、推測で循環と断定しない。</p></li>
+<li><p>出し方: 図の推測の辺に「推測」と書く / モジュール一覧に <code class="docutils literal notranslate"><span class="pre">(推測)</span></code> / 札つきの依存の表 / JSON の <code class="docutils literal notranslate"><span class="pre">edges</span></code>。「どこからも使われていない」の判定も、
+無いことからの推測として出す。</p></li>
+<li><p>限界: 札は 2 値だけ。<code class="docutils literal notranslate"><span class="pre">EXTRACTED</span></code> の辺も、実行時に必ず起きるとは限らない (条件つきの <code class="docutils literal notranslate"><span class="pre">import</span></code> など)。AI による意味づけはしていないので、
+<code class="docutils literal notranslate"><span class="pre">INFERRED</span></code> は <strong>文字列の一致</strong> だけを指す。</p></li>
+</ul>
+<p><strong>Z66 k: 権利を層で書く</strong></p>
+<ul class="simple">
+<li><p>コード・文章・図・名前を分けて書く、という書き方を、README の「権利」に取り入れた。</p></li>
+<li><p>いまの状態を、そのまま書いた: <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> が無く、コード・文章・図のライセンスは <strong>未決定</strong>。決めるのは作者で、この実装では決めていない
+(決めずに MIT などと書くと、事実と食い違う)。README の表と <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> の有無が食い違うと、テストが失敗する。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docspipeline</span> <span class="pre">init</span></code> が作る雛形に、権利の欄を足すことは、していない (雛形リポジトリの標準にする案は、ライセンスが決まってから)。</p></li>
+</ul>
+</section>
 <section id="ux1ux7">
 <h3>使いやすさの提案 (UX1〜UX7) の取り込み方<a class="headerlink" href="#ux1ux7" title="Link to this heading">¶</a></h3>
 <p>設計書の側の「使いやすさの提案」(2026-11-04) は、全プロジェクト共通の 7 項目を挙げ、DocsPipeline には
@@ -546,10 +603,17 @@ docstring の <code class="docutils literal notranslate"><span class="pre">Args<
 <td><p>提案・未実装</p></td>
 <td><p>一部実装: UX4・UX2・UX6 (CLI の範囲)。UX1 は一部、UX5・UX7 は未実装、UX3 は対象外 (上の節)</p></td>
 </tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>第 6 弾 (Z50・Z47・Z66 k)</p></td>
+<td><p>2026-11-08</p></td>
+<td><p>提案・未実装</p></td>
+<td><p>Z50 は実装 (<code class="docutils literal notranslate"><span class="pre">skills/design-doc/</span></code>)。Z47 は実装 (<code class="docutils literal notranslate"><span class="pre">map</span></code> の札)。Z66 k は一部 (README の権利の層の表。ライセンスは未決定)</p></td>
+</tr>
 </tbody>
 </table>
 </div>
-<p>設計書の「追補の索引」が、状態の語彙の元。進み具合は、設計書の側の <code class="docutils literal notranslate"><span class="pre">IMPLEMENTATION_PROGRESS</span></code> を参照 (このリポジトリには、含まれない)。</p>
+<p>設計書の「追補の索引」が、状態の語彙の元。進み具合は、設計書の側の <code class="docutils literal notranslate"><span class="pre">IMPLEMENTATION_PROGRESS</span></code> を参照 (このリポジトリには、含まれない)。
+なお、設計書の索引には、第 6 弾 (2026-11-08) が <strong>まだ載っていない</strong> (本文には追補がある)。この表の 10 番は、本文から数えた。</p>
 </section>
 <section id="id8">
 <h2>よくある誤り<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
@@ -642,6 +706,7 @@ Sphinx が入っていない環境でも動く (<code class="docutils literal no
 <li><a class="reference internal" href="#copy-prompt-z19">「Copy prompt」(Z19) の取り込み方</a></li>
 <li><a class="reference internal" href="#pdfmathtranslate-z31">PDFMathTranslate (Z31) は取り込まない</a></li>
 <li><a class="reference internal" href="#z39">契約と副作用の境界 (Z39) の取り込み方</a></li>
+<li><a class="reference internal" href="#z50z47z66-k">第 6 弾の外部資料 (Z50・Z47・Z66 k) の取り込み方</a></li>
 <li><a class="reference internal" href="#ux1ux7">使いやすさの提案 (UX1〜UX7) の取り込み方</a></li>
 </ul>
 </li>

@@ -45,7 +45,7 @@ docspipeline build docs        # 警告をエラー扱いにしてビルド
 | `docspipeline check-mermaid [PATH...]` | Mermaid のブロックが、標準の `%%{init}%%` の行で始まるか (`--fix` で入れる)。GitHub と HTML で、色とフォントが揃う |
 | `docspipeline mermaid-style` | 標準の `%%{init}%%` の行と、5 色の `classDef` を表示する (貼り付け用) |
 | `docspipeline linkcheck [DOCS]` | 外部リンクの切れ |
-| `docspipeline map PACKAGE` | ソースを構文解析して、モジュールの依存の地図 (Markdown の下書き / Mermaid / JSON) を作る。ローカルで読むだけで、外部へは送信しない。`--fail-on-cycle` |
+| `docspipeline map PACKAGE` | ソースを構文解析して、モジュールの依存の地図 (Markdown の下書き / Mermaid / JSON) を作る。依存の辺には **読んだ (`EXTRACTED`) / 推測 (`INFERRED`)** の札が付く。ローカルで読むだけで、外部へは送信しない。`--fail-on-cycle` |
 | `docspipeline doctor` | 手元で使える機能 (`mmdc`・`doxygen`・設定の有無) を確認。トークンの値は出さない |
 | `docspipeline confluence-check [DOCS]` | Confluence への接続・認証・権限の確認 (ページは変更しない) |
 | `docspipeline publish [DOCS] --mode local\|dryrun\|publish` | 既定は `local` (ネットワークにつながない) |
@@ -98,6 +98,9 @@ Graphify の地図との比較も、未実施。
 関数を 純粋 / 読み取り / 書き込み・起動 の 3 層に分けた (副作用の境界)。純粋な層は、I/O を禁じて呼んでも動くことを、テストが確かめる。
 「使いやすさの提案」(2026-11-04) のうち、CLI に当たる UX4 (エラーを 何が起きた / なぜ / 次の一手 の 3 行に)・UX2 (進み具合・完了・Ctrl-C での中断)・
 UX6 (`doctor` などの次の一手) を **実装した** ([使い方](docs/usage.md))。残りは [設計](docs/design.md) に、取り込まない理由とともに書いた。
+第 6 弾の追補 (2026-11-08) のうち、Z50 (設計書のひな形をスキルにする) は **実装した**: [`skills/design-doc/`](skills/design-doc/SKILL.md) に、
+契約の欄つきのひな形と検査スクリプトを置いた。Z47 (「読んだ / 推測した」の札) は **実装した**: `docspipeline map` の依存の辺に付く。
+Z66 k (権利を層で書く) は **一部**: 下の「権利」の表を足したが、ライセンスそのものは **未決定**。
 各追補の状態は、[設計](docs/design.md) の「設計書の追補と、この実装での扱い」にまとめた。
 
 ## 未検証のこと
@@ -107,6 +110,19 @@ UX6 (`doctor` などの次の一手) を **実装した** ([使い方](docs/usag
 - GitHub Actions の実行
 - Python 3.12 (3.11 と 3.13 は、手元で `pytest` を全て通した。CI の対象も 3.11 と 3.13。3.12 は、図の生成物の一致だけ確かめた)
 - 実際の ProfilingTool・ToolOrchestrationHub・AssetDataInsightSuite・RAGReel (Qt) のコード
+
+## 権利
+
+コード・文章・図・名前を **層で分けて** 書く (設計書の追補 Z66 k の書き方)。いまは `LICENSE` が無く、**ライセンスは決めていない**
+(法的な判断はしていない)。決めたら、この表と `LICENSE` を同じ変更で直す (食い違うと `tests/test_rights.py` が失敗する)。
+
+| 層 | 対象 | 権利・ライセンス |
+|---|---|---|
+| コード | `docspipeline/`・`tools/`・`tests/`・`skills/design-doc/scripts/` | **未決定** (`LICENSE` なし) |
+| 文章 | `README.md`・`docs/` (学習資料・講義資料を含む)・`skills/design-doc/` の `SKILL.md` と `template.md` | **未決定** |
+| 図 | `docs/diagrams/` (`tools/diagrams` から生成)・`site/_images/` (Mermaid から生成) | **未決定** |
+| 名前 | 「DocsPipeline」 | 作者 (manato1201) のもの。ロゴは無い |
+| 第三者のもの | `site/` に同梱されたテーマ (furo) と Sphinx の静的ファイル | それぞれの元のライセンスに従う (同梱の表記の例: `site/_static/scripts/furo.js.LICENSE.txt`)。この表の「未決定」の対象外 |
 
 ## 開発
 

@@ -29,10 +29,12 @@ flowchart LR
 | 生成物 | `test_diagrams.py` | 図の生成物が定義と一致し、重なり・はみ出しが無い。`module-map` の矢印が、実際の依存と一致する |
 | 拡張 | `test_prompt.py` | `prompt` 拡張。秘密情報の検出、HTML (ボタンの部品が入る) と Confluence (ボタン無しのコードブロック) の出力。ボタンの動作は、ブラウザで確かめる ([拡張のしかた](04-extend.md) のレシピ 7) |
 | 再発防止 | `test_robustness.py` | レビューで見つかった不備 (打ち間違いで検査が空になる・構文エラーで落ちる・循環を見逃す、など) の回帰テスト。**不備を直したら、ここに足す** |
-| 構造 | `test_structure_map.py` | 依存の向きのルール (循環なし・Sphinx に依存してよいのは拡張だけ・葉のモジュール)。Sphinx を隠して core を import する実行テスト |
+| 構造 | `test_structure_map.py` | 依存の向きのルール (循環なし・Sphinx に依存してよいのは拡張だけ・葉のモジュール)。Sphinx を隠して core を import する実行テスト。辺の札 (`import` は読んだ・文字列の参照は推測) |
 | 書式 | `test_mermaid_style.py` | Mermaid の標準の `%%{init}%%` の行。`check-mermaid` と `--fix` (冪等・インデント・閉じていないブロック) |
 | HTML 版 | `test_site.py` | `site/` が元の文書・ソース・図と、ずれていない (ハッシュの印)。生のままの Mermaid や秘密らしき値が入っていない |
 | 契約 | `test_contracts.py` | [契約の表](../contracts.md) の関数とテストが実在する。**純粋** の層は I/O を禁じて呼んでも動く。**読み取り** の層は何も書かない。不変条件を、いろいろな入力 (種を固定した乱数・総当たりとの突き合わせ) で確かめる |
+| スキル | `test_skill.py` | `skills/design-doc` の形式 (front matter・リンク)。検査スクリプトが、見出し・空の欄・層の名前・書き換え忘れを見つける。**このリポジトリ自身の契約の表を通す** (規則が実態から離れない) |
+| 権利 | `test_rights.py` | README の「権利」の表が、層ごとにそろい、`LICENSE` の有無と食い違わない |
 | 講義 | `test_lectures.py` | 講義の引用がソースと一致し、`# 実行できる` の例が本当に動いて、`# 出力` と一致する ([講義 第 10 回](../lecture/10-testing.md)) |
 
 ### 外部のものを偽物にする型

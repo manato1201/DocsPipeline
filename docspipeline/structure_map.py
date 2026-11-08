@@ -25,6 +25,15 @@
 * 関数の中の import (``deferred``)。呼ばれたときに初めて読み込まれる。循環を断つ定番の書き方。
 
 見つけられないもの: ``importlib.import_module(変数)`` のような動的な読み込み、部分的に組み立てた名前。
+
+出どころの札 (読んだ / 推測した)
+    地図の辺には、出どころを区別する札を付ける。人が「どこまで信じてよいか」を見分けるため。
+
+    ``EXTRACTED`` (読んだ)
+        原文に **明示されている** ことを、そのまま読み取った。``import`` 文による依存 (関数の中のものを含む)。
+    ``INFERRED`` (推測した)
+        書き方から **推し量った** こと。外れることがある。モジュール名と一致する文字列による参照は、
+        その文字列が実際にモジュールを指すかどうかを、読んだだけでは確かめられない。
 """
 
 from __future__ import annotations
@@ -36,6 +45,15 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .files import iter_python_files
+
+#: 札: 原文に明示されている (読んだ)。
+EXTRACTED = "EXTRACTED"
+#: 札: 書き方から推し量った (推測した)。外れることがある。
+INFERRED = "INFERRED"
+#: 依存の種類 → 札。``import`` と ``deferred`` は文として書かれている。``reference`` は文字列の一致からの推測。
+EDGE_LABELS = {"import": EXTRACTED, "deferred": EXTRACTED, "reference": INFERRED}
+#: 札の日本語の呼び名 (図・文書に出す語)。
+LABEL_NAMES = {EXTRACTED: "読んだ", INFERRED: "推測"}
 
 
 @dataclass(frozen=True)
@@ -89,6 +107,15 @@ class Graph:
                 if include_root or dst != self.package:
                     result.add((m.name, dst))
         return result
+
+    def labeled_edges(self) -> list[tuple[str, str, str, str]]:
+        """全ての依存を ``(使う側, 使われる側, 種類, 札)`` で返す。
+
+        札は ``EXTRACTED`` (読んだ) か ``INFERRED`` (推測)。パッケージ自身への依存は含めない。
+        整列済みで、同じ地図なら同じ結果になる。
+        """
+        rows = [(src, dst, kind, EDGE_LABELS[kind]) for kind in EDGE_LABELS for src, dst in self.edges(kind)]
+        return sorted(rows)
 
     def cycles(self) -> list[list[str]]:
         """``import`` の循環を、強連結成分として返す (無ければ空)。
@@ -282,7 +309,11 @@ def _short(graph: Graph, name: str) -> str:
 
 
 def to_mermaid(graph: Graph) -> str:
-    """依存の図を Mermaid で返す。実線は ``import``、点線は文字列による参照。"""
+    """依存の図を Mermaid で返す。
+
+    実線は ``import`` (読んだ)、``遅延`` の点線は関数の中の ``import`` (読んだ)、
+    ``推測`` の点線は文字列による参照 (推測した)。推測の辺は、図の上でも札が分かる。
+    """
     lines = ["flowchart LR"]
     for m in graph.modules:
         if m.name == graph.package:
@@ -295,7 +326,7 @@ def to_mermaid(graph: Graph) -> str:
     for src, dst in sorted(graph.edges()):
         lines.append(f"    {_node_id(src)} --> {_node_id(dst)}")
     for src, dst in sorted(graph.edges("reference")):
-        lines.append(f"    {_node_id(src)} -.-> {_node_id(dst)}")
+        lines.append(f"    {_node_id(src)} -. {LABEL_NAMES[INFERRED]} .-> {_node_id(dst)}")
     for src, dst in sorted(graph.edges("deferred")):
         lines.append(f"    {_node_id(src)} -. 遅延 .-> {_node_id(dst)}")
     return "\n".join(lines) + "\n"
@@ -314,9 +345,21 @@ def to_markdown(graph: Graph) -> str:
         "外部へは何も送信していません。",
         "```",
         "",
+        "## 札の見方",
+        "",
+        "この地図の事実には、**出どころの札** が付いています。推測は、読んだことと混ぜずに区別して見せています。",
+        "",
+        "| 札 | 意味 | この地図での例 |",
+        "|---|---|---|",
+        f"| `{EXTRACTED}` ({LABEL_NAMES[EXTRACTED]}) | 原文に **明示されている** ことを、そのまま読み取った "
+        "| `import` 文による依存、要約 (docstring の 1 行目)、行数、公開 API の数 |",
+        f"| `{INFERRED}` ({LABEL_NAMES[INFERRED]}) | 書き方から **推し量った**。外れることがある "
+        "| モジュール名と一致する文字列による参照、「どこからも使われていない」の判定 |",
+        "",
         "## 依存の地図",
         "",
-        "実線は `import`、点線は名前の文字列による参照 (Sphinx の `extensions` など)。",
+        "実線は `import` (読んだ)、「遅延」の点線は関数の中の `import` (読んだ)、"
+        f"「{LABEL_NAMES[INFERRED]}」の点線は名前の文字列による参照 (推測した。Sphinx の `extensions` など)。",
         "",
         "```mermaid",
         to_mermaid(graph).rstrip(),
@@ -327,24 +370,50 @@ def to_markdown(graph: Graph) -> str:
         "| モジュール | 要約 | 行数 | 公開 API | 使う | 使われる |",
         "|---|---|---:|---:|---|---|",
     ]
+    guessed = references - imports  # 文字列の参照だけで結ばれた依存 (推測)
+
+    def mark(src: str, dst: str, shown: str) -> str:
+        suffix = f" ({LABEL_NAMES[INFERRED]})" if (src, dst) in guessed else ""
+        return f"`{shown}`{suffix}"
+
     for m in graph.modules:
-        uses = sorted({_short(graph, d) for s, d in imports | references if s == m.name})
-        used_by = sorted({_short(graph, s) for s, d in imports | references if d == m.name})
+        uses = sorted({(_short(graph, d), d) for s, d in imports | references if s == m.name})
+        used_by = sorted({(_short(graph, s), s) for s, d in imports | references if d == m.name})
         summary = m.summary.replace("|", "\\|")
         out.append(
             f"| `{_short(graph, m.name)}` | {summary} | {m.lines} | {m.public_api} "
-            f"| {', '.join(f'`{u}`' for u in uses) or '-'} | {', '.join(f'`{u}`' for u in used_by) or '-'} |"
+            f"| {', '.join(mark(m.name, d, short) for short, d in uses) or '-'} "
+            f"| {', '.join(mark(s, m.name, short) for short, s in used_by) or '-'} |"
         )
+    labeled = graph.labeled_edges()
+    out += [
+        "",
+        f"({LABEL_NAMES[INFERRED]}) は、文字列の参照だけで結ばれた依存。",
+        "",
+        "## 依存の一覧 (札つき)",
+        "",
+        "| 使う側 | 使われる側 | 種類 | 札 |",
+        "|---|---|---|---|",
+    ]
+    for src, dst, kind, label in labeled:
+        out.append(f"| `{_short(graph, src)}` | `{_short(graph, dst)}` | `{kind}` | `{label}` ({LABEL_NAMES[label]}) |")
+    counts = {label: sum(1 for *_, lab in labeled if lab == label) for label in LABEL_NAMES}
+    out += [
+        "",
+        f"{LABEL_NAMES[EXTRACTED]}辺: {counts[EXTRACTED]} 本 / {LABEL_NAMES[INFERRED]}した辺: {counts[INFERRED]} 本。",
+    ]
     cycles = graph.cycles()
     out += ["", "## 依存の向きの点検", ""]
     if cycles:
-        out.append("**循環があります**:")
+        out.append(f"**循環があります** ({LABEL_NAMES[EXTRACTED]}辺だけで判定):")
         out += [f"- {' ⇄ '.join(_short(graph, n) for n in c)}" for c in cycles]
     else:
-        out.append("- `import` の循環: なし")
+        out.append(f"- `import` の循環: なし ({LABEL_NAMES[EXTRACTED]}辺だけで判定)")
     entries = graph.entry_points()
     out.append(
-        "- どこからも使われていない (入口の候補): " + (", ".join(f"`{_short(graph, e)}`" for e in entries) or "なし")
+        f"- どこからも使われていない (入口の候補、{LABEL_NAMES[INFERRED]}): "
+        + (", ".join(f"`{_short(graph, e)}`" for e in entries) or "なし")
+        + "。関数の中の `import` や動的な読み込みで使われているかもしれない"
     )
     out += [
         "",
@@ -361,6 +430,7 @@ def to_json(graph: Graph) -> str:
     """機械で読める形 (JSON) で返す。"""
     data = {
         "package": graph.package,
+        "labels": {EXTRACTED: LABEL_NAMES[EXTRACTED], INFERRED: LABEL_NAMES[INFERRED]},
         "modules": [
             {
                 "name": m.name,
@@ -373,6 +443,9 @@ def to_json(graph: Graph) -> str:
                 "external": sorted(m.external),
             }
             for m in graph.modules
+        ],
+        "edges": [
+            {"from": src, "to": dst, "kind": kind, "label": label} for src, dst, kind, label in graph.labeled_edges()
         ],
         "cycles": graph.cycles(),
         "entry_points": graph.entry_points(),

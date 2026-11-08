@@ -17,6 +17,9 @@
    純粋にできるものは純粋にし、外の世界に触れる部分だけを薄い外側に置く。表の関数と層は、`tests/test_contracts.py` が検査する。
 8. 新しいページは `docs/page-template.rst.tmpl` を元にして、目的 / 見るポイント / 使うときの注意 / よくある誤り / 関連、の順に書く。
 9. 文書を変えたら、**HTML 版 (`site/`) を作り直す**: `python tools/build_site.py`。作り直し忘れは、テストが検出する。
+10. 新しい設計書は、`skills/design-doc/template.md` を写して書き、`python skills/design-doc/scripts/check_design_doc.py` で書き忘れを確かめる ([使い方](usage.md))。
+    自動で作った図や下書きは、**読んだこと / 推測したこと** を区別して見せる (`docspipeline map` の札)。推測は、人が確かめてから文書に書く。
+11. 権利 (ライセンス) を決めたら、README の「権利」の表と `LICENSE` を **同じ変更で** 直す (食い違うと、テストが失敗する)。
 
 ```mermaid
 %%{init: {"theme":"base","fontFamily":"Noto Sans JP, Hiragino Sans, Meiryo, sans-serif","themeVariables":{"fontFamily":"Noto Sans JP, Hiragino Sans, Meiryo, sans-serif","primaryColor":"#ffffff","primaryBorderColor":"#d0d5dd","primaryTextColor":"#101828","lineColor":"#667085","clusterBkg":"#f2f4f7","clusterBorder":"#d0d5dd","edgeLabelBackground":"#ffffff"},"flowchart":{"wrappingWidth":480,"nodeSpacing":40,"rankSpacing":56,"padding":14},"sequence":{"mirrorActors":false,"wrap":false,"width":150,"actorMargin":30,"messageMargin":34}}}%%

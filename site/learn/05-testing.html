@@ -326,7 +326,7 @@
 </tr>
 <tr class="row-even"><td><p>構造</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test_structure_map.py</span></code></p></td>
-<td><p>依存の向きのルール (循環なし・Sphinx に依存してよいのは拡張だけ・葉のモジュール)。Sphinx を隠して core を import する実行テスト</p></td>
+<td><p>依存の向きのルール (循環なし・Sphinx に依存してよいのは拡張だけ・葉のモジュール)。Sphinx を隠して core を import する実行テスト。辺の札 (<code class="docutils literal notranslate"><span class="pre">import</span></code> は読んだ・文字列の参照は推測)</p></td>
 </tr>
 <tr class="row-odd"><td><p>書式</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test_mermaid_style.py</span></code></p></td>
@@ -339,6 +339,14 @@
 <tr class="row-odd"><td><p>契約</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test_contracts.py</span></code></p></td>
 <td><p><a class="reference internal" href="../contracts.html"><span class="std std-doc">契約の表</span></a> の関数とテストが実在する。<strong>純粋</strong> の層は I/O を禁じて呼んでも動く。<strong>読み取り</strong> の層は何も書かない。不変条件を、いろいろな入力 (種を固定した乱数・総当たりとの突き合わせ) で確かめる</p></td>
+</tr>
+<tr class="row-even"><td><p>スキル</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_skill.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">skills/design-doc</span></code> の形式 (front matter・リンク)。検査スクリプトが、見出し・空の欄・層の名前・書き換え忘れを見つける。<strong>このリポジトリ自身の契約の表を通す</strong> (規則が実態から離れない)</p></td>
+</tr>
+<tr class="row-odd"><td><p>権利</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test_rights.py</span></code></p></td>
+<td><p>README の「権利」の表が、層ごとにそろい、<code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> の有無と食い違わない</p></td>
 </tr>
 <tr class="row-even"><td><p>講義</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test_lectures.py</span></code></p></td>

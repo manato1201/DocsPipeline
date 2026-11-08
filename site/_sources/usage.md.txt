@@ -72,6 +72,8 @@ flowchart LR
 
 - ローカルで読むだけで、外部へは送信しない。`--fail-on-cycle` で、循環があれば失敗させる。
   使い方は [機械の地図](learn/09-structure-map.md)。
+- 依存の辺には **出どころの札** が付く。`import` 文による依存は `EXTRACTED` (読んだ)、モジュール名と一致する文字列による参照は
+  `INFERRED` (推測)。Mermaid の図では、推測の辺に「推測」と書く。`--format json` は、辺ごとに `kind` と `label` を持つ。
 
 **`publish`**
 
@@ -151,6 +153,25 @@ Markdown (MyST) では、コードフェンスの言語名の代わりに `{prom
 - Confluence など HTML 以外では、題名と普通のコードブロックになる。
 - **秘密情報を書かない**。`TOKEN=値` のような形があれば、値を伏せた警告を出す。環境変数は、名前だけを書く。
 - 書き方の指針: 何をしてほしいか → 手順 → **してはいけないこと** (コミットしない、値を書き写さない、など) の順に書く。
+
+## 設計書のひな形 (スキル)
+
+設計書を書くときの、契約の欄つきのひな形を、リポジトリの `skills/design-doc/` に置いている。形式は、Claude のスキルと同じ
+(`SKILL.md` + スクリプト + 資料のフォルダ)。
+
+| ファイル | 内容 |
+|---|---|
+| `SKILL.md` | いつ使うか・手順・「読んだ / 推測した」の札の付け方 |
+| `template.md` | ひな形。目的 / 構成 / 契約と副作用の境界 / 判断の記録 / 未確認のこと (+ 権利と出典) |
+| `scripts/check_design_doc.py` | 設計書の検査。必須の見出し・契約の表・層の名前・書き換え忘れ (`〈…〉`) を確かめる |
+
+```bash
+cp skills/design-doc/template.md docs/my-feature-design.md   # 写して、〈…〉を書き換える
+python skills/design-doc/scripts/check_design_doc.py docs/my-feature-design.md
+```
+
+スキルとして使うときは、`skills/design-doc/` を、使う側の `.claude/skills/design-doc/` に写す。検査は、**書き忘れ** を見つけるだけで、
+内容が正しいかは確かめない。
 
 ## 設定の追加
 
