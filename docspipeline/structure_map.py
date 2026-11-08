@@ -46,9 +46,9 @@ from pathlib import Path
 
 from .files import iter_python_files
 
-#: 札: 原文に明示されている (読んだ)。
+#: 原文に明示されている (読んだ) ことを表す札。
 EXTRACTED = "EXTRACTED"
-#: 札: 書き方から推し量った (推測した)。外れることがある。
+#: 書き方から推し量った (推測した) ことを表す札。外れることがある。
 INFERRED = "INFERRED"
 #: 依存の種類 → 札。``import`` と ``deferred`` は文として書かれている。``reference`` は文字列の一致からの推測。
 EDGE_LABELS = {"import": EXTRACTED, "deferred": EXTRACTED, "reference": INFERRED}

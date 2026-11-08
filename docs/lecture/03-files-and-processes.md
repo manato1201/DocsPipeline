@@ -307,7 +307,7 @@ def run_masked(cmd, secret):
         return proc.wait()
 
 
-child = f"import sys; print('認証に失敗: {SECRET}'); print('続き', file=sys.stderr); sys.exit(2)"
+child = f"import sys; print('認証に失敗: {SECRET}', flush=True); print('続き', file=sys.stderr); sys.exit(2)"
 code = run_masked([sys.executable, "-c", child], SECRET)
 print("終了コード:", code)
 ```
@@ -318,6 +318,9 @@ print("終了コード:", code)
 続き
 終了コード: 2
 ```
+
+子の最初の `print` に `flush=True` を付けているのは、パイプにつながった標準出力は **溜めてから** 出る一方、標準エラーはすぐ出るため、
+付けないと「続き」が先に出て、順序が実行環境で変わるからです。
 
 ## 5. 終了コード
 

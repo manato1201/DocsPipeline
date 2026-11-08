@@ -17,7 +17,7 @@ from pathlib import Path
 from . import confluence, diagrams, docstring_coverage, doctor, messages, mmdc, scaffold, structure_map
 from .files import iter_markdown_files
 
-#: Ctrl-C で中断したときの終了コード (シェルの慣習: 128 + SIGINT)
+#: Ctrl-C で中断したときの終了コード。シェルの慣習で、128 + SIGINT。
 EXIT_INTERRUPTED = 130
 
 

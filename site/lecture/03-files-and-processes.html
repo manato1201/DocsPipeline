@@ -590,7 +590,7 @@ stderr: '標準エラー\n'
         <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
 
-<span class="n">child</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"import sys; print('認証に失敗: </span><span class="si">{</span><span class="n">SECRET</span><span class="si">}</span><span class="s2">'); print('続き', file=sys.stderr); sys.exit(2)"</span>
+<span class="n">child</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"import sys; print('認証に失敗: </span><span class="si">{</span><span class="n">SECRET</span><span class="si">}</span><span class="s2">', flush=True); print('続き', file=sys.stderr); sys.exit(2)"</span>
 <span class="n">code</span> <span class="o">=</span> <span class="n">run_masked</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">child</span><span class="p">],</span> <span class="n">SECRET</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"終了コード:"</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 </pre></div>
@@ -601,6 +601,8 @@ stderr: '標準エラー\n'
 終了コード: 2
 </pre></div>
 </div>
+<p>子の最初の <code class="docutils literal notranslate"><span class="pre">print</span></code> に <code class="docutils literal notranslate"><span class="pre">flush=True</span></code> を付けているのは、パイプにつながった標準出力は <strong>溜めてから</strong> 出る一方、標準エラーはすぐ出るため、
+付けないと「続き」が先に出て、順序が実行環境で変わるからです。</p>
 </section>
 </section>
 <section id="id6">
