@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from . import confluence
-from .mermaid import find_mmdc
+from .mmdc import MMDC_ENV, command_exists, find_mmdc
 
 
 @dataclass(frozen=True)
@@ -25,6 +25,7 @@ class Check:
     ok: bool
     detail: str
     required: bool = False
+    hint: str = ""  # 失敗したとき、次にすること (成功したときは使わない)
 
 
 def _version(dist: str) -> str | None:
@@ -54,26 +55,67 @@ def run_checks(environ: Mapping[str, str] | None = None) -> list[Check]:
         ("Confluence ビルダー", "sphinxcontrib-confluencebuilder", False),
     ):
         version = _version(dist)
-        checks.append(Check(label, version is not None, version or f"pip install '{dist}' (extras を参照)", required))
+        checks.append(
+            Check(
+                label,
+                version is not None,
+                version or f"pip install '{dist}' (extras を参照)",
+                required,
+                hint=f"pip install '{dist}' (または pip install -e \".[docs,cpp,confluence]\")",
+            )
+        )
 
-    mmdc = find_mmdc(env.get("DOCSPIPELINE_MMDC"), os.getcwd())
-    checks.append(
-        Check("mmdc (Mermaid → SVG)", mmdc is not None, " ".join(mmdc) if mmdc else "無い: 図はコードのまま出る")
-    )
+    mmdc = find_mmdc(env.get(MMDC_ENV), os.getcwd())
+    if mmdc is None:
+        checks.append(
+            Check(
+                "mmdc (Mermaid → SVG)",
+                False,
+                "無い: 図はコードのまま出る",
+                hint="npm install @mermaid-js/mermaid-cli (入れた場所を使うなら DOCSPIPELINE_MMDC)",
+            )
+        )
+    elif not command_exists(mmdc):
+        # DOCSPIPELINE_MMDC に、存在しないコマンドを指定している
+        checks.append(
+            Check(
+                "mmdc (Mermaid → SVG)",
+                False,
+                f"指定されたコマンドが見つからない: {' '.join(mmdc)}",
+                hint=f"{MMDC_ENV} の値を、実在するコマンドに直す (または、外して PATH から探させる)",
+            )
+        )
+    else:
+        checks.append(Check("mmdc (Mermaid → SVG)", True, " ".join(mmdc)))
     doxygen = shutil.which("doxygen")
-    checks.append(Check("doxygen (C++)", doxygen is not None, doxygen or "無い: C++ の文書を作るときだけ必要"))
+    checks.append(
+        Check(
+            "doxygen (C++)",
+            doxygen is not None,
+            doxygen or "無い: C++ の文書を作るときだけ必要",
+            hint="doxygen をインストールする。C++ を使わないなら、何もしなくてよい",
+        )
+    )
 
     try:
         mode = confluence.current_mode(env)
         checks.append(Check("Confluence のモード", True, mode))
     except confluence.ConfluenceSettingsError as exc:
-        checks.append(Check("Confluence のモード", False, str(exc)))
+        checks.append(
+            Check(
+                "Confluence のモード",
+                False,
+                str(exc),
+                hint=f"{confluence.MODE_ENV} を local / dryrun / publish のいずれかにする",
+            )
+        )
     missing = confluence.missing_env(env)
     checks.append(
         Check(
             "Confluence の環境変数",
             not missing,
             "すべて設定済み" if not missing else f"未設定: {', '.join(missing)} (公開するときだけ必要)",
+            hint="公開するなら、名前の環境変数を設定する (トークンはファイルに書かない)。公開しないなら不要",
         )
     )
     return checks
@@ -85,6 +127,8 @@ def format_checks(checks: list[Check]) -> str:
     for c in checks:
         mark = "OK  " if c.ok else ("NG  " if c.required else "なし")
         lines.append(f"[{mark}] {c.name}: {c.detail}")
+        if not c.ok and c.hint:
+            lines.append(f"       次の一手: {c.hint}")
     return "\n".join(lines)
 
 

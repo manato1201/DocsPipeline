@@ -120,6 +120,7 @@ def build_config(
         "myst_parser",
         "docspipeline.guard",
         "docspipeline.mermaid",
+        "docspipeline.prompt",
     ]
     if not offline:
         extensions.append("sphinx.ext.intersphinx")

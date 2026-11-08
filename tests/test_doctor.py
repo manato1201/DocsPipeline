@@ -1,3 +1,5 @@
+import sys
+
 from docspipeline import doctor
 
 
@@ -21,6 +23,6 @@ def test_bad_mode_is_reported_not_raised():
 
 
 def test_mmdc_is_found_from_the_environment(tmp_path):
-    checks = doctor.run_checks({"DOCSPIPELINE_MMDC": "my-mmdc --flag"})
+    checks = doctor.run_checks({"DOCSPIPELINE_MMDC": f"{sys.executable} --flag"})
     mmdc = next(c for c in checks if c.name.startswith("mmdc"))
-    assert mmdc.ok and "my-mmdc" in mmdc.detail
+    assert mmdc.ok and sys.executable in mmdc.detail

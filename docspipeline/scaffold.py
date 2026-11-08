@@ -9,10 +9,14 @@ from __future__ import annotations
 
 import os
 import pathlib
+import re
+import shlex
 import unicodedata
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+
+from .files import iter_python_files
 
 TEMPLATES = Path(__file__).parent / "templates" / "project"
 
@@ -21,7 +25,7 @@ _DOXYGEN_STEP = """      - name: Install Doxygen
 """
 
 _COVERAGE_STEP = """      - name: Docstring coverage
-        run: docspipeline coverage {paths}
+        run: docspipeline coverage {paths} --fail-under {minimum}
 """
 
 
@@ -44,6 +48,7 @@ class Options:
     package: tuple[str, ...] = ()
     cpp: tuple[str, ...] = ()
     hou: bool = False
+    min_coverage: int = 80
 
 
 def title_rule(text: str) -> str:
@@ -61,7 +66,7 @@ def python_modules(source_root: Path) -> list[str]:
     ``_`` で始まる名前と、``tests`` / ``test`` の下は除く。
     """
     names = []
-    for path in sorted(source_root.rglob("*.py")):
+    for path in iter_python_files([source_root]):  # .venv・node_modules・build などは、共通の規則で除く
         parts = list(path.relative_to(source_root).with_suffix("").parts)
         if any(p.startswith("_") and p != "__init__" for p in parts) or any(p in ("tests", "test") for p in parts):
             continue
@@ -97,7 +102,10 @@ def _py_list(items: Sequence[str]) -> str:
 
 def _values(opts: Options) -> dict[str, str]:
     docs = opts.target / "docs"
-    coverage_paths = " ".join(os.path.relpath((docs / p).resolve(), opts.target) for p in opts.package)
+    # CI は Linux で動く。区切りは / に揃え、空白などを含む名前は引用する
+    coverage_paths = " ".join(
+        shlex.quote(Path(os.path.relpath((docs / p).resolve(), opts.target)).as_posix()) for p in opts.package
+    )
     return {
         "project": opts.project,
         "project_repr": repr(opts.project),
@@ -109,7 +117,7 @@ def _values(opts: Options) -> dict[str, str]:
         "extra_toctree": ("   api\n" if opts.package else "") + ("   cpp\n" if opts.cpp else ""),
         "api_modules": api_modules(docs, opts.package),
         "doxygen_step": _DOXYGEN_STEP if opts.cpp else "",
-        "coverage_step": _COVERAGE_STEP.format(paths=coverage_paths) if opts.package else "",
+        "coverage_step": _COVERAGE_STEP.format(paths=coverage_paths, minimum=opts.min_coverage) if opts.package else "",
     }
 
 
@@ -136,11 +144,19 @@ def plan(opts: Options) -> dict[Path, str]:
             continue
         if rel.with_suffix("").name == "api.rst" and not opts.package:
             continue
-        text = src.read_text(encoding="utf-8")
-        for key, value in values.items():
-            text = text.replace(f"@@{key}@@", value)
+        # 1 回の走査で置き換える。値の中に @@名前@@ があっても、さらに置き換わらない
+        text = re.sub(r"@@(\w+)@@", lambda m: values.get(m.group(1), m.group(0)), src.read_text(encoding="utf-8"))
         result[opts.target / _destination(rel)] = text
     return result
+
+
+def missing_sources(opts: Options) -> list[Path]:
+    """``--package`` / ``--cpp`` で指定された、実在しないソースの場所を返す (``docs/`` からの相対で解決)。
+
+    打ち間違いのまま作ると、API ページが空で、CI が何も検査しない文書になる。
+    """
+    docs = opts.target / "docs"
+    return [(docs / p).resolve() for p in (*opts.package, *opts.cpp) if not (docs / p).resolve().is_dir()]
 
 
 def write(opts: Options, *, force: bool = False) -> list[Path]:

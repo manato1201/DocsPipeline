@@ -16,11 +16,11 @@ from __future__ import annotations
 
 import ast
 import contextlib
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-_SKIP_DIRS = {"__pycache__", ".git", ".venv", "venv", "node_modules", "_build", "build", "dist", ".tox"}
+from .files import iter_python_files
 
 
 @dataclass(frozen=True)
@@ -53,32 +53,35 @@ class Report:
         return 100.0 * (len(self.items) - len(self.missing)) / len(self.items)
 
 
-def iter_python_files(roots: Iterable[Path]) -> Iterator[Path]:
-    """``roots`` 配下の ``.py`` ファイルを、生成物や仮想環境を除いて列挙する。"""
-    for root in roots:
-        if root.is_file():
-            yield root
-            continue
-        for path in sorted(root.rglob("*.py")):
-            if not _SKIP_DIRS.intersection(path.relative_to(root).parts):
-                yield path
-
-
 def _is_public(name: str) -> bool:
     return not name.startswith("_")
 
 
 def _exported(tree: ast.Module) -> set[str] | None:
-    """``__all__`` の中身を返す。無い (または静的に読めない) ときは ``None``。"""
+    """``__all__`` の中身を返す。無い (または静的に読めない) ときは ``None``。
+
+    ``__all__ = [...]``・``__all__: list[str] = [...]``・``__all__ += [...]`` を読む。
+    """
+    names: set[str] | None = None
     for node in tree.body:
         if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
-            try:
-                value = ast.literal_eval(node.value)
-            except ValueError:
-                return None
-            if isinstance(value, (list, tuple)) and all(isinstance(v, str) for v in value):
-                return set(value)
-    return None
+            value_node, replace = node.value, True
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == "__all__":
+            if node.value is None:
+                continue
+            value_node, replace = node.value, True
+        elif isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Name) and node.target.id == "__all__":
+            value_node, replace = node.value, False
+        else:
+            continue
+        try:
+            value = ast.literal_eval(value_node)
+        except ValueError:
+            return None
+        if not (isinstance(value, list | tuple) and all(isinstance(v, str) for v in value)):
+            return None
+        names = set(value) if replace or names is None else names | set(value)
+    return names
 
 
 def _decorator_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
@@ -100,9 +103,15 @@ def scan_file(path: Path, *, module_name: str | None = None) -> list[Item]:
         module_name: 結果に使うモジュール名。省略するとファイル名から付ける。
 
     Returns:
-        見つかった項目。構文エラーのファイルは ``SyntaxError`` をそのまま投げる。
+        見つかった項目。
+
+    Raises:
+        ValueError: ファイルが構文エラーのとき (ファイル名と行を含む)。
     """
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError as exc:
+        raise ValueError(f"{path}:{exc.lineno}: 構文エラー: {exc.msg}") from exc
     module = module_name or path.stem
     exported = _exported(tree)
     items: list[Item] = []
@@ -137,6 +146,14 @@ def scan_file(path: Path, *, module_name: str | None = None) -> list[Item]:
     return items
 
 
+def _is_private_module(path: Path, root: Path) -> bool:
+    """``_`` で始まる名前 (``_compat.py``・``_impl/``) の下にあるか。``__init__`` は、パッケージ自身なので除く。"""
+    if not root.is_dir():
+        return False
+    parts = path.relative_to(root).with_suffix("").parts
+    return any(part.startswith("_") and part != "__init__" for part in parts)
+
+
 def _module_name(path: Path, root: Path) -> str:
     """``root`` からの相対パスでモジュール名を付ける。``root`` がパッケージなら、その名前から始める。"""
     if not root.is_dir():
@@ -150,10 +167,19 @@ def _module_name(path: Path, root: Path) -> str:
 
 
 def scan(roots: Iterable[Path]) -> Report:
-    """``roots`` 配下の公開 API を調べて集計する。"""
+    """``roots`` 配下の公開 API を調べて集計する。
+
+    Raises:
+        ValueError: 存在しないパスがあるとき、または構文エラーのファイルがあるとき。
+            存在しないパスを「100%」と報告すると、パスの打ち間違いや移動で、検査が黙って空になる。
+    """
     items: list[Item] = []
     for root in roots:
+        if not root.exists():
+            raise ValueError(f"パスがありません: {root}")
         for path in iter_python_files([root]):
+            if _is_private_module(path, root):
+                continue  # 公開 API の定義は「_ で始まらない名前」。非公開のモジュールは数えない
             items.extend(scan_file(path, module_name=_module_name(path, root)))
     return Report(tuple(items))
 

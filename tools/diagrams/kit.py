@@ -57,9 +57,13 @@ ICONS = {
 
 
 def text_width(text: str, size: float, mono: bool = False) -> float:
-    """文字列の幅 (px) の見積り。全角は 1 文字ぶん、半角は約 0.55 (等幅は 0.6) 文字ぶん。"""
+    """文字列の幅 (px) の見積り。全角は 1 文字ぶん、半角は約 0.55 (等幅は 0.6) 文字ぶん。
+
+    小数第 2 位に丸める。Python 3.12 から、浮動小数点の ``sum`` の誤差の出方が変わり、
+    丸めないと、版によって生成物 (.drawio / .svg) の末尾の桁が違ってしまう。
+    """
     ascii_w = 0.6 if mono else 0.55
-    return sum(size if unicodedata.east_asian_width(c) in "WF" else size * ascii_w for c in text)
+    return round(sum(size if unicodedata.east_asian_width(c) in "WF" else size * ascii_w for c in text), 2)
 
 
 @dataclass
@@ -145,7 +149,7 @@ class Note:
     lines: list[str]
     color: str = MUTED
     size: float = 12
-    anchor: str = "start"  # start / middle
+    anchor: str = "start"  # start / middle / end
     mono: bool = False
     bold: bool = False
 
@@ -392,9 +396,9 @@ class Diagram:
 
         for note in self.notes:
             family = "Courier New" if note.mono else "Noto Sans JP"
-            style = f"text;html=1;align={'center' if note.anchor == 'middle' else 'left'};verticalAlign=top;fontSize={int(note.size)};fontColor={note.color};fontFamily={family};{'fontStyle=1;' if note.bold else ''}"
+            style = f"text;html=1;align={ {'middle': 'center', 'end': 'right'}.get(note.anchor, 'left') };verticalAlign=top;fontSize={int(note.size)};fontColor={note.color};fontFamily={family};{'fontStyle=1;' if note.bold else ''}"
             width = max(text_width(line, note.size, note.mono) for line in note.lines) + 16
-            x = note.x - width / 2 if note.anchor == "middle" else note.x
+            x = {"middle": note.x - width / 2, "end": note.x - width}.get(note.anchor, note.x)
             add(
                 "<br>".join(html.escape(line) for line in note.lines),
                 style,

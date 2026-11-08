@@ -23,63 +23,65 @@ TEAL_DARK = "#0b6b5d"
 ORANGE = "#e8710a"
 RED = "#d92d20"
 GRAY = "#344054"
+MUTED_TEXT = "#667085"
 
 OUT_DIR = Path(__file__).resolve().parents[2] / "docs" / "diagrams"
 
 
 def system_overview() -> Diagram:
     """全体像: 何を書き、どこで組み立て、どこへ届け、何で守るか。"""
-    d = Diagram("system-overview", 1200, 880)
+    d = Diagram("system-overview", 1200, 940)
     d.panels += [
-        Panel(160, 40, 250, 560, "書く", "リポジトリの中身"),
-        Panel(450, 40, 480, 560, "組み立てる", "docspipeline (Sphinx + 拡張)"),
+        Panel(160, 40, 250, 620, "書く", "リポジトリの中身"),
+        Panel(450, 40, 480, 620, "組み立てる", "docspipeline (Sphinx + 拡張)"),
         Panel(
             474,
             112,
             432,
-            468,
+            530,
             "Sphinx",
             "docs/conf.py → build_config()",
             fill="#e6f4f1",
             stroke=TEAL,
             title_color=TEAL_DARK,
         ),
-        Panel(970, 40, 200, 560, "届ける", "出力"),
-        Panel(160, 650, 1010, 200, "守る", "GitHub Actions (ci.yml)"),
+        Panel(970, 40, 200, 620, "届ける", "出力"),
+        Panel(160, 700, 1010, 200, "守る", "GitHub Actions (ci.yml)"),
     ]
     d.cards += [
-        Card(80, 320, "開発者", "docs/ を書く・PR", "user", GRAY),
+        Card(80, 350, "開発者", "docs/ を書く・PR", "user", GRAY),
         Card(285, 150, "Python コード", "docstring (Google 形式)", "code", BLUE),
-        Card(285, 270, "Markdown 文書", "既存の .md", "doc", BLUE),
-        Card(285, 390, "C++ ヘッダー", "Doxygen コメント", "braces", BLUE),
-        Card(285, 510, "図", "Mermaid / diagrams.net", "diagram", BLUE),
-        Card(560, 235, "autodoc", "+ napoleon", "book", TEAL),
-        Card(690, 235, "MyST", "Markdown を取り込む", "doc", TEAL),
-        Card(820, 235, "mermaid 拡張", "mmdc で SVG に", "diagram", TEAL),
-        Card(560, 400, "Breathe", "Doxygen の XML", "braces", TEAL),
-        Card(690, 400, "guard", "設定エラーの報告", "shield", TEAL),
-        Card(820, 400, "Confluence 設定", "公開の安全装置", "lock", TEAL),
-        Card(1070, 200, "HTML", "docs/_build/html", "globe", GRAY),
-        Card(1070, 410, "Confluence", "専用の親ページ配下だけ", "cloud", ORANGE),
-        Card(300, 755, "build -W", "警告はエラー", "check", GRAY),
-        Card(480, 755, "coverage", "docstring 100%", "check", GRAY),
-        Card(660, 755, "check-diagrams", ".drawio に SVG", "diagram", GRAY),
-        Card(840, 755, "linkcheck", "週 1 回", "link", GRAY),
-        Card(1020, 755, "secrets", "トークンは環境変数だけ", "lock", GRAY),
+        Card(285, 290, "Markdown 文書", "既存の .md・手順のプロンプト", "doc", BLUE),
+        Card(285, 430, "C++ ヘッダー", "Doxygen コメント", "braces", BLUE),
+        Card(285, 570, "図", "Mermaid / diagrams.net", "diagram", BLUE),
+        Card(560, 225, "autodoc", "+ napoleon", "book", TEAL),
+        Card(690, 225, "MyST", "Markdown を取り込む", "doc", TEAL),
+        Card(820, 225, "mermaid 拡張", "mmdc で SVG に", "diagram", TEAL),
+        Card(560, 355, "Breathe", "Doxygen の XML", "braces", TEAL),
+        Card(690, 355, "guard", "設定エラーの報告", "shield", TEAL),
+        Card(820, 355, "prompt 拡張", "コピーできる手順", "terminal", TEAL),
+        Card(690, 485, "Confluence 設定", "公開の安全装置", "lock", TEAL),
+        Card(1070, 230, "HTML", "docs/_build/html", "globe", GRAY),
+        Card(1070, 470, "Confluence", "専用の親ページ配下だけ", "cloud", ORANGE),
+        Card(300, 805, "build -W", "警告はエラー", "check", GRAY),
+        Card(480, 805, "coverage", "docstring 100%", "check", GRAY),
+        Card(660, 805, "check-diagrams", ".drawio に SVG", "diagram", GRAY),
+        Card(840, 805, "linkcheck", "週 1 回", "link", GRAY),
+        Card(1020, 805, "secrets", "トークンは公開の手順だけ", "lock", GRAY),
     ]
     d.edges += [
-        Edge([(114, 320), (156, 320)], color="gray"),
+        Edge([(114, 350), (156, 350)], color="gray"),
         Edge([(322, 150), (472, 150)], "autodoc", "blue"),
-        Edge([(322, 270), (472, 270)], "MyST", "blue"),
-        Edge([(322, 390), (472, 390)], "Doxygen → Breathe", "blue"),
-        Edge([(322, 510), (472, 510)], "mmdc → SVG", "blue"),
-        Edge([(908, 200), (1034, 200)], "-b html", "blue"),
-        Edge([(908, 410), (1034, 410)], "-b confluence", "orange"),
-        Edge([(690, 648), (690, 604)], "検査", "gray", dashed=True),
+        Edge([(322, 290), (472, 290)], "MyST", "blue"),
+        Edge([(322, 430), (472, 430)], "Doxygen → Breathe", "blue"),
+        Edge([(322, 570), (472, 570)], "mmdc → SVG", "blue"),
+        Edge([(908, 230), (1034, 230)], "-b html", "blue"),
+        Edge([(908, 470), (1034, 470)], "-b confluence", "orange"),
+        Edge([(690, 698), (690, 664)], "検査", "gray", dashed=True),
     ]
     d.notes += [
-        Note(690, 548, ["-W: 警告はエラー (リンク切れ・未解決の参照も止める)"], TEAL_DARK, 12, "middle", bold=True),
-        Note(1070, 530, ["local → dryrun → publish", "の順に進める (既定は local)"], "#b45309", 12, "middle"),
+        Note(690, 620, ["-W: 警告はエラー (リンク切れ・未解決の参照も止める)"], TEAL_DARK, 12, "middle", bold=True),
+        Note(1070, 600, ["local → dryrun → publish", "の順に進める (既定は local)"], "#b45309", 12, "middle"),
     ]
     return d
 
@@ -138,18 +140,60 @@ def publish_flow() -> Diagram:
     return d
 
 
+#: module-map の矢印。キーは (使う側, 使われる側) のモジュール名 (パッケージ名を除く)。値は、矢印の折れ線と、ラベル。
+#: 実際の依存と一致していることは tests/test_diagrams.py が確かめる (docspipeline map と同じ読み取り)。
+BUS = 215
+CLI_X = 545
+
+
+def _bus(cx: float) -> list[tuple[float, float]]:
+    """cli から、部品のカードへ降りる折れ線。"""
+    if cx == CLI_X:
+        return [(CLI_X, 190), (CLI_X, 282)]
+    return [(CLI_X, 190), (CLI_X, BUS), (cx, BUS), (cx, 282)]
+
+
+MODULE_IMPORTS: dict[tuple[str, str], tuple[list[tuple[float, float]], str]] = {
+    ("cli", "messages"): (_bus(95), ""),
+    ("cli", "scaffold"): (_bus(215), ""),
+    ("cli", "diagrams"): (_bus(380), ""),
+    ("cli", "docstring_coverage"): (_bus(545), ""),
+    ("cli", "structure_map"): (_bus(710), ""),
+    ("cli", "doctor"): (_bus(875), ""),
+    ("cli", "confluence"): ([(CLI_X, 190), (CLI_X, BUS), (1170, BUS), (1170, 282)], ""),
+    ("cli", "mmdc"): ([(CLI_X, 190), (CLI_X, BUS), (985, BUS), (985, 540), (925, 540), (925, 572)], "書式の検査"),
+    ("doctor", "confluence"): ([(909, 320), (1136, 320)], "モードと環境変数"),
+    ("doctor", "mmdc"): ([(875, 402), (875, 446), (900, 446), (900, 572)], "mmdc を探す"),
+    ("config", "confluence"): ([(104, 578), (104, 470), (1170, 470), (1170, 412)], "sphinx_settings()"),
+    ("mermaid", "mmdc"): ([(395, 696), (395, 728), (900, 728), (900, 704)], "変換を依頼"),
+}
+#: 名前の文字列による参照 (config が extensions の名前で読み込む)。
+#: 図に矢印を描かない依存の行き先 (共通部品)。使うモジュールが多く、矢印が図を埋めてしまうため。
+#: 使う側は、カードの説明に書き、tests/test_structure_map.py が実際の依存を検査する。
+UTILITY_MODULES = {"files"}
+MODULE_REFERENCES: dict[tuple[str, str], list[tuple[float, float]]] = {
+    ("config", "guard"): [(255, 545), (255, 576)],
+    ("config", "mermaid"): [(395, 545), (395, 576)],
+    ("config", "doxygen"): [(535, 545), (535, 576)],
+    ("config", "prompt"): [(675, 545), (675, 576)],
+}
+
+
 def module_map() -> Diagram:
-    """モジュールの依存: どれがどれを呼ぶか。読む順番の地図。"""
-    d = Diagram("module-map", 1200, 800)
+    """モジュールの依存: どれがどれを呼ぶか。読む順番の地図。
+
+    矢印は ``MODULE_IMPORTS`` / ``MODULE_REFERENCES`` から作る。実際の依存とのずれは、テストが検出する。
+    """
+    d = Diagram("module-map", 1340, 830)
     d.panels += [
-        Panel(40, 240, 760, 190, "CLI の部品", tab=True),
-        Panel(830, 240, 330, 190, "公開の安全装置", tab=True, fill="#fff7ed", stroke=ORANGE, title_color="#b45309"),
+        Panel(40, 240, 925, 190, "CLI の部品", tab=True),
+        Panel(1005, 240, 295, 190, "公開の安全装置", tab=True, fill="#fff7ed", stroke=ORANGE, title_color="#b45309"),
         Panel(
             40,
             500,
-            760,
-            230,
-            "Sphinx に読み込まれる (docs/conf.py → build_config)",
+            740,
+            250,
+            "Sphinx に読み込まれる",
             tab=True,
             tab_dx=200,
             dashed=True,
@@ -157,40 +201,42 @@ def module_map() -> Diagram:
             stroke=TEAL,
             title_color=TEAL_DARK,
         ),
-        Panel(830, 500, 330, 230, "単体で使う", tab=True),
+        Panel(820, 500, 480, 250, "Sphinx なしで動く部品", tab=True, tab_dx=150),
     ]
     d.cards += [
-        Card(710, 100, "cli", "コマンドの入口", "terminal", GRAY),
+        Card(CLI_X, 100, "cli", "コマンドの入口", "terminal", GRAY),
+        Card(95, 320, "messages", "エラーの 3 行", "doc", GRAY),
         Card(215, 320, "scaffold", "init の雛形", "package", GRAY),
-        Card(380, 320, "doctor", "環境の確認", "wrench", GRAY),
-        Card(545, 320, "diagrams", "SVG の有無", "diagram", GRAY),
-        Card(710, 320, "docstring_coverage", "ast で検査", "check", GRAY),
-        Card(995, 320, "confluence", "モード・トークン伏せ字", "lock", ORANGE),
-        Card(140, 620, "config", "build_config()", "gear", TEAL),
-        Card(330, 620, "guard", "設定エラーの報告", "shield", TEAL),
-        Card(520, 620, "mermaid", "mmdc で SVG に", "diagram", TEAL),
-        Card(710, 620, "doxygen", "Doxygen → XML", "braces", TEAL),
-        Card(995, 620, "stubs.hou", "hou のスタブ", "package", GRAY, sub2="config が sys.path の末尾に足す"),
+        Card(380, 320, "diagrams", "SVG の有無", "diagram", GRAY),
+        Card(545, 320, "docstring_coverage", "ast で検査", "check", GRAY),
+        Card(710, 320, "structure_map", "依存の地図 (map)", "branch", GRAY),
+        Card(875, 320, "doctor", "環境の確認", "wrench", GRAY),
+        Card(1170, 320, "confluence", "モード・トークン伏せ字", "lock", ORANGE),
+        Card(120, 610, "config", "build_config()", "gear", TEAL),
+        Card(255, 610, "guard", "設定エラーの報告", "shield", TEAL),
+        Card(395, 610, "mermaid", "Mermaid の指示子", "diagram", TEAL),
+        Card(535, 610, "doxygen", "Doxygen → XML", "braces", TEAL),
+        Card(675, 610, "prompt", "コピーできる手順", "doc", TEAL),
+        Card(900, 610, "mmdc", "mmdc の探索と実行", "plug", GRAY),
+        Card(1050, 610, "stubs.hou", "hou のスタブ", "package", GRAY, sub2="sys.path の末尾に足す"),
+        Card(1215, 610, "files", "ファイルの列挙 (共通)", "doc", GRAY, sub2="coverage・map・init が使う"),
     ]
-    bus = 215
-    for cx in (215, 380, 545, 995):
-        d.edges.append(Edge([(710, 190), (710, bus), (cx, bus), (cx, 282)], "", "blue"))
+    for (src, dst), (points, label) in MODULE_IMPORTS.items():
+        d.edges.append(
+            Edge(points, label, "blue", label_t={("doctor", "mmdc"): 0.4, ("cli", "mmdc"): 0.8}.get((src, dst), 0.5))
+        )
+    for points in MODULE_REFERENCES.values():
+        d.edges.append(Edge(points, "", "gray", dashed=True))
     d.edges += [
-        Edge([(710, 190), (710, 282)], "", "blue"),
-        Edge([(676, 100), (18, 100), (18, 620), (106, 620)], "sphinx を起動", "gray", dashed=True, label_t=0.43),
-        Edge([(116, 586), (116, 462), (995, 462), (995, 412)], "sphinx_settings()", "blue", label_t=0.5),
-        Edge([(140, 586), (140, 552), (710, 552)], "extensions", "gray", dashed=True, arrow=False, label_t=0.5),
-        Edge([(330, 552), (330, 584)], "", "gray", dashed=True),
-        Edge([(520, 552), (520, 584)], "", "gray", dashed=True),
-        Edge([(710, 552), (710, 584)], "", "gray", dashed=True),
-    ]
-    d.edges += [
-        Edge([(40, 774), (90, 774)], "", "blue"),
-        Edge([(330, 774), (380, 774)], "", "gray", dashed=True),
+        Edge([(513, 100), (18, 100), (18, 610), (86, 610)], "sphinx を起動", "gray", dashed=True, label_t=0.25),
+        Edge([(120, 578), (120, 545), (675, 545)], "extensions", "gray", dashed=True, arrow=False, label_t=0.5),
+        Edge([(40, 800), (90, 800)], "", "blue"),
+        Edge([(330, 800), (380, 800)], "", "gray", dashed=True),
     ]
     d.notes += [
-        Note(102, 779, ["import・関数の呼び出し"], GRAY, 12),
-        Note(392, 779, ["別のプロセスの起動・拡張の登録"], GRAY, 12),
+        Note(102, 805, ["import (関数の呼び出し)"], GRAY, 12),
+        Note(392, 805, ["起動・名前による参照"], GRAY, 12),
+        Note(1300, 805, ["矢印は実際の依存と一致 (共通部品 files への矢印は省略)"], MUTED_TEXT, 12, "end"),
     ]
     return d
 
