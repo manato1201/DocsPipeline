@@ -12,4 +12,8 @@ config = build_config(
 
 # Sphinx / docutils の型は、この文書では解説しない (リンク先を持たない) ので警告から外す
 config["nitpick_ignore_regex"] += [(r"py:.*", r"(sphinx|docutils)(\..*)?")]
+# 自分の HTML 版にだけ、ちいさな動き (読み進みの帯・コピーの結果の表示) を足す。
+# ファイルは docspipeline/static/ にあり、他のプロジェクトへは配らない (読み込むかは、その conf.py が決める)
+config["html_css_files"] = ["dp_motion.css"]
+config["html_js_files"] = ["dp_motion.js"]
 globals().update(config)

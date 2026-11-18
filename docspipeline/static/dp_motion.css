@@ -1,0 +1,46 @@
+/* HTML 版の、ちいさな動き (読み進みの帯・コピーの結果の表示)。テーマ (furo) の色の変数を使い、新しい色は足さない。
+ * 動かすのは transform と opacity だけ。1 回きり (無限ループは足さない)。
+ * `prefers-reduced-motion: reduce` では、帯を出さず、動きも付けない (動きは、すべて no-preference の中だけ)。 */
+.dp-progress {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 長い講義・解説のページで、いま、どのあたりを読んでいるかが分かる細い帯。スクロールに合わせて、横に伸びる */
+  .dp-progress {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 20;
+    background: var(--color-brand-primary, #1a73e8);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
+  }
+
+  /* 「コピーしました」などの結果は、ボタンの横に小さく現れる (見落とさない) */
+  .dp-prompt .dp-prompt-status:not(:empty) {
+    animation: dp-status-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes dp-status-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media print {
+  .dp-progress {
+    display: none;
+  }
+}

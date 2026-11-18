@@ -1,5 +1,6 @@
 """``.. prompt::`` (コピーできるプロンプト) の拡張。"""
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -74,6 +75,24 @@ def test_names_and_placeholders_are_not_secrets(text):
 def test_static_assets_ship_with_the_package():
     assert (prompt.STATIC_DIR / "dp_prompt.js").is_file()
     assert (prompt.STATIC_DIR / "dp_prompt.css").is_file()
+    assert (prompt.STATIC_DIR / "dp_motion.js").is_file()
+    assert (prompt.STATIC_DIR / "dp_motion.css").is_file()
+
+
+def test_motion_css_is_one_shot_guarded_and_moves_only_transform_and_opacity():
+    css = (prompt.STATIC_DIR / "dp_motion.css").read_text(encoding="utf-8")
+    assert "infinite" not in css  # 新しい無限ループは足さない
+    # animation / transition は、動きを減らさない設定のときだけ。ガードの外 (keyframes を除く) には置かない
+    guarded_start = css.index("@media (prefers-reduced-motion: no-preference)")
+    guarded_end = css.index("@keyframes")
+    assert "animation:" in css[guarded_start:guarded_end]
+    outside = css[:guarded_start] + css[guarded_end:]
+    outside = re.sub(r"@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})+[^{}]*\}", "", outside)
+    assert "animation:" not in outside and "transition:" not in outside
+    for frame in re.findall(r"@keyframes[^{]+\{((?:[^{}]*\{[^{}]*\})+[^{}]*)\}", css):
+        for body in re.findall(r"\{([^{}]*)\}", frame):
+            props = {d.split(":")[0].strip() for d in body.split(";") if d.strip()}
+            assert props <= {"transform", "opacity"}, props
 
 
 # ---- Sphinx での出力 ----
